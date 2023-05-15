@@ -5,22 +5,26 @@ go 1.18
 require (
 	github.com/go-ping/ping v1.1.0
 	github.com/google/uuid v1.3.0
-	github.com/system-transparency/stboot v0.0.0-20221114151647-f5d3e1636100
-	github.com/u-root/u-root v0.10.0
-	github.com/vishvananda/netlink v1.1.1-0.20211118161826-650dca95af54
+	github.com/u-root/u-root v0.11.0
+	github.com/vishvananda/netlink v1.2.1-beta.2
 	golang.org/x/crypto v0.0.0-20220331220935-ae2d96664a29
 	system-transparency.org/stboot v0.0.0
 )
 
 require (
+	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/google/go-tpm v0.3.3 // indirect
-	github.com/insomniacslk/dhcp v0.0.0-20211209223715-7d93572ebe8e // indirect
-	github.com/mdlayher/ethernet v0.0.0-20190606142754-0394541c37b7 // indirect
-	github.com/mdlayher/raw v0.0.0-20191009151244-50f2db8cc065 // indirect
-	github.com/pierrec/lz4/v4 v4.1.14 // indirect
-	github.com/u-root/uio v0.0.0-20220204230159-dac05f7d2cb4 // indirect
-	github.com/vishvananda/netns v0.0.0-20210104183010-2eb08e3e575f // indirect
-	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
-	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/sys v0.0.0-20220610221304-9f5ed59c137d // indirect
+	github.com/insomniacslk/dhcp v0.0.0-20230407062729-974c6f05fe16 // indirect
+	github.com/josharian/native v1.1.0 // indirect
+	github.com/mdlayher/ethernet v0.0.0-20220221185849-529eae5b6118 // indirect
+	github.com/mdlayher/packet v1.1.2 // indirect
+	github.com/mdlayher/raw v0.1.0 // indirect
+	github.com/mdlayher/socket v0.4.1 // indirect
+	github.com/pierrec/lz4/v4 v4.1.17 // indirect
+	github.com/u-root/uio v0.0.0-20230305220412-3e8cd9d6bf63 // indirect
+	github.com/vishvananda/netns v0.0.4 // indirect
+	golang.org/x/net v0.10.0 // indirect
+	golang.org/x/sync v0.2.0 // indirect
+	golang.org/x/sys v0.8.0 // indirect
+	google.golang.org/grpc v1.31.0 // indirect
 )

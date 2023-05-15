@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/system-transparency/stboot/host/network"
-	"github.com/system-transparency/stboot/opts"
+	"system-transparency.org/stboot/host"
+	"system-transparency.org/stboot/host/network"
 
 	mptnetwork "system-transparency.org/stprov/internal/network"
 	"system-transparency.org/stprov/internal/options"
@@ -53,7 +53,10 @@ func Main(args []string, optDNS, optInterface, optHostName, optUser, optPassword
 	if err := mptnetwork.ResetInterfaces(); err != nil {
 		return fmt.Errorf("failed to reset network interfaces: %v", err)
 	}
-	if err := network.ConfigureDHCP(&opts.HostCfg{NetworkInterface: &mac}); err != nil {
+	if err := network.SetupNetworkInterface(&host.Config{
+		IPAddrMode:       host.IPDynamic,
+		NetworkInterface: &mac,
+	}); err != nil {
 		return fmt.Errorf("setup network: %w", err)
 	}
 	config := st.NewDHCPHostConfig([]string{url}, optDNS, &optInterface)
