@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/u-root/u-root/pkg/efivarfs"
-	"github.com/vishvananda/netlink"
+	"system-transparency.org/stboot/host"
 )
 
 type NetworkInterface struct {
@@ -19,48 +19,55 @@ type NetworkInterface struct {
 // https://github.com/system-transparency/system-transparency#host_configurationjson
 // TODO: Replace with stboot hostcfg
 type HostConfig struct {
-	Version           int                 `json:"version"`
-	IPAddrMode        int                 `json:"network_mode"`
-	HostIP            string              `json:"host_ip"`
-	Gateway           string              `json:"gateway"`
-	DNS               string              `json:"dns"`
-	NetworkInterfaces []*NetworkInterface `json:"network_interfaces"`
-	ProvisioningURLs  []string            `json:"provisioning_urls"`
-	Identity          string              `json:"identity"`
-	Authentication    string              `json:"authentication"`
-	BondingMode       string              `json:"bonding_mode"`
-	BondName          string              `json:"bond_name"`
+	Version           int                      `json:"version"`
+	IPAddrMode        int                      `json:"network_mode"`
+	HostIP            string                   `json:"host_ip"`
+	Gateway           string                   `json:"gateway"`
+	DNS               string                   `json:"dns"`
+	NetworkInterfaces []*host.NetworkInterface `json:"network_interfaces"`
+	ProvisioningURLs  []string                 `json:"provisioning_urls"`
+	Identity          string                   `json:"identity"`
+	Authentication    string                   `json:"authentication"`
+	BondingMode       string                   `json:"bonding_mode"`
+	BondName          string                   `json:"bond_name"`
 }
 
 // NewStaticHostConfig outputs a static host configuration without setting
 // any identity string, authentication string, and timestamp.  You may
 // leave dnsAddr and interfaceAddr as empty strings, see ST documentation.
-func NewStaticHostConfig(hostIP, gateway string, provisioningURLs []string, dnsAddr string, interfaceAddr *string, ifname string) *HostConfig {
+func NewStaticHostConfig(hostIP, gateway string, provisioningURLs []string, dnsAddr string, cfg []*host.NetworkInterface) *HostConfig {
 	return &HostConfig{
-		Version:    1,
-		IPAddrMode: 1,
-		HostIP:     hostIP,
-		Gateway:    gateway,
-		DNS:        dnsAddr,
-		NetworkInterfaces: []*NetworkInterface{
-			{InterfaceName: ifname, MACAddress: *interfaceAddr},
-		},
-		ProvisioningURLs: provisioningURLs,
+		Version:           1,
+		IPAddrMode:        1,
+		HostIP:            hostIP,
+		Gateway:           gateway,
+		DNS:               dnsAddr,
+		NetworkInterfaces: cfg,
+		ProvisioningURLs:  provisioningURLs,
 	}
 }
 
 // NewDHCPHostConfig outputs a dhcp host configuration without setting any
 // identity string, authentication string, and timestamp.  You may leave dnsAddr
 // and interfaceAddr as empty strings, see ST documentation.
-func NewDHCPHostConfig(provisioningURLs []string, dnsAddr string, interfaceAddr *string, ifname string) *HostConfig {
+func NewDHCPHostConfig(provisioningURLs []string, dnsAddr string, cfg []*host.NetworkInterface) *HostConfig {
 	return &HostConfig{
-		Version:    1,
-		IPAddrMode: 2,
-		DNS:        dnsAddr,
-		NetworkInterfaces: []*NetworkInterface{
-			{InterfaceName: ifname, MACAddress: *interfaceAddr},
-		},
-		ProvisioningURLs: provisioningURLs,
+		Version:           1,
+		IPAddrMode:        2,
+		DNS:               dnsAddr,
+		NetworkInterfaces: cfg,
+		ProvisioningURLs:  provisioningURLs,
+	}
+}
+
+func NewBondingHostConfig(provisioningURLs []string, dnsAddr string, mode string, cfg []*host.NetworkInterface) *HostConfig {
+	return &HostConfig{
+		Version:           1,
+		IPAddrMode:        3,
+		DNS:               dnsAddr,
+		BondingMode:       mode,
+		NetworkInterfaces: cfg,
+		ProvisioningURLs:  provisioningURLs,
 	}
 }
 
@@ -83,18 +90,6 @@ func (cfg *HostConfig) WriteEFI(varUUID *uuid.UUID, efiName string) error {
 		return fmt.Errorf("marshal: %w", err)
 	}
 	return writeEFI(b, varUUID, efiName)
-}
-
-// SetBonding sets up the bonding mode on the host configuration
-func (cfg *HostConfig) SetBonding(name, mode string, interfaces []string) error {
-	if netlink.StringToBondMode(mode) == netlink.BOND_MODE_UNKNOWN {
-		return fmt.Errorf("unknown bonding mode: %s", mode)
-	}
-	cfg.Bonding = true
-	cfg.BondingMode = mode
-	cfg.NetworkInterfaces = interfaces
-	cfg.BondName = name
-	return nil
 }
 
 // HostName is a host name

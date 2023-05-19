@@ -127,6 +127,5 @@ func readWriteHostConfig(_ *secrets.UniqueDeviceSecret, timestamp int64, varUUID
 	}
 	cfg.Authentication = "foo"
 	cfg.Identity = "bar"
-	cfg.Timestamp = timestamp
 	return cfg.WriteEFI(varUUID, name)
 }
