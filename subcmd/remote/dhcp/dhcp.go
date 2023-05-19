@@ -53,13 +53,18 @@ func Main(args []string, optDNS, optInterface, optHostName, optUser, optPassword
 	if err := mptnetwork.ResetInterfaces(); err != nil {
 		return fmt.Errorf("failed to reset network interfaces: %v", err)
 	}
-	if err := network.SetupNetworkInterface(&host.Config{
-		IPAddrMode:       host.IPDynamic,
-		NetworkInterface: &mac,
-	}); err != nil {
+	ifname := mptnetwork.GetInterfaceName(&mac)
+	mode := host.IPDynamic
+	cfg := &host.Config{
+		IPAddrMode: &mode,
+		NetworkInterfaces: &[]*host.NetworkInterface{
+			{InterfaceName: &ifname, MACAddress: &mac},
+		},
+	}
+	if err := network.SetupNetworkInterface(cfg); err != nil {
 		return fmt.Errorf("setup network: %w", err)
 	}
-	config := st.NewDHCPHostConfig([]string{url}, optDNS, &optInterface)
+	config := st.NewDHCPHostConfig([]string{url}, optDNS, *cfg.NetworkInterfaces)
 	if err := config.WriteEFI(&varUUID, efiName); err != nil {
 		return fmt.Errorf("persist host config: %w", err)
 	}

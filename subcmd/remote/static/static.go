@@ -107,10 +107,15 @@ func Main(args []string, optDNS, optInterface, optHostName, optHostIP, optGatewa
 		return fmt.Errorf("failed to reset network interfaces: %v", err)
 	}
 
+	ifname := mptnetwork.GetInterfaceName(&mac)
+	mode := host.IPStatic
 	cfg := host.Config{
-		HostIP:           hostIP,
-		DefaultGateway:   &gateway,
-		NetworkInterface: &mac,
+		HostIP:         hostIP,
+		DefaultGateway: &gateway,
+		IPAddrMode:     &mode,
+		NetworkInterfaces: &[]*host.NetworkInterface{
+			{InterfaceName: &ifname, MACAddress: &mac},
+		},
 	}
 
 	if len(bondedInterfaces) > 0 {
@@ -119,12 +124,16 @@ func Main(args []string, optDNS, optInterface, optHostName, optHostIP, optGatewa
 			return fmt.Errorf("bonding mode unknown: %s", optBondingMode)
 		}
 		// cfg.BondingMode = bondmode
-		var ifaces []*string
+		var ifaces []*host.NetworkInterface
 		for _, iface := range bondedInterfaces {
 			// This is a bug in the go for-loop semantics. See
 			// https://github.com/golang/go/discussions/56010
 			iface := iface
-			ifaces = append(ifaces, &iface)
+			mac := mptnetwork.GetHardwareAddr(iface)
+			ifaces = append(ifaces, &host.NetworkInterface{
+				InterfaceName: &iface,
+				MACAddress:    mac,
+			})
 		}
 		cfg.NetworkInterfaces = &ifaces
 		cfg.BondName = &bondingName
@@ -133,13 +142,14 @@ func Main(args []string, optDNS, optInterface, optHostName, optHostIP, optGatewa
 	if err := network.SetupNetworkInterface(&cfg); err != nil {
 		return fmt.Errorf("setup network: %w", err)
 	}
-	config := st.NewStaticHostConfig(optHostIP, optGateway, []string{url}, optDNS, &optInterface)
 
+	var config *st.HostConfig
 	if len(bondedInterfaces) > 0 {
-		if err := config.SetBonding("bond0", optBondingMode, bondedInterfaces); err != nil {
-			return fmt.Errorf("failed adding bonding mode: %w", err)
-		}
+		config = st.NewBondingHostConfig([]string{url}, optDNS, optBondingMode, *cfg.NetworkInterfaces)
+	} else {
+		config = st.NewStaticHostConfig(optHostIP, optGateway, []string{url}, optDNS, *cfg.NetworkInterfaces)
 	}
+
 	if err := config.WriteEFI(&varUUID, efiName); err != nil {
 		return fmt.Errorf("persist host config: %w", err)
 	}

@@ -168,3 +168,25 @@ func TestInterfaces(gw, addr string, interfaceWait time.Duration) ([]netlink.Lin
 	})
 	return testedDevices, err
 }
+
+func GetInterfaceName(mac *net.HardwareAddr) string {
+	var ret string
+	ForEachInterface(func(link netlink.Link) error {
+		if link.Attrs().HardwareAddr.String() == mac.String() {
+			ret = link.Attrs().Name
+		}
+		return nil
+	})
+	return ret
+}
+
+func GetHardwareAddr(s string) *net.HardwareAddr {
+	var ret *net.HardwareAddr
+	ForEachInterface(func(link netlink.Link) error {
+		if link.Attrs().Name == s {
+			ret = &link.Attrs().HardwareAddr
+		}
+		return nil
+	})
+	return ret
+}

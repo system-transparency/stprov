@@ -10,37 +10,41 @@ import (
 	"github.com/vishvananda/netlink"
 )
 
+type NetworkInterface struct {
+	InterfaceName string `json:"interface_name"`
+	MACAddress    string `json:"mac_address"`
+}
+
 // HostConfig is an ST host configuration, see:
 // https://github.com/system-transparency/system-transparency#host_configurationjson
 // TODO: Replace with stboot hostcfg
 type HostConfig struct {
-	Version           int      `json:"version"`
-	NetworkMode       string   `json:"network_mode"`
-	HostIP            string   `json:"host_ip"`
-	Gateway           string   `json:"gateway"`
-	DNS               string   `json:"dns"`
-	NetworkInterface  *string  `json:"network_interface"`
-	ProvisioningURLs  []string `json:"provisioning_urls"`
-	Identity          string   `json:"identity"`
-	Authentication    string   `json:"authentication"`
-	Timestamp         int64    `json:"timestamp"`
-	NetworkInterfaces []string `json:"network_interfaces"`
-	Bonding           bool     `json:"bonding"`
-	BondingMode       string   `json:"bonding_mode"`
-	BondName          string   `json:"bond_name"`
+	Version           int                 `json:"version"`
+	IPAddrMode        int                 `json:"network_mode"`
+	HostIP            string              `json:"host_ip"`
+	Gateway           string              `json:"gateway"`
+	DNS               string              `json:"dns"`
+	NetworkInterfaces []*NetworkInterface `json:"network_interfaces"`
+	ProvisioningURLs  []string            `json:"provisioning_urls"`
+	Identity          string              `json:"identity"`
+	Authentication    string              `json:"authentication"`
+	BondingMode       string              `json:"bonding_mode"`
+	BondName          string              `json:"bond_name"`
 }
 
 // NewStaticHostConfig outputs a static host configuration without setting
 // any identity string, authentication string, and timestamp.  You may
 // leave dnsAddr and interfaceAddr as empty strings, see ST documentation.
-func NewStaticHostConfig(hostIP, gateway string, provisioningURLs []string, dnsAddr string, interfaceAddr *string) *HostConfig {
+func NewStaticHostConfig(hostIP, gateway string, provisioningURLs []string, dnsAddr string, interfaceAddr *string, ifname string) *HostConfig {
 	return &HostConfig{
-		Version:          1,
-		NetworkMode:      "static",
-		HostIP:           hostIP,
-		Gateway:          gateway,
-		DNS:              dnsAddr,
-		NetworkInterface: interfaceAddr,
+		Version:    1,
+		IPAddrMode: 1,
+		HostIP:     hostIP,
+		Gateway:    gateway,
+		DNS:        dnsAddr,
+		NetworkInterfaces: []*NetworkInterface{
+			{InterfaceName: ifname, MACAddress: *interfaceAddr},
+		},
 		ProvisioningURLs: provisioningURLs,
 	}
 }
@@ -48,12 +52,14 @@ func NewStaticHostConfig(hostIP, gateway string, provisioningURLs []string, dnsA
 // NewDHCPHostConfig outputs a dhcp host configuration without setting any
 // identity string, authentication string, and timestamp.  You may leave dnsAddr
 // and interfaceAddr as empty strings, see ST documentation.
-func NewDHCPHostConfig(provisioningURLs []string, dnsAddr string, interfaceAddr *string) *HostConfig {
+func NewDHCPHostConfig(provisioningURLs []string, dnsAddr string, interfaceAddr *string, ifname string) *HostConfig {
 	return &HostConfig{
-		Version:          1,
-		NetworkMode:      "dhcp",
-		DNS:              dnsAddr,
-		NetworkInterface: interfaceAddr,
+		Version:    1,
+		IPAddrMode: 2,
+		DNS:        dnsAddr,
+		NetworkInterfaces: []*NetworkInterface{
+			{InterfaceName: ifname, MACAddress: *interfaceAddr},
+		},
 		ProvisioningURLs: provisioningURLs,
 	}
 }
