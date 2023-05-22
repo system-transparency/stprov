@@ -20,7 +20,7 @@ type NetworkInterface struct {
 // TODO: Replace with stboot hostcfg
 type HostConfig struct {
 	Version           int                      `json:"version"`
-	IPAddrMode        int                      `json:"network_mode"`
+	IPAddrMode        string                   `json:"network_mode"`
 	HostIP            string                   `json:"host_ip"`
 	Gateway           string                   `json:"gateway"`
 	DNS               string                   `json:"dns"`
@@ -38,7 +38,7 @@ type HostConfig struct {
 func NewStaticHostConfig(hostIP, gateway string, provisioningURLs *string, dnsAddr string, cfg []*host.NetworkInterface) *HostConfig {
 	return &HostConfig{
 		Version:           1,
-		IPAddrMode:        1,
+		IPAddrMode:        "static",
 		HostIP:            hostIP,
 		Gateway:           gateway,
 		DNS:               dnsAddr,
@@ -53,7 +53,7 @@ func NewStaticHostConfig(hostIP, gateway string, provisioningURLs *string, dnsAd
 func NewDHCPHostConfig(provisioningURLs *string, dnsAddr string, cfg []*host.NetworkInterface) *HostConfig {
 	return &HostConfig{
 		Version:           1,
-		IPAddrMode:        2,
+		IPAddrMode:        "dhcp",
 		DNS:               dnsAddr,
 		NetworkInterfaces: cfg,
 		OSPkgPointer:      provisioningURLs,
@@ -63,7 +63,7 @@ func NewDHCPHostConfig(provisioningURLs *string, dnsAddr string, cfg []*host.Net
 func NewBondingHostConfig(provisioningURLs *string, dnsAddr string, mode string, cfg []*host.NetworkInterface) *HostConfig {
 	return &HostConfig{
 		Version:           1,
-		IPAddrMode:        3,
+		IPAddrMode:        "static",
 		DNS:               dnsAddr,
 		BondingMode:       mode,
 		NetworkInterfaces: cfg,
