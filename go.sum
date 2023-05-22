@@ -269,3 +269,5 @@ system-transparency.org/stboot v0.0.0 h1:7n2wW3Uc03Kzx65eYQN6atQVdBXHFnyzK1u+aRB
 system-transparency.org/stboot v0.0.0/go.mod h1:quimmCmuu3htZfQu1P87qgs6njz2B+F21Xcio91fdJc=
 system-transparency.org/stboot v0.1.0 h1:OACZTjjRM/YOGNyAKjXYIecrlMVqzFTjEdwOut+3L8o=
 system-transparency.org/stboot v0.1.0/go.mod h1:quimmCmuu3htZfQu1P87qgs6njz2B+F21Xcio91fdJc=
+system-transparency.org/stboot v0.1.1-0.20230519134548-03507ebd3bbd h1:cnKcvZ9aVZAkPewwwRQHI5ywyhaGkXDJyjKs6NY78bQ=
+system-transparency.org/stboot v0.1.1-0.20230519134548-03507ebd3bbd/go.mod h1:quimmCmuu3htZfQu1P87qgs6njz2B+F21Xcio91fdJc=
