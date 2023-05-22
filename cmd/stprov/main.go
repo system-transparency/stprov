@@ -21,7 +21,7 @@ const usage = `Usage:
 Cheat sheet:
 
   ### REMOTE
-  stprov remote static -h se99-wireguard.devmole.eu -i 185.195.233.75/26 -g 185.195.233.65 -b eth0 -b eth1 -u stboot -p ospkg-password
+  stprov remote static -h example.org -i 192.168.1.75/26 -g 192.168.1.1 -b eth0 -b eth1 -u stboot -p ospkg-password
   stprov remote run -o "operations one-time password"
   shutdown -r +0
 

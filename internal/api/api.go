@@ -16,7 +16,7 @@ const (
 	EndpointAddData = "add-data"
 	EndpointCommit  = "commit"
 
-	BasicAuthUser = "mole"
+	BasicAuthUser = "example-user"
 )
 
 // AddDataRequest is the input of an add-data request
