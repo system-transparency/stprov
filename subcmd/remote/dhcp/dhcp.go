@@ -64,7 +64,7 @@ func Main(args []string, optDNS, optInterface, optHostName, optUser, optPassword
 	if err := network.SetupNetworkInterface(cfg); err != nil {
 		return fmt.Errorf("setup network: %w", err)
 	}
-	config := st.NewDHCPHostConfig([]string{url}, optDNS, *cfg.NetworkInterfaces)
+	config := st.NewDHCPHostConfig(&url, optDNS, *cfg.NetworkInterfaces)
 	if err := config.WriteEFI(&varUUID, efiName); err != nil {
 		return fmt.Errorf("persist host config: %w", err)
 	}

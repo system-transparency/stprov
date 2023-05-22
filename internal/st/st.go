@@ -25,7 +25,7 @@ type HostConfig struct {
 	Gateway           string                   `json:"gateway"`
 	DNS               string                   `json:"dns"`
 	NetworkInterfaces []*host.NetworkInterface `json:"network_interfaces"`
-	ProvisioningURLs  []string                 `json:"provisioning_urls"`
+	OSPkgPointer      *string                  `json:"ospkg_pointer"`
 	Identity          string                   `json:"identity"`
 	Authentication    string                   `json:"authentication"`
 	BondingMode       string                   `json:"bonding_mode"`
@@ -35,7 +35,7 @@ type HostConfig struct {
 // NewStaticHostConfig outputs a static host configuration without setting
 // any identity string, authentication string, and timestamp.  You may
 // leave dnsAddr and interfaceAddr as empty strings, see ST documentation.
-func NewStaticHostConfig(hostIP, gateway string, provisioningURLs []string, dnsAddr string, cfg []*host.NetworkInterface) *HostConfig {
+func NewStaticHostConfig(hostIP, gateway string, provisioningURLs *string, dnsAddr string, cfg []*host.NetworkInterface) *HostConfig {
 	return &HostConfig{
 		Version:           1,
 		IPAddrMode:        1,
@@ -43,31 +43,31 @@ func NewStaticHostConfig(hostIP, gateway string, provisioningURLs []string, dnsA
 		Gateway:           gateway,
 		DNS:               dnsAddr,
 		NetworkInterfaces: cfg,
-		ProvisioningURLs:  provisioningURLs,
+		OSPkgPointer:      provisioningURLs,
 	}
 }
 
 // NewDHCPHostConfig outputs a dhcp host configuration without setting any
 // identity string, authentication string, and timestamp.  You may leave dnsAddr
 // and interfaceAddr as empty strings, see ST documentation.
-func NewDHCPHostConfig(provisioningURLs []string, dnsAddr string, cfg []*host.NetworkInterface) *HostConfig {
+func NewDHCPHostConfig(provisioningURLs *string, dnsAddr string, cfg []*host.NetworkInterface) *HostConfig {
 	return &HostConfig{
 		Version:           1,
 		IPAddrMode:        2,
 		DNS:               dnsAddr,
 		NetworkInterfaces: cfg,
-		ProvisioningURLs:  provisioningURLs,
+		OSPkgPointer:      provisioningURLs,
 	}
 }
 
-func NewBondingHostConfig(provisioningURLs []string, dnsAddr string, mode string, cfg []*host.NetworkInterface) *HostConfig {
+func NewBondingHostConfig(provisioningURLs *string, dnsAddr string, mode string, cfg []*host.NetworkInterface) *HostConfig {
 	return &HostConfig{
 		Version:           1,
 		IPAddrMode:        3,
 		DNS:               dnsAddr,
 		BondingMode:       mode,
 		NetworkInterfaces: cfg,
-		ProvisioningURLs:  provisioningURLs,
+		OSPkgPointer:      provisioningURLs,
 	}
 }
 

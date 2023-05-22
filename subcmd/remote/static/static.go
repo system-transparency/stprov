@@ -145,9 +145,9 @@ func Main(args []string, optDNS, optInterface, optHostName, optHostIP, optGatewa
 
 	var config *st.HostConfig
 	if len(bondedInterfaces) > 0 {
-		config = st.NewBondingHostConfig([]string{url}, optDNS, optBondingMode, *cfg.NetworkInterfaces)
+		config = st.NewBondingHostConfig(&url, optDNS, optBondingMode, *cfg.NetworkInterfaces)
 	} else {
-		config = st.NewStaticHostConfig(optHostIP, optGateway, []string{url}, optDNS, *cfg.NetworkInterfaces)
+		config = st.NewStaticHostConfig(optHostIP, optGateway, &url, optDNS, *cfg.NetworkInterfaces)
 	}
 
 	if err := config.WriteEFI(&varUUID, efiName); err != nil {
