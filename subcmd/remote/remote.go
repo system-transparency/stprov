@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"system-transparency.org/stprov/internal/network"
 	"system-transparency.org/stprov/internal/options"
 	"system-transparency.org/stprov/subcmd/remote/dhcp"
 	"system-transparency.org/stprov/subcmd/remote/run"
@@ -32,6 +33,7 @@ const usage_string = `Usage:
     -H, --full-host    Full host name (e.g., localhost.local)
     -f                 Don't protect against minor configuration anomalies, like gw outside of subnet
     -i, --ip           Host IP in CIDR notation (e.g., 185.195.233.75/26)
+    -I, --interface    Interface name of the network interface
     -g, --gateway      Default gateway (e.g., 185.195.233.65) (Default: Assumes first IP in the subnet)
     -u, --user         User name at provisioning server (Default: %s)
     -p, --pass         Password at provisioning server (e.g., mjaoouww)
@@ -67,7 +69,7 @@ const (
 var (
 	optDNS, optMAC, optHostName, optUser, optPassword, optURL          string
 	optHostIP, optGateway, optAllowedCIDRs, optOTP, optFullHostName    string
-	optInterfaceWait                                                   string
+	optInterfaceWait, optInterface                                     string
 	optPort                                                            int
 	optAutodetect, optBonding, optAllowConfigQuirks, optTryLastGateway bool
 	optBondingInterfaces                                               options.SliceFlag
@@ -89,6 +91,7 @@ func setOptions(fs *flag.FlagSet) {
 	case "static":
 		options.AddString(fs, &optDNS, "d", "dns", options.DefDNS)
 		options.AddString(fs, &optMAC, "m", "mac", "")
+		options.AddString(fs, &optInterface, "I", "interface", "")
 		options.AddBool(fs, &optAutodetect, "A", "autodetect", false)
 		options.AddString(fs, &optHostName, "h", "host", "")
 		options.AddString(fs, &optFullHostName, "H", "full-host", "")
@@ -107,6 +110,7 @@ func setOptions(fs *flag.FlagSet) {
 	case "dhcp":
 		options.AddString(fs, &optDNS, "d", "dns", options.DefDNS)
 		options.AddString(fs, &optMAC, "m", "mac", "")
+		options.AddString(fs, &optInterface, "I", "interface", "")
 		options.AddString(fs, &optHostName, "h", "host", "")
 		options.AddString(fs, &optFullHostName, "H", "full-host", "")
 		options.AddString(fs, &optUser, "u", "user", "")
@@ -146,6 +150,10 @@ func Main(args []string) error {
 		if interfaceWait, err = time.ParseDuration(optInterfaceWait); err != nil {
 			return fmtErr(err, opt.Name())
 		}
+	}
+
+	if optInterface != "" {
+		optMAC = network.GetHardwareAddr(optInterface).String()
 	}
 
 	switch opt.Name() {
