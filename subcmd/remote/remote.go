@@ -153,7 +153,11 @@ func Main(args []string) error {
 	}
 
 	if optInterface != "" {
-		optMAC = network.GetHardwareAddr(optInterface).String()
+		addr := network.GetHardwareAddr(optInterface)
+		if addr == nil {
+			return fmtErr(fmt.Errorf("invalid interface name %s", optInterface), opt.Name())
+		}
+		optMAC = addr.String()
 	}
 
 	switch opt.Name() {
