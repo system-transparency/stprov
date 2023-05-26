@@ -8,7 +8,7 @@ require (
 	github.com/u-root/u-root v0.11.0
 	github.com/vishvananda/netlink v1.2.1-beta.2
 	golang.org/x/crypto v0.0.0-20220331220935-ae2d96664a29
-	system-transparency.org/stboot v0.1.1-0.20230519134548-03507ebd3bbd
+	system-transparency.org/stboot v0.1.2
 )
 
 require (
