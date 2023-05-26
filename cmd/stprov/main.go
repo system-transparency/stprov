@@ -6,11 +6,10 @@ import (
 	"os"
 
 	"system-transparency.org/stprov/internal/options"
+	"system-transparency.org/stprov/internal/version"
 	"system-transparency.org/stprov/subcmd/local"
 	"system-transparency.org/stprov/subcmd/remote"
 )
-
-var Version = "undefined"
 
 const usage = `Usage:
 
@@ -42,7 +41,7 @@ func main() {
 	case "remote":
 		err = remote.Main(opt.Args())
 	case "version":
-		fmt.Println(Version)
+		fmt.Println(version.Version)
 	default:
 		err = fmt.Errorf(": invalid command %q, try \"help\"", opt.Name())
 	}
