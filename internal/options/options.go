@@ -21,7 +21,7 @@ import (
 var DefHostname = "localhost.local"
 var DefUser = "stboot"
 var DefPassword = "stboot"
-var DefDNS = "8.8.8.8"
+var DefDNS = "9.9.9.9"
 var DefAllowedNetworks = "127.0.0.1/32"
 var DefBondingMode = "balance-rr"
 
