@@ -32,9 +32,9 @@ const usage_string = `Usage:
     -h, --host         Host name (amended with: %s)
     -H, --full-host    Full host name (e.g., localhost.local)
     -f                 Don't protect against minor configuration anomalies, like gw outside of subnet
-    -i, --ip           Host IP in CIDR notation (e.g., 185.195.233.75/26)
+    -i, --ip           Host IP in CIDR notation (e.g., 10.0.2.10/26)
     -I, --interface    Interface name of the network interface
-    -g, --gateway      Default gateway (e.g., 185.195.233.65) (Default: Assumes first IP in the subnet)
+    -g, --gateway      Default gateway (e.g., 10.0.2.2) (Default: Assumes first IP in the subnet)
     -u, --user         User name at provisioning server (Default: %s)
     -p, --pass         Password at provisioning server (e.g., mjaoouww)
     -r, --url          Absolute provisioning URL

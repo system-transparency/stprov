@@ -18,7 +18,7 @@ const usage = `Usage:
 
     Options:
     -p, --port  stprov remote listenting port (Default: 2009)
-    -i, --ip    stprov remote ip address (e.g., 185.195.233.75)
+    -i, --ip    stprov remote ip address (e.g., 10.0.2.10)
     -o, --otp   one-time password (e.g., mjaoouuuuw)
 `
 
