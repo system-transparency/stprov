@@ -20,13 +20,13 @@ const usage = `Usage:
 Cheat sheet:
 
   ### REMOTE
-  stprov remote static -h example.org -i 192.168.1.75/26 -g 192.168.1.1 -b eth0 -b eth1 -u stboot -p ospkg-password
+  stprov remote static -h example.org -i 10.0.2.10/26 -g 10.0.2.2 -b eth0 -b eth1 -u stboot -p ospkg-password
   stprov remote run -o "operations one-time password"
   shutdown -r +0
 
   ### LOCAL
   go install system-transparency.org/stprov/cmd/stprov@latest
-  stprov local run -i 185.195.233.75 -o "operations one-time password" 
+  stprov local run -i 10.0.2.10 -o "operations one-time password"
 `
 
 func main() {
