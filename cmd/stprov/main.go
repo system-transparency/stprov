@@ -20,7 +20,7 @@ const usage = `Usage:
 Cheat sheet:
 
   ### REMOTE
-  stprov remote static -h example.org -i 10.0.2.10/26 -g 10.0.2.2 -b eth0 -b eth1 -u stboot -p ospkg-password
+  stprov remote static -h myhostname -i 10.0.2.10/26 -g 10.0.2.2 -b eth0 -b eth1 -u stboot -p ospkg-password
   stprov remote run -o "operations one-time password"
   shutdown -r +0
 
