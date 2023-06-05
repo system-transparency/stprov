@@ -3,7 +3,7 @@ DEFAULT_USER=stboot
 DEFAULT_PASSWORD=stboot
 DEFAULT_DNS=9.9.9.9
 DEFAULT_ALLOWED_NETWORKS=127.0.0.1/32
-DEFAULT_BONDING_MODE=balance-rrheyho
+DEFAULT_BONDING_MODE=balance-rr
 
 FLAGS = -X 'system-transparency.org/stprov/internal/version.Version=$(shell git describe --tags --always)'
 FLAGS+=-X 'system-transparency.org/stprov/internal/options.DefHostname=$(DEFAULT_DOMAIN)'
