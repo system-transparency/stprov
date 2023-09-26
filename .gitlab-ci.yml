@@ -1,0 +1,13 @@
+stages:
+  - check
+
+commitlint:
+  stage: check
+  image: registry.hub.docker.com/library/node:alpine
+  before_script:
+    - apk add --no-cache git
+    - npm install --save-dev @commitlint/config-conventional @commitlint/cli
+  script:
+    - echo "${CI_COMMIT_MESSAGE}" | npx commitlint
+
+
