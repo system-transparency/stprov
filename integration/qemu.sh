@@ -24,12 +24,12 @@ mkdir -p "$BUILD" "$SAVED"
 ###
 # Build
 ###
-[[ -d "$BUILD"/u-root ]] || git clone --depth 1 --branch v0.10.0 https://github.com/u-root/u-root "$BUILD"/u-root
-
 GOPATH="$BUILD"/go go install ../cmd/stprov
-GOPATH="$BUILD"/go go install github.com/u-root/u-root@v0.10.0
+[[ -d "$BUILD"/u-root ]] ||
+  git clone --depth 1 https://github.com/u-root/u-root "$BUILD"/u-root &&
+  pushd "$BUILD"/u-root && GOPATH="$BUILD"/go go install && popd
 
-url="https://git.glasklar.is/system-transparency/core/system-transparency/-/raw/main/contrib/linuxboot.vmlinuz?inline=false"
+url="https://git.glasklar.is/system-transparency/core/system-transparency/-/raw/main/contrib/linuxboot.vmlinuz"
 [[ -f "$BUILD"/kernel.vmlinuz ]] || curl -L "$url" -o "$BUILD"/kernel.vmlinuz
 
 "$BUILD"/go/bin/u-root\
@@ -43,7 +43,10 @@ url="https://git.glasklar.is/system-transparency/core/system-transparency/-/raw/
 echo "PASS: build"
 
 ###
-# Setup EFI-NVRAM stuff
+# Setup EFI-NVRAM stuff.  Magic, if you understand the choises please docdoc here.
+#
+# From:
+# https://git.glasklar.is/system-transparency/core/system-transparency/-/blob/main/tasks/qemu.yml?ref_type=heads#L5-19
 ###
 ovmf_code=""
 for str in "OVMF" "edk2/ovmf" "edk2-ovmf/x64"; do
@@ -51,6 +54,7 @@ for str in "OVMF" "edk2/ovmf" "edk2-ovmf/x64"; do
   if [[ -f "$file" ]]; then
     ovmf_code="$file"
     cp /usr/share/"$str"/OVMF_VARS.fd "$SAVED"/OVMF_VARS.fd
+    break
   fi
 done
 
@@ -99,7 +103,7 @@ function reach_stage() {
 
 reach_stage 10 "stage:boot"
 reach_stage 60 "stage:network"
-"$BUILD"/go/bin/stprov local run -i 127.0.0.1 -o stprov | tee "$SAVED"/stprov.log
+"$BUILD"/go/bin/stprov local run --ip 127.0.0.1 --otp sikritpassword | tee "$SAVED"/stprov.log
 reach_stage 3 "stage:shutdown"
 
 hostname=$(grep hostname "$SAVED"/stprov.log | cut -d'=' -f2)
