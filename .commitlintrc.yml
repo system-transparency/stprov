@@ -51,3 +51,12 @@ rules:
   scope-empty: 
     - 2
     - always
+
+# Override subject-scope to allow upper case.
+
+  subject-case:
+    - 2
+    - always
+    - - sentence-case
+      - start-case
+      - upper-case
