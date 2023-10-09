@@ -1,8 +1,9 @@
+//go:build efi_nvram
+
 package st
 
 import (
 	"net"
-	"os/user"
 	"reflect"
 	"testing"
 
@@ -11,7 +12,6 @@ import (
 )
 
 func TestReadWriteEFI(t *testing.T) {
-	maybeSkip(t)
 	testIfname := "eth0"
 	ifaceConfig := host.NetworkInterface{InterfaceName: &testIfname, MACAddress: testHardwareAddr(t)}
 	testURL := "http://localhost:80"
@@ -34,28 +34,18 @@ func TestReadWriteEFI(t *testing.T) {
 }
 
 func TestReadWriteHostName(t *testing.T) {
-	maybeSkip(t)
 	hn := HostName("mullis")
 	if err := hn.WriteEFI(testUUID(t), "STHostName"); err != nil {
 		t.Errorf("%v", err)
+		return
 	}
 	var hnAgain HostName
 	if err := hnAgain.ReadEFI(testUUID(t), "STHostName"); err != nil {
 		t.Errorf("%v", err)
+		return
 	}
 	if hn != hnAgain {
 		t.Errorf("got host name %q, want %q", hn, hnAgain)
-	}
-}
-
-func maybeSkip(t *testing.T) {
-	t.Helper()
-	user, err := user.Current()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if user.Username != "root" {
-		t.Skip("need sudo to clutter efi-nvram, skipping a test")
 	}
 }
 
