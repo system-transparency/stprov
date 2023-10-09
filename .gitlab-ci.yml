@@ -1,7 +1,16 @@
 ---
 stages:
+  - unit_test
   - integration
   - commit
+
+go_test:
+  stage: unit_test
+  image: golang:1.19
+  script:
+    - go build ./...
+    - go test -v -race ./...
+    - if gofmt -d . | grep . ; then false ; else true ; fi
 
 qemu_test:
   stage: integration
