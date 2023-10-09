@@ -35,7 +35,7 @@ type HostConfig struct {
 // NewStaticHostConfig outputs a static host configuration without setting
 // any identity string, authentication string, and timestamp.  You may
 // leave dnsAddr and interfaceAddr as empty strings, see ST documentation.
-func NewStaticHostConfig(hostIP, gateway string, provisioningURLs *string, dnsAddr string, cfg []*host.NetworkInterface) *HostConfig {
+func NewStaticHostConfig(hostIP, gateway string, provisioningURL *string, dnsAddr string, cfg []*host.NetworkInterface) *HostConfig {
 	return &HostConfig{
 		Version:           1,
 		IPAddrMode:        "static",
@@ -43,20 +43,20 @@ func NewStaticHostConfig(hostIP, gateway string, provisioningURLs *string, dnsAd
 		Gateway:           gateway,
 		DNS:               []string{dnsAddr},
 		NetworkInterfaces: cfg,
-		OSPkgPointer:      provisioningURLs,
+		OSPkgPointer:      provisioningURL,
 	}
 }
 
 // NewDHCPHostConfig outputs a dhcp host configuration without setting any
 // identity string, authentication string, and timestamp.  You may leave dnsAddr
 // and interfaceAddr as empty strings, see ST documentation.
-func NewDHCPHostConfig(provisioningURLs *string, dnsAddr string, cfg []*host.NetworkInterface) *HostConfig {
+func NewDHCPHostConfig(provisioningURL *string, dnsAddr string, cfg []*host.NetworkInterface) *HostConfig {
 	return &HostConfig{
 		Version:           1,
 		IPAddrMode:        "dhcp",
 		DNS:               []string{dnsAddr},
 		NetworkInterfaces: cfg,
-		OSPkgPointer:      provisioningURLs,
+		OSPkgPointer:      provisioningURL,
 	}
 }
 
