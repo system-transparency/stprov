@@ -3,11 +3,16 @@ package remote
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
+	"strings"
 	"time"
+
+	"github.com/google/uuid"
 
 	"system-transparency.org/stprov/internal/network"
 	"system-transparency.org/stprov/internal/options"
+	"system-transparency.org/stprov/internal/st"
 	"system-transparency.org/stprov/subcmd/remote/dhcp"
 	"system-transparency.org/stprov/subcmd/remote/run"
 	"system-transparency.org/stprov/subcmd/remote/static"
@@ -163,15 +168,51 @@ func Main(args []string) error {
 	switch opt.Name() {
 	case "help", "":
 		opt.Usage()
+		return nil
 	case "static":
-		err = static.Main(opt.Args(), optDNS, optMAC, optHostName, optHostIP, optGateway, optUser, optPassword, optURL, efiUUID, efiConfigName, efiHostName, provURL, interfaceWait, optAutodetect, optBonding, optBondingInterfaces, optBondingMode, optAllowConfigQuirks, optTryLastGateway)
+		config, err := static.Config(opt.Args(), optDNS, optMAC, optHostIP, optGateway, interfaceWait, optAutodetect, optBonding, optBondingInterfaces, optBondingMode, optAllowConfigQuirks, optTryLastGateway)
+		if err != nil {
+			return fmtErr(err, opt.Name())
+		}
+		return fmtErr(commitConfig(optHostIP, config, optURL, provURL, optUser, optPassword), opt.Name())
 	case "dhcp":
-		err = dhcp.Main(opt.Args(), optDNS, optMAC, optHostName, optUser, optPassword, optURL, efiUUID, efiConfigName, efiHostName, provURL, interfaceWait, optAutodetect)
+		config, err := dhcp.Config(opt.Args(), optDNS, optMAC, interfaceWait, optAutodetect)
+		if err != nil {
+			return fmtErr(err, opt.Name())
+		}
+		return fmtErr(commitConfig(optHostIP, config, optURL, provURL, optUser, optPassword), opt.Name())
 	case "run":
-		err = run.Main(opt.Args(), optPort, optHostIP, optAllowedCIDRs, optOTP, efiUUID, efiConfigName, efiKeyName, efiHostName)
+		return fmtErr(run.Main(opt.Args(), optPort, optHostIP, optAllowedCIDRs, optOTP, efiUUID, efiConfigName, efiKeyName, efiHostName), opt.Name())
 	default:
-		err = fmt.Errorf("invalid command %q, try \"help\"", opt.Name())
+		return fmt.Errorf("invalid command %q, try \"help\"", opt.Name())
+	}
+}
+
+func commitConfig(optHostName string, config *st.HostConfig, optURL, provURL, optUser, optPassword string) error {
+	if len(optHostName) == 0 {
+		return fmt.Errorf("host name is a required option")
+	}
+	hostName := st.HostName(optHostName)
+
+	url, err := options.ParseProvisioningURL(optURL, provURL, optUser, optPassword)
+	if err != nil {
+		return err // either invalid option combination or values
+	}
+	if strings.Contains(url, options.DefUser+":"+options.DefPassword) {
+		log.Println("WARNING: using default username and password")
+	}
+	config.OSPkgPointer = &url
+
+	UUID, err := uuid.Parse(efiUUID)
+	if err != nil {
+		return fmt.Errorf("parse efi UUID: %w", err)
 	}
 
-	return fmtErr(err, opt.Name())
+	if err := hostName.WriteEFI(&UUID, efiHostName); err != nil {
+		return fmt.Errorf("persist host name: %w", err)
+	}
+	if err := config.WriteEFI(&UUID, efiConfigName); err != nil {
+		return fmt.Errorf("persist host config: %w", err)
+	}
+	return nil
 }

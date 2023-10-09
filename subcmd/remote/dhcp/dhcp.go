@@ -2,12 +2,9 @@ package dhcp
 
 import (
 	"fmt"
-	"log"
 	"net"
-	"strings"
 	"time"
 
-	"github.com/google/uuid"
 	"system-transparency.org/stboot/host"
 	"system-transparency.org/stboot/host/network"
 
@@ -16,42 +13,26 @@ import (
 	"system-transparency.org/stprov/internal/st"
 )
 
-func Main(args []string, optDNS, optInterface, optHostName, optUser, optPassword, optURL, efiUUID, efiName, efiHost, provURL string, interfaceWait time.Duration, optAutodetect bool) error {
+func Config(args []string, optDNS, optInterface string, interfaceWait time.Duration, optAutodetect bool) (*st.HostConfig, error) {
 	if len(args) != 0 {
-		return fmt.Errorf("trailing arguments: %v", args)
-	}
-	if len(optHostName) == 0 {
-		return fmt.Errorf("host name is a required option")
-	}
-	url, err := options.ParseProvisioningURL(optURL, provURL, optUser, optPassword)
-	if err != nil {
-		return err // either invalid option combination or values
-	}
-	if strings.Contains(url, options.DefUser+":"+options.DefPassword) {
-		log.Println("WARNING: using default username and password")
+		return nil, fmt.Errorf("trailing arguments: %v", args)
 	}
 	if ip := net.ParseIP(optDNS); ip == nil {
-		return fmt.Errorf("malformed dns address: %s", optDNS)
+		return nil, fmt.Errorf("malformed dns address: %s", optDNS)
 	}
 	if optInterface == "" {
 		defaultMACs, err := options.DefaultInterfaces(interfaceWait)
 		if err != nil {
-			return fmt.Errorf("no suitable network interface available")
+			return nil, fmt.Errorf("no suitable network interface available")
 		}
 		optInterface = defaultMACs[0].String()
 	}
 	mac, err := net.ParseMAC(optInterface)
 	if err != nil {
-		return fmt.Errorf("malformed mac address: %s", optInterface)
+		return nil, fmt.Errorf("malformed mac address: %s", optInterface)
 	}
-	hostName := st.HostName(optHostName)
-	varUUID, err := uuid.Parse(efiUUID)
-	if err != nil {
-		return fmt.Errorf("parse efi UUID: %w", err)
-	}
-
 	if err := mptnetwork.ResetInterfaces(); err != nil {
-		return fmt.Errorf("failed to reset network interfaces: %v", err)
+		return nil, fmt.Errorf("failed to reset network interfaces: %v", err)
 	}
 	ifname := mptnetwork.GetInterfaceName(&mac)
 	mode := host.IPDynamic
@@ -62,15 +43,7 @@ func Main(args []string, optDNS, optInterface, optHostName, optUser, optPassword
 		},
 	}
 	if err := network.SetupNetworkInterface(cfg); err != nil {
-		return fmt.Errorf("setup network: %w", err)
+		return nil, fmt.Errorf("setup network: %w", err)
 	}
-	config := st.NewDHCPHostConfig(&url, optDNS, *cfg.NetworkInterfaces)
-	if err := config.WriteEFI(&varUUID, efiName); err != nil {
-		return fmt.Errorf("persist host config: %w", err)
-	}
-	if err := hostName.WriteEFI(&varUUID, efiHost); err != nil {
-		return fmt.Errorf("persist host name: %w", err)
-	}
-
-	return nil
+	return st.NewDHCPHostConfig(optDNS, *cfg.NetworkInterfaces), nil
 }
