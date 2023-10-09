@@ -1,20 +1,23 @@
 package st
 
 import (
+	"net"
 	"os/user"
 	"reflect"
 	"testing"
 
 	"github.com/google/uuid"
+	"system-transparency.org/stboot/host"
 )
 
 func TestReadWriteEFI(t *testing.T) {
 	maybeSkip(t)
-	testAddr := "aa:aa:aa:aa:aa"
-	urls := []string{"http://localhost:80", "https://localhost:443"}
+	testIfname := "eth0"
+	ifaceConfig := host.NetworkInterface{InterfaceName: &testIfname, MACAddress: testHardwareAddr(t)}
+	testURL := "http://localhost:80"
 	for i, cfg := range []*HostConfig{
-		NewStaticHostConfig("192.168.0.2/32", "192.168.0.1", urls, "1.1.1.1", &testAddr),
-		NewDHCPHostConfig(urls, "2.2.2.2", nil),
+		NewStaticHostConfig("192.168.0.2/32", "192.168.0.1", &testURL, "1.1.1.1", []*host.NetworkInterface{&ifaceConfig}),
+		NewDHCPHostConfig(&testURL, "2.2.2.2", nil),
 	} {
 		if err := cfg.WriteEFI(testUUID(t), "STHostConfig"); err != nil {
 			t.Errorf("%d: %v", i, err)
@@ -63,4 +66,12 @@ func testUUID(t *testing.T) *uuid.UUID {
 		t.Fatal(err)
 	}
 	return &varUUID
+}
+
+func testHardwareAddr(t *testing.T) *net.HardwareAddr {
+	a, err := net.ParseMAC("aa:aa:aa:bb:bb:bb")
+	if err != nil {
+		t.Fatal(err)
+	}
+	return &a
 }
