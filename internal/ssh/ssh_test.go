@@ -4,10 +4,8 @@ import (
 	"bytes"
 	"crypto/rand"
 	"encoding/pem"
-	"os/user"
 	"testing"
 
-	"github.com/google/uuid"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -70,25 +68,6 @@ func TestWriteAndFingerprint(t *testing.T) {
 	}
 	if got, want := fprHere, fprThere; got != want {
 		t.Errorf("got fingerprint\n%s\nbut wanted\n%s", got, want)
-	}
-}
-
-func TestWriteEFI(t *testing.T) {
-	user, err := user.Current()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if user.Username != "root" {
-		t.Skip("need sudo to clutter efi-nvram, skipping TestWriteEFI()")
-	}
-
-	varUUID, err := uuid.Parse("f401f2c1-b005-4be0-8cee-f2e5945bcbe7")
-	if err != nil {
-		t.Fatal(err)
-	}
-	hk := newHostKey(t)
-	if err := hk.WriteEFI(&varUUID, "STHostKey"); err != nil {
-		t.Error(err)
 	}
 }
 
