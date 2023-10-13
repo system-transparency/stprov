@@ -25,6 +25,10 @@ qemu_test:
   script:
     - cd integration/
     - ./qemu.sh
+  artifacts:
+    when: always
+    paths:
+    - ./integration/saved/
 
 commitlint:
   stage: commit
