@@ -75,8 +75,8 @@ func (srv *Server) Run(ctx context.Context) error {
 		mux.Handle(path, handler)
 	}
 
+	wg.Add(1)
 	go await(ctx, srv.commit, func() {
-		wg.Add(1)
 		defer wg.Done()
 
 		ctx, cancel := context.WithTimeout(ctx, srv.Timeout)

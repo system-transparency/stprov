@@ -15,8 +15,8 @@ func TestRun(t *testing.T) {
 
 	srv := testServer(t)
 	var wg sync.WaitGroup
+	wg.Add(1)
 	go func() {
-		wg.Add(1)
 		defer wg.Done()
 		if err := srv.Run(ctx); err != nil {
 			t.Errorf("server failed: %v", err)
@@ -24,9 +24,25 @@ func TestRun(t *testing.T) {
 	}()
 
 	cli := testClient(t)
-	data, err := cli.AddData()
-	if err != nil {
-		t.Errorf("client add-data failed: %v", err)
+
+	// We race with the server startup, and may get here before
+	// the server goroutine calls listen(2). There's seems to be
+	// no way to get a signal from http.Server when it's ready to
+	// serve requests, so instead, just retry a few times.
+	var data *AddDataRequest
+	try := 0
+	for {
+		var err error
+		data, err = cli.AddData()
+		if err == nil {
+			break
+		}
+		try++
+		if try >= 3 {
+			t.Fatalf("client add-data failed: %v", err)
+		}
+		t.Logf("client add-data failed: %v, retrying in 1s", err)
+		time.Sleep(time.Second)
 	}
 	cr, err := cli.Commit()
 	if err != nil {
