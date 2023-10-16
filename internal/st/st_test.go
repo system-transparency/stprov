@@ -14,10 +14,9 @@ import (
 func TestReadWriteEFI(t *testing.T) {
 	testIfname := "eth0"
 	ifaceConfig := host.NetworkInterface{InterfaceName: &testIfname, MACAddress: testHardwareAddr(t)}
-	testURL := "http://localhost:80"
 	for i, cfg := range []*HostConfig{
-		NewStaticHostConfig("192.168.0.2/32", "192.168.0.1", &testURL, "1.1.1.1", []*host.NetworkInterface{&ifaceConfig}),
-		NewDHCPHostConfig(&testURL, "2.2.2.2", nil),
+		NewStaticHostConfig("192.168.0.2/32", "192.168.0.1", "1.1.1.1", []*host.NetworkInterface{&ifaceConfig}),
+		NewDHCPHostConfig("2.2.2.2", nil),
 	} {
 		if err := cfg.WriteEFI(testUUID(t), "STHostConfig"); err != nil {
 			t.Errorf("%d: %v", i, err)
