@@ -37,4 +37,7 @@ commitlint:
     - apk add --no-cache git
     - npm install --save-dev @commitlint/config-conventional @commitlint/cli
   script:
-    - echo "${CI_COMMIT_MESSAGE}" | npx commitlint
+    - git fetch origin "${CI_MERGE_REQUEST_TARGET_BRANCH_NAME:=main}"
+    - base_commit_id="$(git merge-base HEAD "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME")"
+    - commit_ids=$(git rev-list --no-merges "$base_commit_id"..)
+    - for commit_id in $commit_ids; do git log --format=%B -n1 "$commit_id" | npx commitlint; done
