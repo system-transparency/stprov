@@ -52,10 +52,9 @@ There are a few additional unit tests that are not running in our CI.  These
 tests write to the system's EFI-NVRAM - **be warned** - and require root
 privileges.
 
-    $ go test --tags=efi_nvram ./...
+    $ TEST_CLOBBER_EFI_NVRAM=y go test ./...
 
-Add `sudo` to the above if you want EFI-NVRAM read/writes to succeed.  It is
-appreciated if you try that the above builds and fails with permission errors.
+Add `sudo` to the above if you want EFI-NVRAM read/writes to succeed.
 
 ### Commits
 
