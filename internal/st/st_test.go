@@ -1,9 +1,8 @@
-//go:build efi_nvram
-
 package st
 
 import (
 	"net"
+	"os"
 	"reflect"
 	"testing"
 
@@ -12,6 +11,10 @@ import (
 )
 
 func TestReadWriteEFI(t *testing.T) {
+	if os.Getenv("TEST_CLOBBER_EFI_NVRAM") == "" {
+		t.Skip("Skipping tests associated with TEST_CLOBBER_EFI_NVRAM")
+	}
+
 	testIfname := "eth0"
 	ifaceConfig := host.NetworkInterface{InterfaceName: &testIfname, MACAddress: testHardwareAddr(t)}
 	for i, cfg := range []*HostConfig{
@@ -33,6 +36,10 @@ func TestReadWriteEFI(t *testing.T) {
 }
 
 func TestReadWriteHostName(t *testing.T) {
+	if os.Getenv("TEST_CLOBBER_EFI_NVRAM") == "" {
+		t.Skip("Skipping tests associated with TEST_CLOBBER_EFI_NVRAM")
+	}
+
 	hn := HostName("mullis")
 	if err := hn.WriteEFI(testUUID(t), "STHostName"); err != nil {
 		t.Errorf("%v", err)
