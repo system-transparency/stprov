@@ -17,7 +17,7 @@ qemu_test:
   image: debian:stable
   before_script:
     - apt update
-    - apt install -qqy git golang-1.19 python3 qemu-system-x86 curl jq basez openssh-client
+    - apt install -qqy git golang-1.19 python3 qemu-system-x86 curl jq openssh-client
     - apt install -qqy --no-install-recommends python3-pip
     - pip install --break-system-packages --user virt-firmware
     - export PATH=/usr/lib/go-1.19/bin:$PATH
