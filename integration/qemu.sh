@@ -11,7 +11,7 @@ set -eu
 trap clean_up EXIT
 
 # Change directory to where script is located.
-cd $(dirname $0)
+cd "$(dirname $0)"
 # Use local directory for built go tools.
 export GOBIN="$(pwd)"/bin
 
