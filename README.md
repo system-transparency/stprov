@@ -82,6 +82,6 @@ optional.
 
   - IRC room `#system-transparency` @ OFTC.net
   - Matrix room `#system-transparency` which is bridged with IRC
-  - System Transparency [mailing list][]
+  - System Transparency [discuss list][]
 
-[mailing list]: https://lists.sigsum.org/mailman3/postorius/lists/system-transparency.lists.system-transparency.org/
+[discuss list]: https://lists.system-transparency.org/mailman3/postorius/lists/st-discuss.lists.system-transparency.org/
