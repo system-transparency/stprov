@@ -38,6 +38,10 @@ to further documentation related to this.  We're also missing a good overview.
 You are encouraged to file issues and open merge requests.  For more information
 on how we collaborate in GitLab, see [accepted proposal][] that describes this.
 
+If you are a first-time contributor, please review the stprov
+[LICENSE](./LICENSE) and copyright in the [AUTHORS](./AUTHORS) file.  Append
+your name to the list of authors at the bottom in a separate commit.
+
 [accepted proposal]: https://git.glasklar.is/system-transparency/project/documentation/-/blob/main/proposals/2023-09-25-gitlab-roles-and-conventions.md
 
 ### Testing
@@ -78,6 +82,6 @@ optional.
 
   - IRC room `#system-transparency` @ OFTC.net
   - Matrix room `#system-transparency` which is bridged with IRC
-  - System Transparency [mailing list][]
+  - System Transparency [discuss list][]
 
-[mailing list]: https://lists.sigsum.org/mailman3/postorius/lists/system-transparency.lists.system-transparency.org/
+[discuss list]: https://lists.system-transparency.org/mailman3/postorius/lists/st-discuss.lists.system-transparency.org/
