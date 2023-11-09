@@ -106,7 +106,7 @@ function reach_stage() {
 
 reach_stage 10 "stage:boot"
 reach_stage 60 "stage:network"
-./bin/stprov local run --ip 127.0.0.1 --otp sikritpassword | tee saved/stprov.log
+./bin/stprov local run --ip 127.0.0.1 -p 2009 --otp sikritpassword | tee saved/stprov.log
 reach_stage 3 "stage:shutdown"
 
 hostname=$(grep hostname saved/stprov.log | cut -d'=' -f2)
