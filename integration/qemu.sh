@@ -109,12 +109,18 @@ reach_stage 60 "stage:network"
 ./bin/stprov local run --ip 127.0.0.1 -p 2009 --otp sikritpassword | tee saved/stprov.log
 reach_stage 3 "stage:shutdown"
 
-hostname=$(grep hostname saved/stprov.log | cut -d'=' -f2)
+got=$(grep hostname saved/stprov.log | cut -d'=' -f2)
+if [[ "$got" != "example.org" ]] then
+  echo "FAIL: wrong hostname in stprov.log ($got)" >&2
+  exit 1
+fi
+echo "PASS: stprov.log hostname"
+
 fingerprint=$(grep fingerprint saved/stprov.log | cut -d'=' -f2)
 virt-fw-vars -i saved/OVMF_VARS.fd --output-json saved/efivars.json
 
 got=$(cat saved/efivars.json | jq -r '.variables[] | select(.name == "STHostName") | .data' | tr a-f A-F | basenc --base16 -d)
-if [[ "$got" != "$hostname" ]]; then
+if [[ "$got" != "example.org" ]]; then
   echo "FAIL: wrong hostname in EFI NVRAM ($got)" >&2
   exit 1
 fi

@@ -174,13 +174,13 @@ func Main(args []string) error {
 		if err != nil {
 			return fmtErr(err, opt.Name())
 		}
-		return fmtErr(commitConfig(optHostIP, config, optURL, provURL, optUser, optPassword), opt.Name())
+		return fmtErr(commitConfig(optHostName, config, optURL, provURL, optUser, optPassword), opt.Name())
 	case "dhcp":
 		config, err := dhcp.Config(opt.Args(), optDNS, optMAC, interfaceWait, optAutodetect)
 		if err != nil {
 			return fmtErr(err, opt.Name())
 		}
-		return fmtErr(commitConfig(optHostIP, config, optURL, provURL, optUser, optPassword), opt.Name())
+		return fmtErr(commitConfig(optHostName, config, optURL, provURL, optUser, optPassword), opt.Name())
 	case "run":
 		return fmtErr(run.Main(opt.Args(), optPort, optHostIP, optAllowedCIDRs, optOTP, efiUUID, efiConfigName, efiKeyName, efiHostName), opt.Name())
 	default:
