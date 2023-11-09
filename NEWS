@@ -1,0 +1,39 @@
+NEWS for stprov v0.2.X
+
+    Other than improved documentation and testing, this release brings a few
+    user-experience improvements such as santity-checking OS package URLs.
+
+    New features:
+
+    * Make a HEAD request on the specified OS package URL to see if it works
+
+    Enhancements:
+
+    * More intuitive hostname default value (no longer a domain name)
+    * Add qemu-based integration test
+    * Run tests and commitlint in CI for every commit
+    * Add documentation, including MAINTAINERS, README, RELEASES, and NEWS
+    * Minor internal refactoring
+
+    Bug fixes:
+
+    * Fix default bonding mode name
+    * Fix broken and racy unit tests
+    * Fix license copyright and list of authors
+
+    Breaking changes:
+
+    * None
+
+    This release has been tested to work with:
+
+    * stboot in provison mode (trust policy fetch-method set to "network")
+      https://git.glasklar.is/system-transparency/core/stboot/, tag v0.2.1
+
+    Use the following reference specifications to be interoperable with stprov:
+
+    * EFI-NVRAM host configuration
+      https://git.glasklar.is/system-transparency/project/documentation/-/blob/main/docs.system-transparency.org/content/docs/reference/host_configuration.md,
+      commit-id a80fc359429315b8dbedef9c61da49202e7a3a01
+
+    We list additional reference specifications here as they become available.
