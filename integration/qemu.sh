@@ -15,10 +15,16 @@ cd "$(dirname $0)"
 # Use local directory for built go tools.
 export GOBIN="$(pwd)"/bin
 
-qemu_pid=""
+rm -f qemu.pid
+
 function clean_up() {
-  set +e
-  ps -p $qemu_pid > /dev/null && kill $qemu_pid
+    # QEMU removes the pid file before exiting. There is a race where
+    # we might read the pid file and attempt to kill the process too
+    # late. Due to the short period, it's extremely unlikely that the
+    # pid has already been reused for a different process.
+    local qemu_pid
+    qemu_pid=$(cat qemu.pid 2>/dev/null) || return 0
+    kill "${qemu_pid}"
 }
 
 mkdir -p build saved
@@ -41,7 +47,7 @@ url="https://git.glasklar.is/system-transparency/core/system-transparency/-/raw/
   -uinitcmd="/bin/sh /bin/uinitcmd.sh"\
   -files bin/stprov:bin/stprov\
   -files uinitcmd.sh:bin/uinitcmd.sh\
-  build/u-root/cmds/core/{init,elvish}
+  build/u-root/cmds/core/{init,elvish,shutdown}
 
 echo "PASS: build"
 
@@ -71,7 +77,7 @@ echo "PASS: copy OVMF files"
 ###
 # Run with qemu
 ###
-qemu-system-x86_64 -nographic\
+qemu-system-x86_64 -nographic -no-reboot -pidfile qemu.pid\
   -m 512M -M q35 -rtc base=localtime\
   -net user,hostfwd=tcp::2009-:2009 -net nic\
   -object rng-random,filename=/dev/urandom,id=rng0\
@@ -81,7 +87,6 @@ qemu-system-x86_64 -nographic\
   -kernel build/kernel.vmlinuz\
   -initrd build/stprov.cpio\
   -append "console=ttyS0" >saved/qemu.log &
-qemu_pid=$!
 
 ###
 # Run tests
