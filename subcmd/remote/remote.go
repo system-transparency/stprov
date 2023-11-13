@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -69,6 +70,7 @@ const (
 	efiKeyName    = "STHostKey"
 	efiHostName   = "STHostName"
 	provURL       = "https://user:password@stpackage.example.org/os-stable.json"
+	httpTimeout   = 20 * time.Second
 )
 
 var (
@@ -188,6 +190,27 @@ func Main(args []string) error {
 	}
 }
 
+// Checks url for validity, and logs any errors.
+func checkURL(url string) {
+	if strings.Contains(url, options.DefUser+":"+options.DefPassword) {
+		log.Println("WARNING: using default username and password")
+	}
+	client := http.Client{Timeout: httpTimeout}
+	resp, err := client.Head(url)
+	if err != nil {
+		log.Printf("WARNING: HEAD request on %q failed: %v", url, err)
+		return
+	}
+	// Ignore any response body
+	resp.Body.Close()
+	if resp.StatusCode != 200 {
+		log.Printf("WARNING: HEAD request on %q returned status: %q", url, resp.Status)
+		return
+	}
+	log.Printf("HEAD request on provisioning url gave content-length: %d, content-type: %q",
+		resp.ContentLength, resp.Header.Get("content-type"))
+}
+
 func commitConfig(optHostName string, config *st.HostConfig, optURL, provURL, optUser, optPassword string) error {
 	if len(optHostName) == 0 {
 		return fmt.Errorf("host name is a required option")
@@ -198,9 +221,7 @@ func commitConfig(optHostName string, config *st.HostConfig, optURL, provURL, op
 	if err != nil {
 		return err // either invalid option combination or values
 	}
-	if strings.Contains(url, options.DefUser+":"+options.DefPassword) {
-		log.Println("WARNING: using default username and password")
-	}
+	checkURL(url)
 	config.OSPkgPointer = &url
 
 	UUID, err := uuid.Parse(efiUUID)
