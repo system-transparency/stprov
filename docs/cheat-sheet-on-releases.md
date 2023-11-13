@@ -53,7 +53,7 @@ Alternatively, you can checkout the git-repository:
 
 Or install using Go's tooling:
 
-  go install system-transparency.org/stprov@v0.2.1
+  go install system-transparency.org/stprov/cmd/stprov@v0.2.1
 
 The expectations and intended use of the stprov software is documented
 in the repository's RELEASES file.  This RELEASES file also contains
