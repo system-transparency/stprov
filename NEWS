@@ -33,7 +33,7 @@ NEWS for stprov v0.2.1
     Use the following reference specifications to be interoperable with stprov:
 
     * EFI-NVRAM host configuration
-      https://git.glasklar.is/system-transparency/project/documentation/-/blob/main/docs.system-transparency.org/content/docs/reference/host_configuration.md,
-      commit-id a80fc359429315b8dbedef9c61da49202e7a3a01
+      https://git.glasklar.is/system-transparency/project/docs/-/blob/main/content/docs/reference/host_configuration.md,
+      commit-id 3f46dd067931b9023984052cc5b98ff6d0ed0a28
 
     We list additional reference specifications here as they become available.
