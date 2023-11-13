@@ -10,7 +10,8 @@ Making a release:
   - [ ] Test the procedure of upgrading from the previous release (if any)
   - [ ] Test and document which other System Transparency components are
     interoperable.  We currently test that stboot provision mode works, which
-    means stprov is able to produce EFI-NVRAM configurations for network-boot.
+    means stprov is able to produce EFI-NVRAM configurations for network-boot in
+    QEMU.  See [detailed manual testing notes](./cheat-sheet-smoke-test.md).
   - [ ] Test/check that the tutorial, how-to, and explanation sections of
     docs.system-transparency.org (branch main) are up-to-date for stprov
   - [ ] After finalizing the release documentation (in particular the NEWS
