@@ -10,7 +10,8 @@ Making a release:
   - [ ] Test the procedure of upgrading from the previous release (if any)
   - [ ] Test and document which other System Transparency components are
     interoperable.  We currently test that stboot provision mode works, which
-    means stprov is able to produce EFI-NVRAM configurations for network-boot.
+    means stprov is able to produce EFI-NVRAM configurations for network-boot in
+    QEMU.  See [detailed manual testing notes](./cheat-sheet-smoke-test.md).
   - [ ] Test/check that the tutorial, how-to, and explanation sections of
     docs.system-transparency.org (branch main) are up-to-date for stprov
   - [ ] After finalizing the release documentation (in particular the NEWS
@@ -52,7 +53,7 @@ Alternatively, you can checkout the git-repository:
 
 Or install using Go's tooling:
 
-  go install system-transparency.org/stprov@v0.2.1
+  go install system-transparency.org/stprov/cmd/stprov@v0.2.1
 
 The expectations and intended use of the stprov software is documented
 in the repository's RELEASES file.  This RELEASES file also contains
