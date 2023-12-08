@@ -13,9 +13,12 @@ FLAGS+=-X 'system-transparency.org/stprov/internal/options.DefDNS=$(DEFAULT_DNS)
 FLAGS+=-X 'system-transparency.org/stprov/internal/options.DefAllowedNetworks=$(DEFAULT_ALLOWED_NETWORKS)'
 FLAGS+=-X 'system-transparency.org/stprov/internal/options.DefBondingMode=$(DEFAULT_BONDING_MODE)'
 
+# https://github.com/golang/go/issues/56174
+ENV = GOPRIVATE=git.glasklar.is/system-transparency/core/stauth
+
 all: build
 build: stprov
 
 .PHONY: stprov
 stprov:
-	go build -ldflags="$(FLAGS)" -o $@ ./cmd/stprov
+	$(ENV) go build -ldflags="$(FLAGS)" -o $@ ./cmd/stprov

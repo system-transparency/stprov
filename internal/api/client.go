@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
@@ -9,7 +10,10 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/url"
 
+	stauth "git.glasklar.is/system-transparency/core/stauth/cmd"
+	"git.glasklar.is/system-transparency/core/stauth/enrollv0"
 	"system-transparency.org/stprov/internal/secrets"
 )
 
@@ -79,6 +83,39 @@ func (c *Client) Commit() (*CommitResponse, error) {
 		return nil, fmt.Errorf("unmarshal: %w", err)
 	}
 	return &cr, nil
+}
+
+func (c *Client) ProvisionAIK() ([]byte, error) {
+	ctx := context.Background()
+
+	platformUrl, err := url.Parse(fmt.Sprintf("https://%s:%d", c.RemoteIP, c.RemotePort))
+	if err != nil {
+		return nil, err
+	}
+
+	// get AIK, EK, and SRK
+	req, err := stauth.EnrollOperatorRequest(ctx, &c.Client, platformUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	// send AIK credential encrypted with EK
+	ch, nonce, err := enrollv0.NewChallenge(req)
+	if err != nil {
+		return nil, err
+	}
+	ans, err := stauth.EnrollOperatorChallenge(ctx, &c.Client, platformUrl, nonce, ch)
+	if err != nil {
+		return nil, err
+	}
+
+	// write out platform data
+	nameHint := req.UxIdentity
+	if nameHint == "" {
+		nameHint = c.RemoteIP.String()
+	}
+
+	return stauth.EnrollOperatorFinish(ctx, nameHint, req, ans)
 }
 
 func (c *Client) doGet(endpointURL string) ([]byte, error) {
