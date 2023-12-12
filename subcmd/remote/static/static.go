@@ -1,6 +1,7 @@
 package static
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
@@ -122,7 +123,7 @@ func Config(args []string, optDNS, optInterface, optHostIP, optGateway string, i
 		cfg.BondName = &bondingName
 	}
 
-	if err := network.SetupNetworkInterface(&cfg); err != nil {
+	if err := network.SetupNetworkInterface(context.Background(), &cfg); err != nil {
 		return nil, fmt.Errorf("setup network: %w", err)
 	}
 
