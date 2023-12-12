@@ -23,8 +23,28 @@ qemu_test:
     - export PATH=/usr/lib/go-1.19/bin:$PATH
     - export PATH=$PATH:$HOME/.local/bin/
   script:
-    - cd integration/
-    - ./qemu.sh
+    - ./integration/qemu.sh
+  artifacts:
+    when: always
+    paths:
+    - ./integration/saved/
+
+# Run tests with HEAD stboot, to detect any breaking changes.
+qemu_head_stboot_test:
+  stage: integration
+  image: debian:stable
+  allow_failure: true
+  before_script:
+    - apt update
+    - apt install -qqy git golang-1.19 python3 qemu-system-x86 curl jq openssh-client
+    - apt install -qqy --no-install-recommends python3-pip
+    - pip install --break-system-packages --user virt-firmware
+    - export PATH=/usr/lib/go-1.19/bin:$PATH
+    - export PATH=$PATH:$HOME/.local/bin/
+    - git clone https://git.glasklar.is/system-transparency/core/stboot.git
+    - go work init && go work use . ./stboot
+  script:
+    - ./integration/qemu.sh
   artifacts:
     when: always
     paths:
