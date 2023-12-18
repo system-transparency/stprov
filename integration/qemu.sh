@@ -34,6 +34,12 @@ mkdir -p build saved
 ###
 
 go install ../cmd/stprov
+# go work interacts badly with building u-root itself and with
+# u-root's building of included commands. It can be enabled for
+# compilation of stprov above by using the GOWORK environment
+# variable, and then disabled for the rest of this script.
+unset GOWORK
+
 [[ -d build/u-root ]] ||
   git clone --depth 1 https://github.com/u-root/u-root build/u-root &&
   (cd build/u-root && go install)

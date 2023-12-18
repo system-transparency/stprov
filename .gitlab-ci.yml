@@ -29,7 +29,12 @@ qemu_test:
     paths:
     - ./integration/saved/
 
-# Run tests with HEAD stboot, to detect any breaking changes.
+# Run tests with HEAD stboot, to detect any breaking changes. One
+# complication is that existence of a go.work file interacts badly
+# with building u-root itself and with u-root's building of included
+# commands. Instead, we create a go.work.local file, and point to it
+# via the GOWORK environment variable; that way, it can be enabled
+# only when building stprov, and disabled for u-root.
 qemu_head_stboot_test:
   stage: integration
   image: debian:stable
@@ -42,9 +47,9 @@ qemu_head_stboot_test:
     - export PATH=/usr/lib/go-1.19/bin:$PATH
     - export PATH=$PATH:$HOME/.local/bin/
     - git clone https://git.glasklar.is/system-transparency/core/stboot.git
-    - go work init && go work use . ./stboot
+    - go work init && go work use . ./stboot && mv go.work go.work.local
   script:
-    - ./integration/qemu.sh
+    - GOWORK=$(pwd)/go.work.local ./integration/qemu.sh
   artifacts:
     when: always
     paths:
