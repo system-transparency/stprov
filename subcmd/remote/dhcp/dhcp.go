@@ -1,6 +1,7 @@
 package dhcp
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"time"
@@ -42,7 +43,7 @@ func Config(args []string, optDNS, optInterface string, interfaceWait time.Durat
 			{InterfaceName: &ifname, MACAddress: &mac},
 		},
 	}
-	if err := network.SetupNetworkInterface(cfg); err != nil {
+	if err := network.SetupNetworkInterface(context.Background(), cfg); err != nil {
 		return nil, fmt.Errorf("setup network: %w", err)
 	}
 	return st.NewDHCPHostConfig(optDNS, *cfg.NetworkInterfaces), nil
