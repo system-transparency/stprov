@@ -5,9 +5,12 @@ import (
 	"os"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"system-transparency.org/stboot/host"
+	"system-transparency.org/stprov/subcmd/remote/dhcp"
+	"system-transparency.org/stprov/subcmd/remote/static"
 )
 
 func TestReadWriteEFI(t *testing.T) {
@@ -15,18 +18,15 @@ func TestReadWriteEFI(t *testing.T) {
 		t.Skip("Skipping tests associated with TEST_CLOBBER_EFI_NVRAM")
 	}
 
-	testIfname := "eth0"
-	ifaceConfig := host.NetworkInterface{InterfaceName: &testIfname, MACAddress: testHardwareAddr(t)}
-	for i, cfg := range []*HostConfig{
-		NewStaticHostConfig("192.168.0.2/32", "192.168.0.1", "1.1.1.1", []*host.NetworkInterface{&ifaceConfig}),
-		NewDHCPHostConfig("2.2.2.2", nil),
-	} {
-		if err := cfg.WriteEFI(testUUID(t), "STHostConfig"); err != nil {
+	cfg1, _ := static.Config(nil, "1.1.1.1", "eth0", "192.168.0.2/32", "192.168.0.1", 10*time.Second, true, false, nil, "", true, false)
+	cfg2, _ := dhcp.Config(nil, "2.2.2.2", "eth0", 10*time.Second, true)
+	for i, cfg := range []*host.Config{cfg1, cfg2} {
+		if err := WriteHostConfigEFI(cfg); err != nil {
 			t.Errorf("%d: %v", i, err)
 			return
 		}
-		var cfgAgain HostConfig
-		if err := cfgAgain.ReadEFI(testUUID(t), "STHostConfig"); err != nil {
+		cfgAgain, err := HostConfigEFI()
+		if err != nil {
 			t.Errorf("%d: %v", i, err)
 		}
 		if got, want := &cfgAgain, cfg; !reflect.DeepEqual(got, want) {

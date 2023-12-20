@@ -4,89 +4,55 @@ package st
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/u-root/u-root/pkg/efivarfs"
 	"system-transparency.org/stboot/host"
 )
 
-type NetworkInterface struct {
-	InterfaceName string `json:"interface_name"`
-	MACAddress    string `json:"mac_address"`
-}
-
-// HostConfig is an ST host configuration, see:
-// https://github.com/system-transparency/system-transparency#host_configurationjson
-// TODO: Replace with stboot hostcfg
-type HostConfig struct {
-	Version           int                      `json:"version"`
-	IPAddrMode        string                   `json:"network_mode"`
-	HostIP            string                   `json:"host_ip"`
-	Gateway           string                   `json:"gateway"`
-	DNS               []string                 `json:"dns"`
-	NetworkInterfaces []*host.NetworkInterface `json:"network_interfaces"`
-	OSPkgPointer      *string                  `json:"ospkg_pointer"`
-	Identity          string                   `json:"identity"`
-	Authentication    string                   `json:"authentication"`
-	BondingMode       string                   `json:"bonding_mode"`
-	BondName          string                   `json:"bond_name"`
-}
-
-// NewStaticHostConfig outputs a static host configuration without setting
-// any identity string, authentication string, and timestamp.  You may
-// leave dnsAddr and interfaceAddr as empty strings, see ST documentation.
-func NewStaticHostConfig(hostIP, gateway string, dnsAddr string, cfg []*host.NetworkInterface) *HostConfig {
-	return &HostConfig{
-		Version:           1,
-		IPAddrMode:        "static",
-		HostIP:            hostIP,
-		Gateway:           gateway,
-		DNS:               []string{dnsAddr},
-		NetworkInterfaces: cfg,
-	}
-}
-
-// NewDHCPHostConfig outputs a dhcp host configuration without setting any
-// identity string, authentication string, and timestamp.  You may leave dnsAddr
-// and interfaceAddr as empty strings, see ST documentation.
-func NewDHCPHostConfig(dnsAddr string, cfg []*host.NetworkInterface) *HostConfig {
-	return &HostConfig{
-		Version:           1,
-		IPAddrMode:        "dhcp",
-		DNS:               []string{dnsAddr},
-		NetworkInterfaces: cfg,
-	}
-}
-
-func NewBondingHostConfig(dnsAddr string, mode string, cfg []*host.NetworkInterface) *HostConfig {
-	return &HostConfig{
-		Version:           1,
-		IPAddrMode:        "static",
-		DNS:               []string{dnsAddr},
-		BondingMode:       mode,
-		NetworkInterfaces: cfg,
-	}
-}
-
-// ReadEFI reads a host configuration from EFI-NVRAM in JSON format
-func (cfg *HostConfig) ReadEFI(varUUID *uuid.UUID, efiName string) error {
-	b, err := readEFI(varUUID, efiName)
-	if err != nil {
-		return fmt.Errorf("read: %w", err)
-	}
-	if err := json.Unmarshal(b, cfg); err != nil {
-		return fmt.Errorf("parse config: %w", err)
-	}
-	return nil
-}
-
-// WriteEFI writes a host configuration to EFI-NVRAM in JSON format
-func (cfg *HostConfig) WriteEFI(varUUID *uuid.UUID, efiName string) error {
+func WriteHostConfigEFI(cfg *host.Config) error {
 	b, err := json.Marshal(cfg)
 	if err != nil {
 		return fmt.Errorf("marshal: %w", err)
 	}
-	return writeEFI(b, varUUID, efiName)
+
+	efiName, efiGuid, err := HostConfigEFIVariableName()
+	if err != nil {
+		return fmt.Errorf("invalid host config EFI var name: %s", host.HostConfigEFIVarName)
+	}
+
+	return writeEFI(b, efiGuid, efiName)
+}
+
+func HostConfigEFI() (*host.Config, error) {
+	efiName, efiGuid, err := HostConfigEFIVariableName()
+	if err != nil {
+		return nil, fmt.Errorf("invalid host config EFI var name: %s", host.HostConfigEFIVarName)
+	}
+
+	b, err := readEFI(efiGuid, efiName)
+	if err != nil {
+		return nil, fmt.Errorf("read: %w", err)
+	}
+
+	var cfg host.Config
+	err = json.Unmarshal(b, &cfg)
+	return &cfg, err
+}
+
+func HostConfigEFIVariableName() (string, *uuid.UUID, error) {
+	efiVarFrag := strings.SplitN(host.HostConfigEFIVarName, "-", 2)
+	if len(efiVarFrag) != 2 {
+		return "", nil, fmt.Errorf("invalid host config EFI var name: %s", host.HostConfigEFIVarName)
+	}
+
+	efiUuid, err := uuid.Parse(efiVarFrag[1])
+	if err != nil {
+		return "", nil, fmt.Errorf("invalid host config EFI var name: %s", host.HostConfigEFIVarName)
+	}
+
+	return efiVarFrag[0], &efiUuid, nil
 }
 
 // HostName is a host name

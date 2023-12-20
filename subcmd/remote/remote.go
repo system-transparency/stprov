@@ -9,8 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
-
+	"system-transparency.org/stboot/host"
 	"system-transparency.org/stprov/internal/network"
 	"system-transparency.org/stprov/internal/options"
 	"system-transparency.org/stprov/internal/st"
@@ -65,12 +64,10 @@ const usage_string = `Usage:
 `
 
 const (
-	efiUUID       = "f401f2c1-b005-4be0-8cee-f2e5945bcbe7"
-	efiConfigName = "STHostConfig"
-	efiKeyName    = "STHostKey"
-	efiHostName   = "STHostName"
-	provURL       = "https://user:password@stpackage.example.org/os-stable.json"
-	httpTimeout   = 20 * time.Second
+	efiKeyName  = "STHostKey"
+	efiHostName = "STHostName"
+	provURL     = "https://user:password@stpackage.example.org/os-stable.json"
+	httpTimeout = 20 * time.Second
 )
 
 var (
@@ -167,6 +164,11 @@ func Main(args []string) error {
 		optMAC = addr.String()
 	}
 
+	efiConfigName, efiUUID, err := st.HostConfigEFIVariableName()
+	if err != nil {
+		return fmtErr(err, opt.Name())
+	}
+
 	switch opt.Name() {
 	case "help", "":
 		opt.Usage()
@@ -211,28 +213,28 @@ func checkURL(url string) {
 		resp.ContentLength, resp.Header.Get("content-type"))
 }
 
-func commitConfig(optHostName string, config *st.HostConfig, optURL, provURL, optUser, optPassword string) error {
+func commitConfig(optHostName string, config *host.Config, optURL, provURL, optUser, optPassword string) error {
 	if len(optHostName) == 0 {
 		return fmt.Errorf("host name is a required option")
 	}
 	hostName := st.HostName(optHostName)
 
-	url, err := options.ParseProvisioningURL(optURL, provURL, optUser, optPassword)
+	parsedUrl, err := options.ParseProvisioningURL(optURL, provURL, optUser, optPassword)
 	if err != nil {
 		return err // either invalid option combination or values
 	}
-	checkURL(url)
-	config.OSPkgPointer = &url
+	checkURL(parsedUrl)
+	config.OSPkgPointer = &parsedUrl
 
-	UUID, err := uuid.Parse(efiUUID)
+	_, efiGuid, err := st.HostConfigEFIVariableName()
 	if err != nil {
 		return fmt.Errorf("parse efi UUID: %w", err)
 	}
 
-	if err := hostName.WriteEFI(&UUID, efiHostName); err != nil {
+	if err := hostName.WriteEFI(efiGuid, efiHostName); err != nil {
 		return fmt.Errorf("persist host name: %w", err)
 	}
-	if err := config.WriteEFI(&UUID, efiConfigName); err != nil {
+	if err := st.WriteHostConfigEFI(config); err != nil {
 		return fmt.Errorf("persist host config: %w", err)
 	}
 	return nil

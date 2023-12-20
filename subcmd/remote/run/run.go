@@ -18,7 +18,7 @@ import (
 	"system-transparency.org/stprov/internal/st"
 )
 
-func Main(args []string, optPort int, optIP, optAllowHosts, optOTP, efiUUID, efiConfigName, efiKeyName, efiHostName string) error {
+func Main(args []string, optPort int, optIP, optAllowHosts, optOTP string, efiUUID *uuid.UUID, efiConfigName, efiKeyName, efiHostName string) error {
 	if len(args) != 0 {
 		return fmt.Errorf("trailing arguments: %v", args)
 	}
@@ -45,23 +45,19 @@ func Main(args []string, optPort int, optIP, optAllowHosts, optOTP, efiUUID, efi
 		allowNets = append(allowNets, *cidr)
 	}
 	otp := optOTP
-	varUUID, err := uuid.Parse(efiUUID)
-	if err != nil {
-		return fmt.Errorf("parse efi UUID: %w", err)
-	}
 
 	var hostname st.HostName
-	if err := hostname.ReadEFI(&varUUID, efiHostName); err != nil {
+	if err := hostname.ReadEFI(efiUUID, efiHostName); err != nil {
 		return fmt.Errorf("ReadEFI: %s: %w", efiHostName, err)
 	}
 	uds, timestamp, err := listen(otp, allowNets, ip, port, hostname)
 	if err != nil {
 		return fmt.Errorf("listen: %w", err)
 	}
-	if err := writeHostKey(uds, &varUUID, efiKeyName); err != nil {
+	if err := writeHostKey(uds, efiUUID, efiKeyName); err != nil {
 		return fmt.Errorf("persist host key: %w", err)
 	}
-	if err := readWriteHostConfig(uds, timestamp, &varUUID, efiConfigName); err != nil {
+	if err := readWriteHostConfig(uds, timestamp, efiUUID, efiConfigName); err != nil {
 		return fmt.Errorf("persist host config: %w", err)
 	}
 
@@ -121,11 +117,13 @@ func writeHostKey(uds *secrets.UniqueDeviceSecret, varUUID *uuid.UUID, name stri
 // Note: identity and authentication strings are hardcoded instead of deriving
 // them from UDS.  It is currently out of scope to use these parameters.
 func readWriteHostConfig(_ *secrets.UniqueDeviceSecret, timestamp int64, varUUID *uuid.UUID, name string) error {
-	var cfg st.HostConfig
-	if err := cfg.ReadEFI(varUUID, name); err != nil {
+	cfg, err := st.HostConfigEFI()
+	if err != nil {
 		return err
 	}
-	cfg.Authentication = "foo"
-	cfg.Identity = "bar"
-	return cfg.WriteEFI(varUUID, name)
+	auth := "foo"
+	id := "bar"
+	cfg.Auth = &auth
+	cfg.ID = &id
+	return st.WriteHostConfigEFI(cfg)
 }
