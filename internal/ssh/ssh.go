@@ -84,7 +84,7 @@ func (hk *HostKey) write(w io.Writer) error {
 	}
 	copy(key.Pub, (hk.Private.Public().(ed25519.PublicKey))[:])
 	copy(key.Priv, hk.Private[:])
-	key.addPadAndPadByte()
+	key.addPad()
 
 	pk1 := keyBody{
 		Check1:  hk.Check,
@@ -244,24 +244,31 @@ type ed25519KeyBody struct {
 	Pad     []byte `ssh:"rest"`
 }
 
-// padSize appears to be eight because we don't have any cipher:
+// addPad computes the padding for a single Ed25519 key manually.  The blob to
+// compute the padding for is defined and implemented by OpenSSH here:
 //
-//   - https://github.com/openssh/openssh-portable/blob/master/cipher.c#L110
-const padSize = 8
-
-// addPadAndPadByte populates the Pad field with bytes 1, 2, ..., k-1 as well
-// as a final pad-length byte k.  We only care about a single key, which means
-// that the pad is computed over the wire-serialized Pub, Priv, and Comment:
+//   - https://github.com/openssh/openssh-portable/blob/8241b9c0529228b4b86d88b1a6076fb9f97e4a99/PROTOCOL.key#L36-L49
+//   - https://github.com/openssh/openssh-portable/blob/8241b9c0529228b4b86d88b1a6076fb9f97e4a99/sshkey.c#L2812-L2831
 //
-//   - https://github.com/openssh/openssh-portable/blob/master/PROTOCOL.key#L32-L34
-func (b *ed25519KeyBody) addPadAndPadByte() {
-	n := 4 + len(b.Pub)
-	n = 4 + len(b.Priv)
-	n = 4 + len(b.Comment)
-	n = (padSize - (n % padSize) + 1) % padSize
-
-	b.Pad = make([]byte, n)
-	for i := range b.Pad {
-		b.Pad[i] = byte(i) + 1
+// The pad length is 8 without a cipher:
+//
+//   - https://github.com/openssh/openssh-portable/blob/0d96b1506b2f4757fefa5d1f884d49e96a6fd4c3/cipher.c#L108
+//
+// Which means that the only things that end up counting towards padding are:
+//
+//	byte[] privatekey1
+//	string comment1
+//
+// Note that what the spec refers to here as privatekey1 is not the raw Ed25519
+// private key.  It is the serialization of "ssh-ed25519", pubkey (32 bytes),
+// and private key (64 bytes).  As all these types are serialized as strings and
+// then contactenated with each other, that sums up to 119 bytes in total.  The
+// comment is also a string, and thus its size will be 4 + the comment length.
+//
+// So, what we need to pad is 119 + 4+len(comment) so that we get zero mod 8.
+// If padding is required, it is the pad bytes 1, 2, ..., k that are added.
+func (b *ed25519KeyBody) addPad() {
+	for i := 0; (119+4+len(b.Comment)+i)%8 != 0; i++ {
+		b.Pad = append(b.Pad, byte(i+1))
 	}
 }
