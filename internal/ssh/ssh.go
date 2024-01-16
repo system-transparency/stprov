@@ -102,7 +102,7 @@ func (hk *HostKey) write(w io.Writer) error {
 		Name  string
 		Bytes []byte
 	}{
-		Name:  "ssh-ed25519",
+		Name:  ssh.KeyAlgoED25519,
 		Bytes: key.Pub,
 	}
 	l := authBody{
