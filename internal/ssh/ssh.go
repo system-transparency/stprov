@@ -150,7 +150,7 @@ func (hk *HostKey) writePEM(w io.Writer) error {
 
 // Read reads an Ed25519 SSH host key after PEM decoding.  Mostly copied from:
 //
-//   - https://cs.opensource.google/go/x/crypto/+/master:ssh/keys.go;l=1250-1416
+//   - https://cs.opensource.google/go/x/crypto/+/master:ssh/keys.go;l=1434-1565;drc=42c83fffffc70640068263e765db9c9b09cd2ba2
 func (hk *HostKey) read(r io.Reader) error {
 	key, err := io.ReadAll(r)
 	if err != nil {
@@ -205,14 +205,14 @@ func (hk *HostKey) read(r io.Reader) error {
 
 // authMagic is defined here:
 //
-//   - https://github.com/openssh/openssh-portable/blob/master/PROTOCOL.key#L8
-//   - https://cs.opensource.google/go/x/crypto/+/master:ssh/keys.go;l=1251
+//   - https://github.com/openssh/openssh-portable/blob/0d96b1506b2f4757fefa5d1f884d49e96a6fd4c3/PROTOCOL.key#L8
+//   - https://cs.opensource.google/go/x/crypto/+/master:ssh/keys.go;l=1387;drc=42c83fffffc70640068263e765db9c9b09cd2ba2
 const authMagic = "openssh-key-v1\x00"
 
 // authBody is defined here:
 //
-//   - https://github.com/openssh/openssh-portable/blob/master/PROTOCOL.key#L11-L19
-//   - https://cs.opensource.google/go/x/crypto/+/master:ssh/keys.go;l=1257-1264
+//   - https://github.com/openssh/openssh-portable/blob/0d96b1506b2f4757fefa5d1f884d49e96a6fd4c3/PROTOCOL.key#L11-L19
+//   - https://cs.opensource.google/go/x/crypto/+/master:ssh/keys.go;l=1392-1399;drc=42c83fffffc70640068263e765db9c9b09cd2ba2
 type authBody struct {
 	CipherName   string
 	KdfName      string
@@ -224,8 +224,8 @@ type authBody struct {
 
 // keyBody is defined here:
 //
-//   - https://github.com/openssh/openssh-portable/blob/master/PROTOCOL.key#L36-L49
-//   - https://cs.opensource.google/go/x/crypto/+/master:ssh/keys.go;l=1287-1292
+//   - https://github.com/openssh/openssh-portable/blob/0d96b1506b2f4757fefa5d1f884d49e96a6fd4c3/PROTOCOL.key#L36-L49
+//   - https://cs.opensource.google/go/x/crypto/+/master:ssh/keys.go;l=1401-1406;drc=42c83fffffc70640068263e765db9c9b09cd2ba2
 type keyBody struct {
 	Check1  uint32
 	Check2  uint32
@@ -235,8 +235,8 @@ type keyBody struct {
 
 // ed25519KeyBody is encoded using the same rules as SSH agent:
 //
-//   - https://github.com/openssh/openssh-portable/blob/master/PROTOCOL.key#L51-L52
-//   - https://cs.opensource.google/go/x/crypto/+/master:ssh/keys.go;l=1340-1345
+//   - https://github.com/openssh/openssh-portable/blob/0d96b1506b2f4757fefa5d1f884d49e96a6fd4c3/PROTOCOL.key#L51-L52
+//   - https://cs.opensource.google/go/x/crypto/+/master:ssh/keys.go;l=1419-1424;drc=42c83fffffc70640068263e765db9c9b09cd2ba2
 type ed25519KeyBody struct {
 	Pub     []byte
 	Priv    []byte
