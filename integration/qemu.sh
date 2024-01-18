@@ -121,7 +121,7 @@ reach_stage 60 "stage:network"
 reach_stage 3 "stage:shutdown"
 
 got=$(grep hostname saved/stprov.log | cut -d'=' -f2)
-if [[ "$got" != "example.org" ]] then
+if [[ "$got" != "example.org" ]]; then
   echo "FAIL: wrong hostname in stprov.log ($got)" >&2
   exit 1
 fi

@@ -13,10 +13,9 @@ import (
 
 	mptnetwork "system-transparency.org/stprov/internal/network"
 	"system-transparency.org/stprov/internal/options"
-	"system-transparency.org/stprov/internal/st"
 )
 
-func Config(args []string, optDNS, optInterface, optHostIP, optGateway string, interfaceWait time.Duration, optAutodetect bool, optBondingAuto bool, optBondingInterfaces []string, optBondingMode string, allowConfigQuirks, optTryLastIPForGateway bool) (*st.HostConfig, error) {
+func Config(args []string, optDNS, optInterface, optHostIP, optGateway string, interfaceWait time.Duration, optAutodetect bool, optBondingAuto bool, optBondingInterfaces []string, optBondingMode string, allowConfigQuirks, optTryLastIPForGateway bool) (*host.Config, error) {
 	if len(args) != 0 {
 		return nil, fmt.Errorf("trailing arguments: %v", args)
 	}
@@ -24,7 +23,8 @@ func Config(args []string, optDNS, optInterface, optHostIP, optGateway string, i
 	if err != nil {
 		return nil, err
 	}
-	if ip := net.ParseIP(optDNS); optDNS != "" && ip == nil {
+	dnsIP := net.ParseIP(optDNS)
+	if optDNS != "" && dnsIP == nil {
 		return nil, fmt.Errorf("malformed dns address: %s", optDNS)
 	}
 	if optBondingAuto && len(optBondingInterfaces) > 0 {
@@ -97,6 +97,7 @@ func Config(args []string, optDNS, optInterface, optHostIP, optGateway string, i
 		HostIP:         hostIP,
 		DefaultGateway: &gateway,
 		IPAddrMode:     &mode,
+		DNSServer:      &[]*net.IP{&dnsIP},
 		NetworkInterfaces: &[]*host.NetworkInterface{
 			{InterfaceName: &ifname, MACAddress: &mac},
 		},
@@ -107,7 +108,7 @@ func Config(args []string, optDNS, optInterface, optHostIP, optGateway string, i
 		if bondmode == host.BondingUnknown {
 			return nil, fmt.Errorf("bonding mode unknown: %s", optBondingMode)
 		}
-		// cfg.BondingMode = bondmode
+		cfg.BondingMode = bondmode
 		var ifaces []*host.NetworkInterface
 		for _, iface := range bondedInterfaces {
 			// This is a bug in the go for-loop semantics. See
@@ -127,8 +128,5 @@ func Config(args []string, optDNS, optInterface, optHostIP, optGateway string, i
 		return nil, fmt.Errorf("setup network: %w", err)
 	}
 
-	if len(bondedInterfaces) > 0 {
-		return st.NewBondingHostConfig(optDNS, optBondingMode, *cfg.NetworkInterfaces), nil
-	}
-	return st.NewStaticHostConfig(optHostIP, optGateway, optDNS, *cfg.NetworkInterfaces), nil
+	return &cfg, nil
 }

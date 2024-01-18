@@ -11,14 +11,14 @@ import (
 
 	mptnetwork "system-transparency.org/stprov/internal/network"
 	"system-transparency.org/stprov/internal/options"
-	"system-transparency.org/stprov/internal/st"
 )
 
-func Config(args []string, optDNS, optInterface string, interfaceWait time.Duration, optAutodetect bool) (*st.HostConfig, error) {
+func Config(args []string, optDNS, optInterface string, interfaceWait time.Duration, optAutodetect bool) (*host.Config, error) {
 	if len(args) != 0 {
 		return nil, fmt.Errorf("trailing arguments: %v", args)
 	}
-	if ip := net.ParseIP(optDNS); ip == nil {
+	dnsIP := net.ParseIP(optDNS)
+	if dnsIP == nil {
 		return nil, fmt.Errorf("malformed dns address: %s", optDNS)
 	}
 	if optInterface == "" {
@@ -37,14 +37,16 @@ func Config(args []string, optDNS, optInterface string, interfaceWait time.Durat
 	}
 	ifname := mptnetwork.GetInterfaceName(&mac)
 	mode := host.IPDynamic
-	cfg := &host.Config{
+	cfg := host.Config{
 		IPAddrMode: &mode,
+		DNSServer:  &[]*net.IP{&dnsIP},
 		NetworkInterfaces: &[]*host.NetworkInterface{
 			{InterfaceName: &ifname, MACAddress: &mac},
 		},
 	}
-	if err := network.SetupNetworkInterface(context.Background(), cfg); err != nil {
+	if err := network.SetupNetworkInterface(context.Background(), &cfg); err != nil {
 		return nil, fmt.Errorf("setup network: %w", err)
 	}
-	return st.NewDHCPHostConfig(optDNS, *cfg.NetworkInterfaces), nil
+
+	return &cfg, err
 }
