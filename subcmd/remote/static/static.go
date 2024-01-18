@@ -108,7 +108,7 @@ func Config(args []string, optDNS, optInterface, optHostIP, optGateway string, i
 		if bondmode == host.BondingUnknown {
 			return nil, fmt.Errorf("bonding mode unknown: %s", optBondingMode)
 		}
-		// cfg.BondingMode = bondmode
+		cfg.BondingMode = bondmode
 		var ifaces []*host.NetworkInterface
 		for _, iface := range bondedInterfaces {
 			// This is a bug in the go for-loop semantics. See
