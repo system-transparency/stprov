@@ -45,6 +45,25 @@ function assert_hostcfg() {
 	[[ "$got" == "$want" ]] || die "host config: wrong $key: got $got, want $want"
 }
 
+function reach_stage() {
+	local abort_in_num_seconds=$1; shift
+	local token=$1; shift
+
+	while :; do
+		if [[ $abort_in_num_seconds == 0 ]]; then
+			die "reach $token"
+		fi
+
+		if grep -q "$token" saved/qemu.log; then
+			pass "reach $token"
+			break
+		fi
+
+		sleep 1
+		abort_in_num_seconds=$(( abort_in_num_seconds - 1 ))
+	done
+}
+
 ###
 # Build
 ###
@@ -105,25 +124,6 @@ qemu-system-x86_64 -nographic -no-reboot -pidfile qemu.pid\
 # Run tests
 ###
 URL=https://example.org/ospkg.json
-
-function reach_stage() {
-	local abort_in_num_seconds=$1; shift
-	local token=$1; shift
-
-	while :; do
-		if [[ $abort_in_num_seconds == 0 ]]; then
-			die "reach $token"
-		fi
-
-		if grep -q "$token" saved/qemu.log; then
-			pass "reach $token"
-			break
-		fi
-
-		sleep 1
-		abort_in_num_seconds=$(( abort_in_num_seconds - 1 ))
-	done
-}
 
 reach_stage 10 "stage:boot"
 reach_stage 60 "stage:network"
