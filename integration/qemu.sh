@@ -124,6 +124,7 @@ qemu-system-x86_64 -nographic -no-reboot -pidfile qemu.pid\
 # Run tests
 ###
 URL=https://example.org/ospkg.json
+FULLHOST=example.org
 
 reach_stage 10 "stage:boot"
 reach_stage 60 "stage:network"
@@ -139,10 +140,10 @@ jq -r '.variables[] | select(.name == "STHostName")   | .data' saved/efivars.jso
 # Check hostname
 #
 got=$(grep hostname saved/stprov.log | cut -d'=' -f2)
-[[ "$got" == "example.org" ]] || die "wrong hostname in stprov.log ($got)"
+[[ "$got" == "$FULLHOST" ]] || die "stprov local hostname: got $got, want $FULLHOST"
 
 got=$(cat saved/hostname)
-[[ "$got" == "example.org" ]] || die "wrong hostname in EFI NVRAM ($got)"
+[[ "$got" == "$FULLHOST" ]] || die "EFI NVRAM hostname: got $got, want $FULLHOST"
 
 pass "hostname"
 
@@ -153,7 +154,7 @@ chmod 600 saved/hostkey
 fingerprint=$(ssh-keygen -lf saved/hostkey | cut -d' ' -f2)
 
 got=$(grep fingerprint saved/stprov.log | cut -d'=' -f2)
-[[ "$got" == "$fingerprint" ]] || die "wrong fingerprint for key in EFI NVRAM ($got)"
+[[ "$got" == "$fingerprint" ]] || die "SSH key fingerprint: got $got, want $fingerprint"
 
 pass "SSH key"
 
