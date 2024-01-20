@@ -101,14 +101,16 @@ qemu-system-x86_64 -nographic -no-reboot -pidfile qemu.pid\
 # Run tests
 ###
 function reach_stage() {
-	abort_in_num_seconds=$1
+	abort_in_num_seconds=$1; shift
+	token=$1; shift
+
 	while :; do
 		if [[ $abort_in_num_seconds == 0 ]]; then
-			die "reach $2"
+			die "reach $token"
 		fi
 
-		if [[ ! -z $(grep "$2" saved/qemu.log) ]]; then
-			pass "reach $2"
+		if [[ ! -z $(grep "$token" saved/qemu.log) ]]; then
+			pass "reach $token"
 			break
 		fi
 
