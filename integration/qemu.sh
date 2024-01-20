@@ -139,14 +139,10 @@ jq -r '.variables[] | select(.name == "STHostName")   | .data' saved/efivars.jso
 # Check hostname
 #
 got=$(grep hostname saved/stprov.log | cut -d'=' -f2)
-if [[ "$got" != "example.org" ]]; then
-	die "wrong hostname in stprov.log ($got)"
-fi
+[[ "$got" == "example.org" ]] || die "wrong hostname in stprov.log ($got)"
 
 got=$(cat saved/hostname)
-if [[ "$got" != "example.org" ]]; then
-	die "wrong hostname in EFI NVRAM ($got)"
-fi
+[[ "$got" == "example.org" ]] || die "wrong hostname in EFI NVRAM ($got)"
 
 pass "hostname"
 
@@ -157,9 +153,7 @@ chmod 600 saved/hostkey
 fingerprint=$(ssh-keygen -lf saved/hostkey | cut -d' ' -f2)
 
 got=$(grep fingerprint saved/stprov.log | cut -d'=' -f2)
-if [[ "$got" != "$fingerprint" ]]; then
-	die "wrong fingerprint for key in EFI NVRAM ($got)"
-fi
+[[ "$got" == "$fingerprint" ]] || die "wrong fingerprint for key in EFI NVRAM ($got)"
 
 pass "SSH key"
 
