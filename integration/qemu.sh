@@ -61,8 +61,6 @@ url="https://git.glasklar.is/system-transparency/core/system-transparency/-/raw/
 	-files uinitcmd.sh:bin/uinitcmd.sh\
 	build/u-root/cmds/core/{init,elvish,shutdown}
 
-pass "build"
-
 # Setup EFI-NVRAM stuff.  Magic, if you understand the choises please docdoc here.
 #
 # From:
@@ -77,11 +75,7 @@ for str in "OVMF" "edk2/ovmf" "edk2-ovmf/x64"; do
 	fi
 done
 
-if [[ -z "$ovmf_code" ]]; then
-	die "unable to locate OVMF_CODE.fd"
-fi
-
-pass "copy OVMF files"
+[[ -n "$ovmf_code" ]] || die "unable to locate OVMF_CODE.fd"
 
 ###
 # Run with qemu
