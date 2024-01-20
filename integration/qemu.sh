@@ -41,19 +41,19 @@ go install ../cmd/stprov
 unset GOWORK
 
 [[ -d build/u-root ]] ||
-  git clone --depth 1 https://github.com/u-root/u-root build/u-root &&
-  (cd build/u-root && go install)
+	git clone --depth 1 https://github.com/u-root/u-root build/u-root &&
+	(cd build/u-root && go install)
 
 url="https://git.glasklar.is/system-transparency/core/system-transparency/-/raw/main/contrib/linuxboot.vmlinuz"
 [[ -f build/kernel.vmlinuz ]] || curl -L "$url" -o build/kernel.vmlinuz
 
 ./bin/u-root\
-  -o build/stprov.cpio\
-  -uroot-source=build/u-root\
-  -uinitcmd="/bin/sh /bin/uinitcmd.sh"\
-  -files bin/stprov:bin/stprov\
-  -files uinitcmd.sh:bin/uinitcmd.sh\
-  build/u-root/cmds/core/{init,elvish,shutdown}
+	-o build/stprov.cpio\
+	-uroot-source=build/u-root\
+	-uinitcmd="/bin/sh /bin/uinitcmd.sh"\
+	-files bin/stprov:bin/stprov\
+	-files uinitcmd.sh:bin/uinitcmd.sh\
+	build/u-root/cmds/core/{init,elvish,shutdown}
 
 echo "PASS: build"
 
@@ -65,17 +65,17 @@ echo "PASS: build"
 ###
 ovmf_code=""
 for str in "OVMF" "edk2/ovmf" "edk2-ovmf/x64"; do
-  file=/usr/share/"$str"/OVMF_CODE.fd
-  if [[ -f "$file" ]]; then
-    ovmf_code="$file"
-    cp /usr/share/"$str"/OVMF_VARS.fd saved/OVMF_VARS.fd
-    break
-  fi
+	file=/usr/share/"$str"/OVMF_CODE.fd
+	if [[ -f "$file" ]]; then
+		ovmf_code="$file"
+		cp /usr/share/"$str"/OVMF_VARS.fd saved/OVMF_VARS.fd
+		break
+	fi
 done
 
 if [[ -z "$ovmf_code" ]]; then
-  echo "FATAL: failed to locate OVMF_CODE.fd" 2>&1
-  exit 1
+	echo "FATAL: failed to locate OVMF_CODE.fd" 2>&1
+	exit 1
 fi
 
 echo "PASS: copy OVMF files"
@@ -84,35 +84,35 @@ echo "PASS: copy OVMF files"
 # Run with qemu
 ###
 qemu-system-x86_64 -nographic -no-reboot -pidfile qemu.pid\
-  -m 512M -M q35 -rtc base=localtime\
-  -net user,hostfwd=tcp::2009-:2009 -net nic\
-  -object rng-random,filename=/dev/urandom,id=rng0\
-  -device virtio-rng-pci,rng=rng0\
-  -drive if=pflash,format=raw,readonly=on,file="$ovmf_code"\
-  -drive if=pflash,format=raw,file=saved/OVMF_VARS.fd\
-  -kernel build/kernel.vmlinuz\
-  -initrd build/stprov.cpio\
-  -append "console=ttyS0" >saved/qemu.log &
+	-m 512M -M q35 -rtc base=localtime\
+	-net user,hostfwd=tcp::2009-:2009 -net nic\
+	-object rng-random,filename=/dev/urandom,id=rng0\
+	-device virtio-rng-pci,rng=rng0\
+	-drive if=pflash,format=raw,readonly=on,file="$ovmf_code"\
+	-drive if=pflash,format=raw,file=saved/OVMF_VARS.fd\
+	-kernel build/kernel.vmlinuz\
+	-initrd build/stprov.cpio\
+	-append "console=ttyS0" >saved/qemu.log &
 
 ###
 # Run tests
 ###
 function reach_stage() {
-  abort_in_num_seconds=$1
-  while :; do
-    if [[ $abort_in_num_seconds == 0 ]]; then
-      echo "FAIL: reach $2" >&2
-      exit 1
-    fi
+	abort_in_num_seconds=$1
+	while :; do
+		if [[ $abort_in_num_seconds == 0 ]]; then
+			echo "FAIL: reach $2" >&2
+			exit 1
+		fi
 
-    if [[ ! -z $(grep "$2" saved/qemu.log) ]]; then
-      echo "PASS: reach $2" >&2
-      break
-    fi
+		if [[ ! -z $(grep "$2" saved/qemu.log) ]]; then
+			echo "PASS: reach $2" >&2
+			break
+		fi
 
-    sleep 1
-    abort_in_num_seconds=$(( $abort_in_num_seconds - 1 ))
-  done
+		sleep 1
+		abort_in_num_seconds=$(( $abort_in_num_seconds - 1 ))
+	done
 }
 
 reach_stage 10 "stage:boot"
@@ -122,8 +122,8 @@ reach_stage 3 "stage:shutdown"
 
 got=$(grep hostname saved/stprov.log | cut -d'=' -f2)
 if [[ "$got" != "example.org" ]]; then
-  echo "FAIL: wrong hostname in stprov.log ($got)" >&2
-  exit 1
+	echo "FAIL: wrong hostname in stprov.log ($got)" >&2
+	exit 1
 fi
 echo "PASS: stprov.log hostname"
 
@@ -132,8 +132,8 @@ virt-fw-vars -i saved/OVMF_VARS.fd --output-json saved/efivars.json
 
 got=$(cat saved/efivars.json | jq -r '.variables[] | select(.name == "STHostName") | .data' | tr a-f A-F | basenc --base16 -d)
 if [[ "$got" != "example.org" ]]; then
-  echo "FAIL: wrong hostname in EFI NVRAM ($got)" >&2
-  exit 1
+	echo "FAIL: wrong hostname in EFI NVRAM ($got)" >&2
+	exit 1
 fi
 echo "PASS: EFI-NVRAM hostname"
 
@@ -141,15 +141,15 @@ cat saved/efivars.json | jq -r '.variables[] | select(.name == "STHostKey") | .d
 chmod 600 saved/hostkey
 got=$(ssh-keygen -lf saved/hostkey | cut -d' ' -f2)
 if [[ "$got" != "$fingerprint" ]]; then
-  echo "FAIL: wrong fingerprint for key in EFI NVRAM ($got)" >&2
-  exit 1
+	echo "FAIL: wrong fingerprint for key in EFI NVRAM ($got)" >&2
+	exit 1
 fi
 echo "PASS: EFI-NVRAM hostkey"
 
 cat saved/efivars.json | jq -r '.variables[] | select(.name == "STHostConfig") | .data' | tr a-f A-F | basenc --base16 -d | jq > saved/hostcfg.json
 got=$(cat saved/hostcfg.json | jq '.ospkg_pointer')
 if [[ "$got" != "\"https://example.org/ospkg.json\"" ]]; then
-  echo "FAIL: wrong URL in EFI NVRAM host config ($got)" >&2
-  exit 1
+	echo "FAIL: wrong URL in EFI NVRAM host config ($got)" >&2
+	exit 1
 fi
 echo "PASS: EFI-NVRAM host config (URL-check only)"
