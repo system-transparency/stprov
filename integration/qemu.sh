@@ -35,6 +35,14 @@ function pass() {
 	echo "PASS: $*" >&2
 }
 
+function assert_hostcfg() {
+	local key=$1; shift
+	local want=$1; shift
+
+	local got=$(cat saved/hostcfg.json | jq "$key")
+	[[ "$got" == "$want" ]] || die "host config: wrong $key: got $got, want $want"
+}
+
 ###
 # Build
 ###
@@ -94,6 +102,8 @@ qemu-system-x86_64 -nographic -no-reboot -pidfile qemu.pid\
 ###
 # Run tests
 ###
+URL=https://example.org/ospkg.json
+
 function reach_stage() {
 	abort_in_num_seconds=$1; shift
 	token=$1; shift
@@ -142,8 +152,5 @@ fi
 pass "EFI-NVRAM hostkey"
 
 cat saved/efivars.json | jq -r '.variables[] | select(.name == "STHostConfig") | .data' | tr a-f A-F | basenc --base16 -d | jq > saved/hostcfg.json
-got=$(cat saved/hostcfg.json | jq '.ospkg_pointer')
-if [[ "$got" != "\"https://example.org/ospkg.json\"" ]]; then
-	die "wrong URL in EFI NVRAM host config ($got)"
-fi
+assert_hostcfg ".ospkg_pointer" "\"$URL\""
 pass "EFI-NVRAM host config (URL-check only)"
