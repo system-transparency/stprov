@@ -170,7 +170,7 @@ for i in "${!remote_configs[@]}"; do
 		-uinitcmd="/bin/sh /bin/uinitcmd.sh"\
 		-files bin/stprov:bin/stprov\
 		-files build/uinitcmd.sh:bin/uinitcmd.sh\
-		build/u-root/cmds/core/{init,elvish,shutdown}
+		build/u-root/cmds/core/{init,elvish,shutdown,cat,cp,dd,echo,grep,hexdump,ls,mkdir,mv,ping,pwd,rm,wget,wc}
 
 	# Documentation to understand qemu user networking and these options:
 	# - https://wiki.qemu.org/Documentation/Networking#User_Networking_(SLIRP)
