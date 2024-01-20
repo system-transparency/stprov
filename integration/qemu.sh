@@ -45,6 +45,29 @@ function assert_hostcfg() {
 	[[ "$got" == "$want" ]] || die "host config: wrong $key: got $got, want $want"
 }
 
+function mock_operator() {
+	local configure=$1; shift
+	local run=$1; shift
+
+	# Mock an operator that boots into the system, configures the network, and
+	# then runs the client-server ping-pongs.  The exact stprov remote commands
+	# are templated so that we can easily loop over several different options.
+	# The printed messages help us figure out how it's going, see reach_stage.
+	cat << EOF
+#!/bin/sh
+
+printf "stage:boot\n"
+$configure
+
+printf "stage:network\n"
+printf "\n" | $run
+printf "\n"
+
+printf "stage:shutdown\n"
+shutdown
+EOF
+}
+
 function reach_stage() {
 	local abort_in_num_seconds=$1; shift
 	local token=$1; shift
@@ -82,12 +105,16 @@ unset GOWORK
 url="https://git.glasklar.is/system-transparency/core/system-transparency/-/raw/main/contrib/linuxboot.vmlinuz"
 [[ -f build/kernel.vmlinuz ]] || curl -L "$url" -o build/kernel.vmlinuz
 
+remote_cfg="stprov remote static -A --ip=10.0.2.15/24 --full-host=example.org --url=https://example.org/ospkg.json"
+remote_run="stprov remote run -p 2009 --allow=0.0.0.0/0 --otp=sikritpassword"
+mock_operator "$remote_cfg" "$remote_run" > build/uinitcmd.sh
+
 ./bin/u-root\
 	-o build/stprov.cpio\
 	-uroot-source=build/u-root\
 	-uinitcmd="/bin/sh /bin/uinitcmd.sh"\
 	-files bin/stprov:bin/stprov\
-	-files uinitcmd.sh:bin/uinitcmd.sh\
+	-files build/uinitcmd.sh:bin/uinitcmd.sh\
 	build/u-root/cmds/core/{init,elvish,shutdown}
 
 # Setup EFI-NVRAM stuff.  Magic, if you understand the choises please docdoc here.
