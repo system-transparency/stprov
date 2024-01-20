@@ -126,13 +126,21 @@ done
 ###
 # Run tests
 ###
+PORT=2009
+IP=10.0.2.15
+MASK=24
+GATEWAY=10.0.2.2
+DNS=10.0.2.3
+IFNAME=eth0
+IFADDR=aa:bb:cc:dd:ee:ff
 URL=https://example.org/ospkg.json
 FULLHOST=example.org
+PASSWORD=sikritpassword
 
-local_run="./bin/stprov local run --ip 127.0.0.1 -p 2009 --otp sikritpassword"
-remote_run="stprov remote run -p 2009 --allow=0.0.0.0/0 --otp=sikritpassword"
+local_run="./bin/stprov local run --ip 127.0.0.1 -p $PORT --otp $PASSWORD"
+remote_run="stprov remote run -p $PORT --allow=0.0.0.0/0 --otp=$PASSWORD"
 remote_configs=(
-	"stprov remote static -A --ip=10.0.2.15/24 --full-host=$FULLHOST --url=https://example.org/ospkg.json"
+	"stprov remote static -A --ip=$IP/$MASK --full-host=$FULLHOST --url=$URL"
 )
 
 for i in "${!remote_configs[@]}"; do
@@ -147,9 +155,21 @@ for i in "${!remote_configs[@]}"; do
 		-files build/uinitcmd.sh:bin/uinitcmd.sh\
 		build/u-root/cmds/core/{init,elvish,shutdown}
 
+	# Documentation to understand qemu user networking and these options:
+	# - https://wiki.qemu.org/Documentation/Networking#User_Networking_(SLIRP)
+	# - https://www.qemu.org/docs/master/system/invocation.html#hxtool-5
+	nic_opts="type=user"               # qemu user networking
+	nic_opts="$nic_opts,net=$IP/$MASK" # guest NAT network
+	nic_opts="$nic_opts,host=$GATEWAY" # guest gateway
+	nic_opts="$nic_opts,dns=$DNS"      # guest dns server
+	nic_opts="$nic_opts,dhcpstart=$IP" # guest dhcp server assigns this ip first
+	nic_opts="$nic_opts,id=$IFNAME"    # guest interface name
+	nic_opts="$nic_opts,mac=$IFADDR"   # guest mac address
+	nic_opts="$nic_opts,restrict=yes"  # guest is isolated inside its NAT network
+	nic_opts="$nic_opts,hostfwd=tcp:127.0.0.1:$PORT-$IP:$PORT"
 	qemu-system-x86_64 -nographic -no-reboot -pidfile qemu.pid\
 		-m 512M -M q35 -rtc base=localtime\
-		-net user,hostfwd=tcp::2009-:2009 -net nic\
+		-nic "$nic_opts"\
 		-object rng-random,filename=/dev/urandom,id=rng0\
 		-device virtio-rng-pci,rng=rng0\
 		-drive if=pflash,format=raw,readonly=on,file="$ovmf_code"\
