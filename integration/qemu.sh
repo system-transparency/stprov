@@ -130,6 +130,11 @@ reach_stage 60 "stage:network"
 ./bin/stprov local run --ip 127.0.0.1 -p 2009 --otp sikritpassword | tee saved/stprov.log
 reach_stage 3 "stage:shutdown"
 
+virt-fw-vars -i saved/OVMF_VARS.fd --output-json saved/efivars.json
+jq -r '.variables[] | select(.name == "STHostConfig") | .data' saved/efivars.json | tr a-f A-F | basenc --base16 -d | jq > saved/hostcfg.json
+jq -r '.variables[] | select(.name == "STHostKey")    | .data' saved/efivars.json | tr a-f A-F | basenc --base16 -d > saved/hostkey
+jq -r '.variables[] | select(.name == "STHostName")   | .data' saved/efivars.json | tr a-f A-F | basenc --base16 -d > saved/hostname
+
 got=$(grep hostname saved/stprov.log | cut -d'=' -f2)
 if [[ "$got" != "example.org" ]]; then
 	die "wrong hostname in stprov.log ($got)"
@@ -137,15 +142,13 @@ fi
 pass "stprov.log hostname"
 
 fingerprint=$(grep fingerprint saved/stprov.log | cut -d'=' -f2)
-virt-fw-vars -i saved/OVMF_VARS.fd --output-json saved/efivars.json
 
-got=$(jq -r '.variables[] | select(.name == "STHostName") | .data' saved/efivars.json | tr a-f A-F | basenc --base16 -d)
+got=$(cat saved/hostname)
 if [[ "$got" != "example.org" ]]; then
 	die "wrong hostname in EFI NVRAM ($got)"
 fi
 pass "EFI-NVRAM hostname"
 
-jq -r '.variables[] | select(.name == "STHostKey") | .data' saved/efivars.json | tr a-f A-F | basenc --base16 -d > saved/hostkey
 chmod 600 saved/hostkey
 got=$(ssh-keygen -lf saved/hostkey | cut -d' ' -f2)
 if [[ "$got" != "$fingerprint" ]]; then
@@ -153,6 +156,5 @@ if [[ "$got" != "$fingerprint" ]]; then
 fi
 pass "EFI-NVRAM hostkey"
 
-jq -r '.variables[] | select(.name == "STHostConfig") | .data' saved/efivars.json | tr a-f A-F | basenc --base16 -d | jq > saved/hostcfg.json
 assert_hostcfg ".ospkg_pointer" "\"$URL\""
 pass "EFI-NVRAM host config (URL-check only)"
