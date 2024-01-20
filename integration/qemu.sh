@@ -10,20 +10,19 @@
 set -eu
 trap clean_up EXIT
 
-# Change directory to where script is located.
-cd "$(dirname $0)"
-# Use local directory for built go tools.
-export GOBIN="$(pwd)"/bin
+cd "$(dirname $0)"        # Change directory to where script is located
+export GOBIN="$(pwd)"/bin # Use local directory for built go tools
 
 rm -f qemu.pid
 
 function clean_up() {
+    local qemu_pid
+    qemu_pid=$(cat qemu.pid 2>/dev/null) || return 0
+
     # QEMU removes the pid file before exiting. There is a race where
     # we might read the pid file and attempt to kill the process too
     # late. Due to the short period, it's extremely unlikely that the
     # pid has already been reused for a different process.
-    local qemu_pid
-    qemu_pid=$(cat qemu.pid 2>/dev/null) || return 0
     kill "${qemu_pid}"
 }
 
@@ -34,12 +33,12 @@ mkdir -p build saved
 ###
 
 go install ../cmd/stprov
+
 # go work interacts badly with building u-root itself and with
 # u-root's building of included commands. It can be enabled for
 # compilation of stprov above by using the GOWORK environment
 # variable, and then disabled for the rest of this script.
 unset GOWORK
-
 [[ -d build/u-root ]] ||
 	git clone --depth 1 https://github.com/u-root/u-root build/u-root &&
 	(cd build/u-root && go install)
@@ -57,12 +56,10 @@ url="https://git.glasklar.is/system-transparency/core/system-transparency/-/raw/
 
 echo "PASS: build"
 
-###
 # Setup EFI-NVRAM stuff.  Magic, if you understand the choises please docdoc here.
 #
 # From:
 # https://git.glasklar.is/system-transparency/core/system-transparency/-/blob/main/tasks/qemu.yml?ref_type=heads#L5-19
-###
 ovmf_code=""
 for str in "OVMF" "edk2/ovmf" "edk2-ovmf/x64"; do
 	file=/usr/share/"$str"/OVMF_CODE.fd
