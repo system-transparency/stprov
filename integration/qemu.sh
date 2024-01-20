@@ -26,6 +26,15 @@ function clean_up() {
     kill "${qemu_pid}"
 }
 
+function die()  {
+	echo "FAIL: $*" >&2
+	exit 1
+}
+
+function pass() {
+	echo "PASS: $*" >&2
+}
+
 mkdir -p build saved
 
 ###
@@ -54,7 +63,7 @@ url="https://git.glasklar.is/system-transparency/core/system-transparency/-/raw/
 	-files uinitcmd.sh:bin/uinitcmd.sh\
 	build/u-root/cmds/core/{init,elvish,shutdown}
 
-echo "PASS: build"
+pass "build"
 
 # Setup EFI-NVRAM stuff.  Magic, if you understand the choises please docdoc here.
 #
@@ -71,11 +80,10 @@ for str in "OVMF" "edk2/ovmf" "edk2-ovmf/x64"; do
 done
 
 if [[ -z "$ovmf_code" ]]; then
-	echo "FATAL: failed to locate OVMF_CODE.fd" 2>&1
-	exit 1
+	die "unable to locate OVMF_CODE.fd"
 fi
 
-echo "PASS: copy OVMF files"
+pass "copy OVMF files"
 
 ###
 # Run with qemu
@@ -98,12 +106,11 @@ function reach_stage() {
 	abort_in_num_seconds=$1
 	while :; do
 		if [[ $abort_in_num_seconds == 0 ]]; then
-			echo "FAIL: reach $2" >&2
-			exit 1
+			die "reach $2"
 		fi
 
 		if [[ ! -z $(grep "$2" saved/qemu.log) ]]; then
-			echo "PASS: reach $2" >&2
+			pass "reach $2"
 			break
 		fi
 
@@ -119,34 +126,30 @@ reach_stage 3 "stage:shutdown"
 
 got=$(grep hostname saved/stprov.log | cut -d'=' -f2)
 if [[ "$got" != "example.org" ]]; then
-	echo "FAIL: wrong hostname in stprov.log ($got)" >&2
-	exit 1
+	die "wrong hostname in stprov.log ($got)"
 fi
-echo "PASS: stprov.log hostname"
+pass "stprov.log hostname"
 
 fingerprint=$(grep fingerprint saved/stprov.log | cut -d'=' -f2)
 virt-fw-vars -i saved/OVMF_VARS.fd --output-json saved/efivars.json
 
 got=$(cat saved/efivars.json | jq -r '.variables[] | select(.name == "STHostName") | .data' | tr a-f A-F | basenc --base16 -d)
 if [[ "$got" != "example.org" ]]; then
-	echo "FAIL: wrong hostname in EFI NVRAM ($got)" >&2
-	exit 1
+	die "wrong hostname in EFI NVRAM ($got)"
 fi
-echo "PASS: EFI-NVRAM hostname"
+pass "EFI-NVRAM hostname"
 
 cat saved/efivars.json | jq -r '.variables[] | select(.name == "STHostKey") | .data' | tr a-f A-F | basenc --base16 -d > saved/hostkey
 chmod 600 saved/hostkey
 got=$(ssh-keygen -lf saved/hostkey | cut -d' ' -f2)
 if [[ "$got" != "$fingerprint" ]]; then
-	echo "FAIL: wrong fingerprint for key in EFI NVRAM ($got)" >&2
-	exit 1
+	die "wrong fingerprint for key in EFI NVRAM ($got)"
 fi
-echo "PASS: EFI-NVRAM hostkey"
+pass "EFI-NVRAM hostkey"
 
 cat saved/efivars.json | jq -r '.variables[] | select(.name == "STHostConfig") | .data' | tr a-f A-F | basenc --base16 -d | jq > saved/hostcfg.json
 got=$(cat saved/hostcfg.json | jq '.ospkg_pointer')
 if [[ "$got" != "\"https://example.org/ospkg.json\"" ]]; then
-	echo "FAIL: wrong URL in EFI NVRAM host config ($got)" >&2
-	exit 1
+	die "wrong URL in EFI NVRAM host config ($got)"
 fi
-echo "PASS: EFI-NVRAM host config (URL-check only)"
+pass "EFI-NVRAM host config (URL-check only)"
