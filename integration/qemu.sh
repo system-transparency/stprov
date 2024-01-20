@@ -35,12 +35,10 @@ function pass() {
 	echo "PASS: $*" >&2
 }
 
-mkdir -p build saved
-
 ###
 # Build
 ###
-
+mkdir -p build saved
 go install ../cmd/stprov
 
 # go work interacts badly with building u-root itself and with
