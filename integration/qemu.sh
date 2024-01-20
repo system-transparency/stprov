@@ -10,8 +10,9 @@
 set -eu
 trap clean_up EXIT
 
-cd "$(dirname $0)"        # Change directory to where script is located
-export GOBIN="$(pwd)"/bin # Use local directory for built go tools
+cd "$(dirname "$0")" # Change directory to where script is located
+GOBIN="$(pwd)"/bin   # Use local directory for built go tools
+export GOBIN
 
 rm -f qemu.pid
 
@@ -38,8 +39,9 @@ function pass() {
 function assert_hostcfg() {
 	local key=$1; shift
 	local want=$1; shift
+	local got
 
-	local got=$(cat saved/hostcfg.json | jq "$key")
+	got=$(jq "$key" saved/hostcfg.json)
 	[[ "$got" == "$want" ]] || die "host config: wrong $key: got $got, want $want"
 }
 
@@ -113,13 +115,13 @@ function reach_stage() {
 			die "reach $token"
 		fi
 
-		if [[ ! -z $(grep "$token" saved/qemu.log) ]]; then
+		if grep -q "$token" saved/qemu.log; then
 			pass "reach $token"
 			break
 		fi
 
 		sleep 1
-		abort_in_num_seconds=$(( $abort_in_num_seconds - 1 ))
+		abort_in_num_seconds=$(( abort_in_num_seconds - 1 ))
 	done
 }
 
@@ -137,13 +139,13 @@ pass "stprov.log hostname"
 fingerprint=$(grep fingerprint saved/stprov.log | cut -d'=' -f2)
 virt-fw-vars -i saved/OVMF_VARS.fd --output-json saved/efivars.json
 
-got=$(cat saved/efivars.json | jq -r '.variables[] | select(.name == "STHostName") | .data' | tr a-f A-F | basenc --base16 -d)
+got=$(jq -r '.variables[] | select(.name == "STHostName") | .data' saved/efivars.json | tr a-f A-F | basenc --base16 -d)
 if [[ "$got" != "example.org" ]]; then
 	die "wrong hostname in EFI NVRAM ($got)"
 fi
 pass "EFI-NVRAM hostname"
 
-cat saved/efivars.json | jq -r '.variables[] | select(.name == "STHostKey") | .data' | tr a-f A-F | basenc --base16 -d > saved/hostkey
+jq -r '.variables[] | select(.name == "STHostKey") | .data' saved/efivars.json | tr a-f A-F | basenc --base16 -d > saved/hostkey
 chmod 600 saved/hostkey
 got=$(ssh-keygen -lf saved/hostkey | cut -d' ' -f2)
 if [[ "$got" != "$fingerprint" ]]; then
@@ -151,6 +153,6 @@ if [[ "$got" != "$fingerprint" ]]; then
 fi
 pass "EFI-NVRAM hostkey"
 
-cat saved/efivars.json | jq -r '.variables[] | select(.name == "STHostConfig") | .data' | tr a-f A-F | basenc --base16 -d | jq > saved/hostcfg.json
+jq -r '.variables[] | select(.name == "STHostConfig") | .data' saved/efivars.json | tr a-f A-F | basenc --base16 -d | jq > saved/hostcfg.json
 assert_hostcfg ".ospkg_pointer" "\"$URL\""
 pass "EFI-NVRAM host config (URL-check only)"
