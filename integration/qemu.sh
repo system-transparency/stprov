@@ -9,6 +9,7 @@
 # Environment variables that can be enabled (disabled by default):
 #
 #   INTERACTIVE=true    Build and launch QEMU for manual stprov tests
+#   SINGLE_TEST=num     Run a single test, num is a zero-based number
 #
 
 set -eu
@@ -19,6 +20,7 @@ GOBIN="$(pwd)"/bin   # Use local directory for built go tools
 export GOBIN
 
 INTERACTIVE=${INTERACTIVE:-false}
+SINGLE_TEST=${SINGLE_TEST:-false}
 
 rm -f qemu.pid
 
@@ -155,6 +157,10 @@ remote_configs=(
 )
 
 for i in "${!remote_configs[@]}"; do
+	if [[ "$SINGLE_TEST" != false ]] && [[ "$SINGLE_TEST" != "$i" ]]; then
+		continue # not the single test being requested by the user
+	fi
+
 	remote_cfg=${remote_configs[$i]}
 	mock_operator "$remote_cfg" "$remote_run" > build/uinitcmd.sh
 
