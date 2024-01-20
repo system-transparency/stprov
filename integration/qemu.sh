@@ -154,8 +154,9 @@ pass "hostname"
 # Check SSH key
 #
 chmod 600 saved/hostkey
-fingerprint=$(grep fingerprint saved/stprov.log | cut -d'=' -f2)
-got=$(ssh-keygen -lf saved/hostkey | cut -d' ' -f2)
+fingerprint=$(ssh-keygen -lf saved/hostkey | cut -d' ' -f2)
+
+got=$(grep fingerprint saved/stprov.log | cut -d'=' -f2)
 if [[ "$got" != "$fingerprint" ]]; then
 	die "wrong fingerprint for key in EFI NVRAM ($got)"
 fi
