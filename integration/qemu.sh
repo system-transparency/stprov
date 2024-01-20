@@ -1,10 +1,14 @@
 #!/bin/bash
 
 #
-# A simple script that takes stprov for a trial run with qemu.  Before running,
-# you may need to install a few dependencies.  See details in ../gitlab-ci.yml.
+# A script that takes stprov for a trial run in qemu.  Before running, you may
+# need to install a few system dependencies.  See details in ../gitlab-ci.yml.
 #
 # Usage: ./qemu.sh
+#
+# Environment variables that can be enabled (disabled by default):
+#
+#   INTERACTIVE=true    Build and launch QEMU for manual stprov tests
 #
 
 set -eu
@@ -13,6 +17,8 @@ trap clean_up EXIT
 cd "$(dirname "$0")" # Change directory to where script is located
 GOBIN="$(pwd)"/bin   # Use local directory for built go tools
 export GOBIN
+
+INTERACTIVE=${INTERACTIVE:-false}
 
 rm -f qemu.pid
 
@@ -49,6 +55,11 @@ function assert_hostcfg() {
 function mock_operator() {
 	local configure=$1; shift
 	local run=$1; shift
+
+	if [[ "$INTERACTIVE" == true ]]; then
+		echo "#!/bin/sh"
+		return
+	fi
 
 	# Mock an operator that boots into the system, configures the network, and
 	# then runs the client-server ping-pongs.  The exact stprov remote commands
@@ -167,16 +178,26 @@ for i in "${!remote_configs[@]}"; do
 	nic_opts="$nic_opts,mac=$IFADDR"   # guest mac address
 	nic_opts="$nic_opts,restrict=yes"  # guest is isolated inside its NAT network
 	nic_opts="$nic_opts,hostfwd=tcp:127.0.0.1:$PORT-$IP:$PORT"
-	qemu-system-x86_64 -nographic -no-reboot -pidfile qemu.pid\
-		-m 512M -M q35 -rtc base=localtime\
-		-nic "$nic_opts"\
-		-object rng-random,filename=/dev/urandom,id=rng0\
-		-device virtio-rng-pci,rng=rng0\
-		-drive if=pflash,format=raw,readonly=on,file="$ovmf_code"\
-		-drive if=pflash,format=raw,file=saved/OVMF_VARS.fd\
-		-kernel build/kernel.vmlinuz\
-		-initrd build/stprov.cpio\
-		-append "console=ttyS0" >saved/qemu.log &
+
+	qemu_opts=(
+		-nographic -no-reboot -m 512M -M q35
+		-rtc base=localtime -pidfile qemu.pid
+		-object "rng-random,filename=/dev/urandom,id=rng0"
+		-device "virtio-rng-pci,rng=rng0"
+		-nic "$nic_opts"
+		-drive "if=pflash,format=raw,readonly=on,file=$ovmf_code"
+		-drive "if=pflash,format=raw,file=saved/OVMF_VARS.fd"
+		-kernel "build/kernel.vmlinuz"
+		-initrd "build/stprov.cpio"
+		-append "console=ttyS0"
+	)
+
+	if [[ "$INTERACTIVE" == true ]]; then
+		qemu-system-x86_64 "${qemu_opts[@]}"
+		exit 0
+	fi
+
+	qemu-system-x86_64 "${qemu_opts[@]}" >saved/qemu.log &
 
 	reach_stage "$i" 10 "stage:boot"
 	reach_stage "$i" 60 "stage:network"
