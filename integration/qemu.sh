@@ -129,6 +129,7 @@ done
 URL=https://example.org/ospkg.json
 FULLHOST=example.org
 
+local_run="./bin/stprov local run --ip 127.0.0.1 -p 2009 --otp sikritpassword"
 remote_run="stprov remote run -p 2009 --allow=0.0.0.0/0 --otp=sikritpassword"
 remote_configs=(
 	"stprov remote static -A --ip=10.0.2.15/24 --full-host=$FULLHOST --url=https://example.org/ospkg.json"
@@ -159,7 +160,7 @@ for i in "${!remote_configs[@]}"; do
 
 	reach_stage "$i" 10 "stage:boot"
 	reach_stage "$i" 60 "stage:network"
-	./bin/stprov local run --ip 127.0.0.1 -p 2009 --otp sikritpassword | tee saved/stprov.log
+	$local_run | tee saved/stprov.log
 	reach_stage "$i" 3 "stage:shutdown"
 
 	virt-fw-vars -i saved/OVMF_VARS.fd --output-json saved/efivars.json
