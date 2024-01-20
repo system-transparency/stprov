@@ -135,26 +135,36 @@ jq -r '.variables[] | select(.name == "STHostConfig") | .data' saved/efivars.jso
 jq -r '.variables[] | select(.name == "STHostKey")    | .data' saved/efivars.json | tr a-f A-F | basenc --base16 -d > saved/hostkey
 jq -r '.variables[] | select(.name == "STHostName")   | .data' saved/efivars.json | tr a-f A-F | basenc --base16 -d > saved/hostname
 
+#
+# Check hostname
+#
 got=$(grep hostname saved/stprov.log | cut -d'=' -f2)
 if [[ "$got" != "example.org" ]]; then
 	die "wrong hostname in stprov.log ($got)"
 fi
-pass "stprov.log hostname"
-
-fingerprint=$(grep fingerprint saved/stprov.log | cut -d'=' -f2)
 
 got=$(cat saved/hostname)
 if [[ "$got" != "example.org" ]]; then
 	die "wrong hostname in EFI NVRAM ($got)"
 fi
-pass "EFI-NVRAM hostname"
 
+pass "hostname"
+
+#
+# Check SSH key
+#
 chmod 600 saved/hostkey
+fingerprint=$(grep fingerprint saved/stprov.log | cut -d'=' -f2)
 got=$(ssh-keygen -lf saved/hostkey | cut -d' ' -f2)
 if [[ "$got" != "$fingerprint" ]]; then
 	die "wrong fingerprint for key in EFI NVRAM ($got)"
 fi
-pass "EFI-NVRAM hostkey"
 
+pass "SSH key"
+
+#
+# Check host configuration
+#
 assert_hostcfg ".ospkg_pointer" "\"$URL\""
-pass "EFI-NVRAM host config (URL-check only)"
+
+pass "host configuration (URL-check only)"
