@@ -107,8 +107,8 @@ qemu-system-x86_64 -nographic -no-reboot -pidfile qemu.pid\
 URL=https://example.org/ospkg.json
 
 function reach_stage() {
-	abort_in_num_seconds=$1; shift
-	token=$1; shift
+	local abort_in_num_seconds=$1; shift
+	local token=$1; shift
 
 	while :; do
 		if [[ $abort_in_num_seconds == 0 ]]; then
