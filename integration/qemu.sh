@@ -40,8 +40,8 @@ function die()  {
 	exit 1
 }
 
-function pass() {
-	echo "PASS: $*" >&2
+function info() {
+	echo "INFO: $*" >&2
 }
 
 function assert_hostcfg() {
@@ -101,7 +101,6 @@ function reach_stage() {
 		fi
 
 		if grep -q "$token" saved/qemu.log; then
-			pass "test $test_num: reach $token"
 			break
 		fi
 
@@ -193,6 +192,8 @@ for i in "${!remote_configs[@]}"; do
 		continue # not the single test being requested by the user
 	fi
 
+	info "running test $i"
+
 	remote_cfg="stprov remote ${remote_configs[$i]}"
 	mock_operator "$remote_cfg" "$remote_run" > build/uinitcmd.sh
 
@@ -263,8 +264,6 @@ for i in "${!remote_configs[@]}"; do
 	got=$(cat saved/hostname)
 	[[ "$got" == "$FULLHOST" ]] || die "test $i: EFI NVRAM hostname: got $got, want $FULLHOST"
 
-	pass "hostname"
-
 	#
 	# Check SSH key
 	#
@@ -273,8 +272,6 @@ for i in "${!remote_configs[@]}"; do
 
 	got=$(grep fingerprint saved/stprov.log | cut -d'=' -f2)
 	[[ "$got" == "$fingerprint" ]] || die "test $i: SSH key fingerprint: got $got, want $fingerprint"
-
-	pass "SSH key"
 
 	#
 	# Check host configuration
@@ -298,6 +295,4 @@ for i in "${!remote_configs[@]}"; do
 	assert_hostcfg "$i" ".authentication"                       "\"foo\"" # FIXME
 	assert_hostcfg "$i" ".bonding_mode"                         null # only tested manually
 	assert_hostcfg "$i" ".bonding_name"                         null # only tested manually
-
-	pass "host configuration"
 done
