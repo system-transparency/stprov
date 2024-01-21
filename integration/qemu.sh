@@ -67,7 +67,7 @@ function mock_operator() {
 	local run=$1; shift
 
 	if [[ "$INTERACTIVE" == true ]]; then
-		echo "#!/bin/sh"
+		echo "#!/bin/elvish"
 		return
 	fi
 
@@ -76,7 +76,7 @@ function mock_operator() {
 	# are templated so that we can easily loop over several different options.
 	# The printed messages help us figure out how it's going, see reach_stage.
 	cat << EOF
-#!/bin/sh
+#!/bin/elvish
 
 printf "stage:boot\n"
 $configure
