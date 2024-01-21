@@ -46,7 +46,7 @@ const usage_string = `Usage:
     -w, --wait         Wait at most this long for link up (Default: 4s)
 
     The values of -u and -p will be incorporated into a hard-coded provisioning
-    URL: "https://user:password@stpackage.example.org/os-stable.json".
+    URL: "%s".
 
     Bonding mode (-M) is one of: balance-rr, active-backup,
     balance-xor, broadcast, 802.3ad, balance-tlb, balance-alb.
@@ -66,7 +66,6 @@ const usage_string = `Usage:
 const (
 	efiKeyName  = "STHostKey"
 	efiHostName = "STHostName"
-	provURL     = "https://user:password@stpackage.example.org/os-stable.json"
 	httpTimeout = 20 * time.Second
 )
 
@@ -86,6 +85,7 @@ func usage() {
 		options.DefBondingMode,
 		options.DefHostname,
 		options.DefUser,
+		options.DefTemplateURL,
 		options.DefAllowedNetworks)
 }
 
@@ -178,13 +178,13 @@ func Main(args []string) error {
 		if err != nil {
 			return fmtErr(err, opt.Name())
 		}
-		return fmtErr(commitConfig(optHostName, config, optURL, provURL, optUser, optPassword), opt.Name())
+		return fmtErr(commitConfig(optHostName, config, optURL, options.DefTemplateURL, optUser, optPassword), opt.Name())
 	case "dhcp":
 		config, err := dhcp.Config(opt.Args(), optDNS, optMAC, interfaceWait, optAutodetect)
 		if err != nil {
 			return fmtErr(err, opt.Name())
 		}
-		return fmtErr(commitConfig(optHostName, config, optURL, provURL, optUser, optPassword), opt.Name())
+		return fmtErr(commitConfig(optHostName, config, optURL, options.DefTemplateURL, optUser, optPassword), opt.Name())
 	case "run":
 		return fmtErr(run.Main(opt.Args(), optPort, optHostIP, optAllowedCIDRs, optOTP, efiUUID, efiConfigName, efiKeyName, efiHostName), opt.Name())
 	default:
@@ -213,13 +213,13 @@ func checkURL(url string) {
 		resp.ContentLength, resp.Header.Get("content-type"))
 }
 
-func commitConfig(optHostName string, config *host.Config, optURL, provURL, optUser, optPassword string) error {
+func commitConfig(optHostName string, config *host.Config, optURL, templateURL, optUser, optPassword string) error {
 	if len(optHostName) == 0 {
 		return fmt.Errorf("host name is a required option")
 	}
 	hostName := st.HostName(optHostName)
 
-	parsedUrl, err := options.ParseProvisioningURL(optURL, provURL, optUser, optPassword)
+	parsedUrl, err := options.ParseProvisioningURL(optURL, templateURL, optUser, optPassword)
 	if err != nil {
 		return err // either invalid option combination or values
 	}

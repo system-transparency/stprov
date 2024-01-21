@@ -24,6 +24,7 @@ var DefPassword = "stboot"
 var DefDNS = "9.9.9.9"
 var DefAllowedNetworks = "127.0.0.1/32"
 var DefBondingMode = "balance-rr"
+var DefTemplateURL = "https://user:password@stpackage.example.org/os-stable.json"
 
 func MaxHost(network *net.IPNet) string {
 	prefixLen, bits := network.Mask.Size()
