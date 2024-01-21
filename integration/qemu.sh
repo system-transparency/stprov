@@ -128,13 +128,19 @@ PASSWORD=sikritpassword
 RESOURCE=ospkg.json
 URL=http://$USER:$PASSWORD@$OSPKG_SRV/$RESOURCE
 
-DEF_URL=http://user:password@$OSPKG_SRV/$RESOURCE
-DEF_DOMAIN=$(cut -d'.' -f2- <<<"$FULLHOST")
-
 mkdir -p build saved bin
-make -C ../ DEFAULT_TEMPLATE_URL="$DEF_URL" DEFAULT_DOMAIN="$DEF_DOMAIN"
+make -C ../\
+	DEFAULT_TEMPLATE_URL="http://user:password@$OSPKG_SRV/$RESOURCE"\
+	DEFAULT_DOMAIN="$(cut -d'.' -f2- <<<"$FULLHOST")"\
+	DEFAULT_USER="$USER"\
+	DEFAULT_PASSWORD="$PASSWORD"\
+	DEFAULT_DNS="$DNS"\
+	DEFAULT_ALLOWED_NETWORKS="$GATEWAY/32"
 mv ../stprov bin/
 go install ./serve-http
+
+version=$(git describe --tags --always)
+[[ "$(./bin/stprov version)" == "$version" ]] || die "invalid stprov version"
 
 # go work interacts badly with building u-root itself and with
 # u-root's building of included commands. It can be enabled for
@@ -168,17 +174,17 @@ done
 # Run tests
 ###
 local_run="./bin/stprov local run --ip 127.0.0.1 -p $PORT --otp $PASSWORD"
-remote_run="stprov remote run -p $PORT --allow=0.0.0.0/0 --otp=$PASSWORD"
+remote_run="stprov remote run -p $PORT --otp=$PASSWORD" # use compiled-in default set via Makefile
 remote_configs=(
 	# Static network configuration
 	"static -I $IFNAME -d $DNS -i $IP/$MASK -H $FULLHOST -r $URL --gateway $GATEWAY"
 	"static -m $IFADDR -d $DNS -i $IP/$MASK -H $FULLHOST -r $URL        -g $GATEWAY"
 	"static -A         -d $DNS -i $IP/$MASK -h $HOST     -u $USER -p $PASSWORD"
-	"static            -d $DNS -i $IP/$MASK -h $HOST     -u $USER -p $PASSWORD"
+	"static -i $IP/$MASK -h $HOST" # use compiled-in defaults set via Makefile
 	# DHCP network configuration
 	"dhcp --interface $IFNAME --dns $DNS --full-host $FULLHOST --url $URL"
 	"dhcp --mac       $IFADDR --dns $DNS --full-host $FULLHOST --user $USER --pass $PASSWORD"
-	"dhcp                     --dns $DNS      --host $HOST     --user $USER --pass $PASSWORD"
+	"dhcp --host $HOST" # use compiled-in defaults set via Makefile
 )
 
 printf '{"desc": "dummy ospkg"}' > "saved/$RESOURCE"
