@@ -256,6 +256,12 @@ for i in "${!remote_configs[@]}"; do
 	jq -r '.variables[] | select(.name == "STHostName")   | .data' saved/efivars.json | tr a-f A-F | basenc --base16 -d > saved/hostname
 
 	#
+	# Check echo:ed IP address
+	#
+	got=$(grep ^ip saved/stprov.log | cut -d'=' -f2)
+	[[ "$got" == "127.0.0.1" ]] || die "test $i: stprov local ip: got $got, want 127.0.0.1"
+
+	#
 	# Check hostname
 	#
 	got=$(grep hostname saved/stprov.log | cut -d'=' -f2)
