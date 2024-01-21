@@ -153,7 +153,7 @@ PASSWORD=sikritpassword
 local_run="./bin/stprov local run --ip 127.0.0.1 -p $PORT --otp $PASSWORD"
 remote_run="stprov remote run -p $PORT --allow=0.0.0.0/0 --otp=$PASSWORD"
 remote_configs=(
-	"stprov remote static -A --ip=$IP/$MASK --full-host=$FULLHOST --url=$URL -d $DNS"
+	"static -A --ip=$IP/$MASK --full-host=$FULLHOST --url=$URL -d $DNS"
 )
 
 for i in "${!remote_configs[@]}"; do
@@ -161,7 +161,7 @@ for i in "${!remote_configs[@]}"; do
 		continue # not the single test being requested by the user
 	fi
 
-	remote_cfg=${remote_configs[$i]}
+	remote_cfg="stprov remote ${remote_configs[$i]}"
 	mock_operator "$remote_cfg" "$remote_run" > build/uinitcmd.sh
 
 	./bin/u-root\
