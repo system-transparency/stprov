@@ -142,7 +142,7 @@ done
 PORT=2009
 IP=10.0.2.15
 MASK=24
-GATEWAY=10.0.2.2
+GATEWAY=10.0.2.1
 DNS=10.0.2.3
 IFNAME=eth0
 IFADDR=aa:bb:cc:dd:ee:ff
@@ -153,7 +153,7 @@ PASSWORD=sikritpassword
 local_run="./bin/stprov local run --ip 127.0.0.1 -p $PORT --otp $PASSWORD"
 remote_run="stprov remote run -p $PORT --allow=0.0.0.0/0 --otp=$PASSWORD"
 remote_configs=(
-	"stprov remote static -A --ip=$IP/$MASK --full-host=$FULLHOST --url=$URL"
+	"stprov remote static -A --ip=$IP/$MASK --full-host=$FULLHOST --url=$URL -d $DNS"
 )
 
 for i in "${!remote_configs[@]}"; do
@@ -240,7 +240,25 @@ for i in "${!remote_configs[@]}"; do
 	#
 	# Check host configuration
 	#
-	assert_hostcfg "$i" ".ospkg_pointer" "\"$URL\""
+	mode=$(echo "$remote_cfg" | cut -d' ' -f3)
+	want_ip=null
+	want_gw=null
+	if [[ "$mode" == static ]]; then
+		want_ip="\"$IP/$MASK\"" # quote here so null can be unquoted
+		want_gw="\"$GATEWAY\""  # quote here so null can be unquoted
+	fi
 
-	pass "host configuration (URL-check only)"
+	assert_hostcfg "$i" ".network_mode"                         "\"$mode\""
+	assert_hostcfg "$i" ".host_ip"                                "$want_ip"
+	assert_hostcfg "$i" ".gateway"                                "$want_gw"
+	assert_hostcfg "$i" ".dns[0]"                               "\"$DNS\""
+	assert_hostcfg "$i" ".network_interfaces[0].interface_name" "\"$IFNAME\""
+	assert_hostcfg "$i" ".network_interfaces[0].mac_address"    "\"$IFADDR\""
+	assert_hostcfg "$i" ".ospkg_pointer"                        "\"$URL\""
+	assert_hostcfg "$i" ".identity"                             "\"bar\"" # FIXME
+	assert_hostcfg "$i" ".authentication"                       "\"foo\"" # FIXME
+	assert_hostcfg "$i" ".bonding_mode"                         null # only tested manually
+	assert_hostcfg "$i" ".bonding_name"                         null # only tested manually
+
+	pass "host configuration"
 done
