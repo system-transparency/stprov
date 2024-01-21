@@ -140,10 +140,10 @@ done
 # Run tests
 ###
 PORT=2009
-IP=10.0.2.15
-MASK=24
-GATEWAY=10.0.2.1
-DNS=10.0.2.3
+IP=10.0.3.200
+MASK=25
+GATEWAY=10.0.3.129
+DNS=10.0.3.130
 IFNAME=eth0
 IFADDR=aa:bb:cc:dd:ee:ff
 HOST=test
