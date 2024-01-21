@@ -100,7 +100,7 @@ function reach_stage() {
 			die "test $test_num: reach $token"
 		fi
 
-		if grep -q "$token" saved/qemu.log; then
+		if grep -q "^$token" saved/qemu.log; then
 			break
 		fi
 
@@ -264,7 +264,7 @@ for i in "${!remote_configs[@]}"; do
 	#
 	# Check hostname
 	#
-	got=$(grep hostname saved/stprov.log | cut -d'=' -f2)
+	got=$(grep ^hostname saved/stprov.log | cut -d'=' -f2)
 	[[ "$got" == "$FULLHOST" ]] || die "test $i: stprov local hostname: got $got, want $FULLHOST"
 
 	got=$(cat saved/hostname)
@@ -276,7 +276,7 @@ for i in "${!remote_configs[@]}"; do
 	chmod 600 saved/hostkey
 	fingerprint=$(ssh-keygen -lf saved/hostkey | cut -d' ' -f2)
 
-	got=$(grep fingerprint saved/stprov.log | cut -d'=' -f2)
+	got=$(grep ^fingerprint saved/stprov.log | cut -d'=' -f2)
 	[[ "$got" == "$fingerprint" ]] || die "test $i: SSH key fingerprint: got $got, want $fingerprint"
 
 	#
