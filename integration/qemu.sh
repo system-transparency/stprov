@@ -113,9 +113,23 @@ function reach_stage() {
 ###
 # Initial setup
 ###
+PORT=2009
+IP=10.0.3.200
+MASK=25
+GATEWAY=10.0.3.129
+DNS=10.0.3.130
 OSPKG_SRV=10.0.3.131
-DEF_URL=http://user:password@$OSPKG_SRV/ospkg.json
-DEF_DOMAIN=example.org
+IFNAME=eth0
+IFADDR=aa:bb:cc:dd:ee:ff
+HOST=testonly
+FULLHOST=$HOST.example.org
+USER=stprov
+PASSWORD=sikritpassword
+RESOURCE=ospkg.json
+URL=http://$USER:$PASSWORD@$OSPKG_SRV/$RESOURCE
+
+DEF_URL=http://user:password@$OSPKG_SRV/$RESOURCE
+DEF_DOMAIN=$(cut -d'.' -f2- <<<"$FULLHOST")
 
 mkdir -p build saved bin
 make -C ../ DEFAULT_TEMPLATE_URL="$DEF_URL" DEFAULT_DOMAIN="$DEF_DOMAIN"
@@ -153,19 +167,6 @@ done
 ###
 # Run tests
 ###
-PORT=2009
-IP=10.0.3.200
-MASK=25
-GATEWAY=10.0.3.129
-DNS=10.0.3.130
-IFNAME=eth0
-IFADDR=aa:bb:cc:dd:ee:ff
-HOST=test
-FULLHOST=test.$DEF_DOMAIN
-USER=stprov
-PASSWORD=sikritpassword
-URL=http://$USER:$PASSWORD@$OSPKG_SRV/ospkg.json
-
 local_run="./bin/stprov local run --ip 127.0.0.1 -p $PORT --otp $PASSWORD"
 remote_run="stprov remote run -p $PORT --allow=0.0.0.0/0 --otp=$PASSWORD"
 remote_configs=(
@@ -180,7 +181,7 @@ remote_configs=(
 	"dhcp                     --dns $DNS      --host $HOST     --user $USER --pass $PASSWORD"
 )
 
-printf '{"desc": "dummy ospkg"}' > "saved/${URL##*/}"
+printf '{"desc": "dummy ospkg"}' > "saved/$RESOURCE"
 for i in "${!remote_configs[@]}"; do
 	if [[ "$SINGLE_TEST" != false ]] && [[ "$SINGLE_TEST" != "$i" ]]; then
 		continue # not the single test being requested by the user
