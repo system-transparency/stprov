@@ -54,6 +54,14 @@ function assert_hostcfg() {
 	[[ "$got" == "$want" ]] || die "test $test_num: host config: wrong $key: got $got, want $want"
 }
 
+function assert_headreq() {
+	local test_num=$1; shift
+	local token
+
+	token="HEAD request on provisioning url gave content-length: "
+	grep -q "$token" saved/qemu.log || die "test $test_num: HTTP HEAD provisioning URL"
+}
+
 function mock_operator() {
 	local configure=$1; shift
 	local run=$1; shift
@@ -105,8 +113,14 @@ function reach_stage() {
 ###
 # Initial setup
 ###
-mkdir -p build saved
-go install ../cmd/stprov
+OSPKG_SRV=10.0.3.131
+DEF_URL=http://user:password@$OSPKG_SRV/ospkg.json
+DEF_DOMAIN=example.org
+
+mkdir -p build saved bin
+make -C ../ DEFAULT_TEMPLATE_URL="$DEF_URL" DEFAULT_DOMAIN="$DEF_DOMAIN"
+mv ../stprov bin/
+go install ./serve-http
 
 # go work interacts badly with building u-root itself and with
 # u-root's building of included commands. It can be enabled for
@@ -147,10 +161,10 @@ DNS=10.0.3.130
 IFNAME=eth0
 IFADDR=aa:bb:cc:dd:ee:ff
 HOST=test
-FULLHOST=test.localhost.local
+FULLHOST=test.$DEF_DOMAIN
 USER=stprov
 PASSWORD=sikritpassword
-URL=https://$USER:$PASSWORD@stpackage.example.org/os-stable.json
+URL=http://$USER:$PASSWORD@$OSPKG_SRV/ospkg.json
 
 local_run="./bin/stprov local run --ip 127.0.0.1 -p $PORT --otp $PASSWORD"
 remote_run="stprov remote run -p $PORT --allow=0.0.0.0/0 --otp=$PASSWORD"
@@ -166,6 +180,7 @@ remote_configs=(
 	"dhcp                     --dns $DNS      --host $HOST     --user $USER --pass $PASSWORD"
 )
 
+printf '{"desc": "dummy ospkg"}' > "saved/${URL##*/}"
 for i in "${!remote_configs[@]}"; do
 	if [[ "$SINGLE_TEST" != false ]] && [[ "$SINGLE_TEST" != "$i" ]]; then
 		continue # not the single test being requested by the user
@@ -185,6 +200,9 @@ for i in "${!remote_configs[@]}"; do
 	# Documentation to understand qemu user networking and these options:
 	# - https://wiki.qemu.org/Documentation/Networking#User_Networking_(SLIRP)
 	# - https://www.qemu.org/docs/master/system/invocation.html#hxtool-5
+	#
+	# Be aware: our use of the guestfwd option appears broken in QEMU version
+	# 7.2.7.  If you encounter the same issue, try QEMU version 8.1.1 instead.
 	nic_opts="type=user"               # qemu user networking
 	nic_opts="$nic_opts,net=$IP/$MASK" # guest NAT network
 	nic_opts="$nic_opts,host=$GATEWAY" # guest gateway
@@ -194,6 +212,7 @@ for i in "${!remote_configs[@]}"; do
 	nic_opts="$nic_opts,mac=$IFADDR"   # guest mac address
 	nic_opts="$nic_opts,restrict=yes"  # guest is isolated inside its NAT network
 	nic_opts="$nic_opts,hostfwd=tcp:127.0.0.1:$PORT-$IP:$PORT"
+	nic_opts="$nic_opts,guestfwd=tcp:$OSPKG_SRV:80-cmd:./bin/serve-http -d saved"
 
 	qemu_opts=(
 		-nographic -no-reboot -m 512M -M q35
@@ -217,6 +236,8 @@ for i in "${!remote_configs[@]}"; do
 
 	reach_stage "$i" 10 "stage:boot"
 	reach_stage "$i" 60 "stage:network"
+	assert_headreq "$i"
+
 	sleep 3 # unclear why local_rune sometimes fail without this
 	$local_run | tee saved/stprov.log
 	reach_stage "$i" 3 "stage:shutdown"
