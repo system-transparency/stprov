@@ -146,14 +146,24 @@ GATEWAY=10.0.2.1
 DNS=10.0.2.3
 IFNAME=eth0
 IFADDR=aa:bb:cc:dd:ee:ff
-URL=https://example.org/ospkg.json
-FULLHOST=example.org
+HOST=test
+FULLHOST=test.localhost.local
+USER=stprov
 PASSWORD=sikritpassword
+URL=https://$USER:$PASSWORD@stpackage.example.org/os-stable.json
 
 local_run="./bin/stprov local run --ip 127.0.0.1 -p $PORT --otp $PASSWORD"
 remote_run="stprov remote run -p $PORT --allow=0.0.0.0/0 --otp=$PASSWORD"
 remote_configs=(
-	"static -A --ip=$IP/$MASK --full-host=$FULLHOST --url=$URL -d $DNS"
+	# Static network configuration
+	"static -I $IFNAME -d $DNS -i $IP/$MASK -H $FULLHOST -r $URL --gateway $GATEWAY"
+	"static -m $IFADDR -d $DNS -i $IP/$MASK -H $FULLHOST -r $URL        -g $GATEWAY"
+	"static -A         -d $DNS -i $IP/$MASK -h $HOST     -u $USER -p $PASSWORD"
+	"static            -d $DNS -i $IP/$MASK -h $HOST     -u $USER -p $PASSWORD"
+	# DHCP network configuration
+	"dhcp --interface $IFNAME --dns $DNS --full-host $FULLHOST --url $URL"
+	"dhcp --mac       $IFADDR --dns $DNS --full-host $FULLHOST --user $USER --pass $PASSWORD"
+	"dhcp                     --dns $DNS      --host $HOST     --user $USER --pass $PASSWORD"
 )
 
 for i in "${!remote_configs[@]}"; do
@@ -207,6 +217,7 @@ for i in "${!remote_configs[@]}"; do
 
 	reach_stage "$i" 10 "stage:boot"
 	reach_stage "$i" 60 "stage:network"
+	sleep 3 # unclear why local_rune sometimes fail without this
 	$local_run | tee saved/stprov.log
 	reach_stage "$i" 3 "stage:shutdown"
 
