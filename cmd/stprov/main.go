@@ -7,6 +7,7 @@ import (
 
 	"system-transparency.org/stprov/internal/options"
 	"system-transparency.org/stprov/internal/version"
+	"system-transparency.org/stprov/subcmd/commit"
 	"system-transparency.org/stprov/subcmd/local"
 	"system-transparency.org/stprov/subcmd/remote"
 )
@@ -15,6 +16,7 @@ const usage = `Usage:
 
   stprov local   Outputs detailed usage of stprov-local
   stprov remote  Outputs detailed usage of stprov-remote
+  stprov commit  Outputs detailed usage of stprov-commit
   stprov version Outputs the version of this program
 
 Cheat sheet:
@@ -27,6 +29,9 @@ Cheat sheet:
   ### LOCAL
   go install system-transparency.org/stprov/cmd/stprov@latest
   stprov local run -i 10.0.2.10 -o "operations one-time password"
+
+  ### COMMIT
+  stprov commit <path to host_configuration.json>
 `
 
 func main() {
@@ -40,6 +45,8 @@ func main() {
 		err = local.Main(opt.Args())
 	case "remote":
 		err = remote.Main(opt.Args())
+	case "commit":
+		err = commit.Main(opt.Args())
 	case "version":
 		fmt.Println(version.Version)
 	default:
