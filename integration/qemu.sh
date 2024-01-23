@@ -153,18 +153,30 @@ unset GOWORK
 url="https://git.glasklar.is/system-transparency/core/system-transparency/-/raw/main/contrib/linuxboot.vmlinuz"
 [[ -f build/kernel.vmlinuz ]] || curl -L "$url" -o build/kernel.vmlinuz
 
-# Setup EFI-NVRAM stuff.  Magic, if you understand the choises please docdoc here.
+# Our tests use OVMF to emulate EFI NVRAM.  For an overview of OVMF, see:
+# https://github.com/tianocore/tianocore.github.io/wiki/OVMF
 #
-# From:
-# https://git.glasklar.is/system-transparency/core/system-transparency/-/blob/main/tasks/qemu.yml?ref_type=heads#L5-19
+# QEMU needs the following files:
+#
+#   OVMF_DATA.fd  Precompiled EFI that runs inside the VM
+#   OVMF_VARS.fd  EFI variables as they would be serialized to the system flash
+#
+# Valid formatting of these files are shipped with the system's OVMF package.
+ovmf_locations=(
+	# https://packages.debian.org/bookworm/all/ovmf/filelist
+	"/usr/share/OVMF/OVMF_CODE.fd /usr/share/OVMF/OVMF_VARS.fd"
+)
+
 ovmf_code=""
-for str in "OVMF" "edk2/ovmf" "edk2-ovmf/x64"; do
-	file=/usr/share/"$str"/OVMF_CODE.fd
-	if [[ -f "$file" ]]; then
-		ovmf_code="$file"
-		cp /usr/share/"$str"/OVMF_VARS.fd saved/OVMF_VARS.fd
-		break
-	fi
+for files in "${ovmf_locations[@]}"; do
+	ovmf_code=$(cut -d' ' -f1 <<<"$files")
+	ovmf_vars=$(cut -d' ' -f2 <<<"$files")
+
+	[[ -f "$ovmf_code" ]] || continue
+	[[ -f "$ovmf_vars" ]] || continue
+
+	cp "$ovmf_vars" saved/OVMF_VARS.fd
+	break
 done
 
 [[ -n "$ovmf_code" ]] || die "unable to locate OVMF_CODE.fd"
