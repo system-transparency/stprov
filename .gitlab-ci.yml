@@ -14,10 +14,14 @@ go_test:
 
 qemu_test:
   stage: integration
-  image: debian:stable
+  image: debian:bookworm-backports # s/bookworm-backports/stable/ when possible
   before_script:
     - apt update
-    - apt install -qqy git golang-1.19 python3 qemu-system-x86 curl jq openssh-client
+    # The guestfwd option is broken on Debian stable with QEMU version 7.2.7.
+    # Backporting QEMU version 8.1.1 makes the guestfwd option work though.  We
+    # did not hunt down what the bug is, just the (non-)working versions.
+    - apt install -qqy -t bookworm-backports qemu-system-x86 qemu-system-common qemu-system-data
+    - apt install -qqy git golang-1.19 python3 curl jq openssh-client make
     - apt install -qqy --no-install-recommends python3-pip
     - pip install --break-system-packages --user virt-firmware
     - export PATH=/usr/lib/go-1.19/bin:$PATH
@@ -35,13 +39,17 @@ qemu_test:
 # commands. Instead, we create a go.work.local file, and point to it
 # via the GOWORK environment variable; that way, it can be enabled
 # only when building stprov, and disabled for u-root.
+#
+# Same comment here as for the above qemu_test job: clean-up the backport once
+# Debian stable packages a QEMU version that works with guestfwd.
 qemu_head_stboot_test:
   stage: integration
-  image: debian:stable
+  image: debian:bookworm-backports
   allow_failure: true
   before_script:
     - apt update
-    - apt install -qqy git golang-1.19 python3 qemu-system-x86 curl jq openssh-client
+    - apt install -qqy -t bookworm-backports qemu-system-x86 qemu-system-common qemu-system-data
+    - apt install -qqy git golang-1.19 python3 curl jq openssh-client make
     - apt install -qqy --no-install-recommends python3-pip
     - pip install --break-system-packages --user virt-firmware
     - export PATH=/usr/lib/go-1.19/bin:$PATH
@@ -63,6 +71,7 @@ commitlint:
     - npm install --save-dev @commitlint/config-conventional @commitlint/cli
   script:
     - git fetch origin "${CI_MERGE_REQUEST_TARGET_BRANCH_NAME:=main}"
+    - while ! git merge-base HEAD "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"; do git fetch --deepen=1 origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"; done
     - base_commit_id="$(git merge-base HEAD "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME")"
     - commit_ids=$(git rev-list --no-merges "$base_commit_id"..)
     - for commit_id in $commit_ids; do git log --format=%B -n1 "$commit_id" | npx commitlint; done
