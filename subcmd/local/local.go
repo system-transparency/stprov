@@ -11,15 +11,16 @@ import (
 
 const usage = `Usage:
 
-  stprov local run [-p PORT] -i IP -o OTP
+  stprov local run -o OTP -i IP_ADDR [-p PORT]
 
-    Connects to stprov remote, taking part in the provisioning of a new platform.
-    A one-time password is used to establish mutually authenticated HTTPS.
+    Connect to stprov remote, taking part in the provisioning of a new platform.
+    A one-time password is used to establish a mutually authenticated HTTPS connection.
 
-    Options:
-    -p, --port  stprov remote listenting port (Default: 2009)
-    -i, --ip    stprov remote ip address (e.g., 10.0.2.10)
-    -o, --otp   one-time password (e.g., mjaoouuuuw)
+  Options:
+
+    -o, --otp   One-time password to establish a secure connection
+    -i, --ip    Listening address (e.g., 10.0.2.10)
+    -p, --port  Listenting port (Default: 2009)
 `
 
 var (
