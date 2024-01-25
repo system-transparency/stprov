@@ -50,15 +50,12 @@ func Main(args []string, optPort int, optIP, optAllowHosts, optOTP string, efiUU
 	if err := hostname.ReadEFI(efiUUID, efiHostName); err != nil {
 		return fmt.Errorf("ReadEFI: %s: %w", efiHostName, err)
 	}
-	uds, timestamp, err := listen(otp, allowNets, ip, port, hostname)
+	uds, _, err := listen(otp, allowNets, ip, port, hostname)
 	if err != nil {
 		return fmt.Errorf("listen: %w", err)
 	}
 	if err := writeHostKey(uds, efiUUID, efiKeyName); err != nil {
 		return fmt.Errorf("persist host key: %w", err)
-	}
-	if err := readWriteHostConfig(uds, timestamp, efiUUID, efiConfigName); err != nil {
-		return fmt.Errorf("persist host config: %w", err)
 	}
 
 	return nil
@@ -108,22 +105,4 @@ func writeHostKey(uds *secrets.UniqueDeviceSecret, varUUID *uuid.UUID, name stri
 		return err
 	}
 	return hk.WriteEFI(varUUID, name)
-}
-
-// readWriteHostConfig reads a partial ST host config, populating it with a
-// timestamp, an identity string and an authentication string.  The resulting
-// host configuration is then written back to EFI-NVRAM.
-//
-// Note: identity and authentication strings are hardcoded instead of deriving
-// them from UDS.  It is currently out of scope to use these parameters.
-func readWriteHostConfig(_ *secrets.UniqueDeviceSecret, timestamp int64, varUUID *uuid.UUID, name string) error {
-	cfg, err := st.HostConfigEFI()
-	if err != nil {
-		return err
-	}
-	auth := "foo"
-	id := "bar"
-	cfg.Auth = &auth
-	cfg.ID = &id
-	return st.WriteHostConfigEFI(cfg)
 }

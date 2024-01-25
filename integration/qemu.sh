@@ -310,8 +310,8 @@ for i in "${!remote_configs[@]}"; do
 	assert_hostcfg "$i" ".network_interfaces[0].interface_name" "\"$IFNAME\""
 	assert_hostcfg "$i" ".network_interfaces[0].mac_address"    "\"$IFADDR\""
 	assert_hostcfg "$i" ".ospkg_pointer"                        "\"$URL\""
-	assert_hostcfg "$i" ".identity"                             "\"bar\"" # FIXME
-	assert_hostcfg "$i" ".authentication"                       "\"foo\"" # FIXME
+	assert_hostcfg "$i" ".identity"                             null
+	assert_hostcfg "$i" ".authentication"                       null
 	assert_hostcfg "$i" ".bonding_mode"                         null # only tested manually
 	assert_hostcfg "$i" ".bonding_name"                         null # only tested manually
 done
