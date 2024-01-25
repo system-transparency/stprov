@@ -4,10 +4,10 @@ go 1.18
 
 require (
 	github.com/go-ping/ping v1.1.0
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.6.0
 	github.com/u-root/u-root v0.11.0
 	github.com/vishvananda/netlink v1.2.1-beta.2
-	golang.org/x/crypto v0.0.0-20220331220935-ae2d96664a29
+	golang.org/x/crypto v0.18.0
 	system-transparency.org/stboot v0.3.1
 )
 
@@ -22,5 +22,5 @@ require (
 	github.com/vishvananda/netns v0.0.4 // indirect
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/sync v0.2.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
+	golang.org/x/sys v0.16.0 // indirect
 )
