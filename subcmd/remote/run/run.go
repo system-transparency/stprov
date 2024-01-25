@@ -50,7 +50,7 @@ func Main(args []string, optPort int, optIP, optAllowHosts, optOTP string, efiUU
 	if err := hostname.ReadEFI(efiUUID, efiHostName); err != nil {
 		return fmt.Errorf("ReadEFI: %s: %w", efiHostName, err)
 	}
-	uds, _, err := listen(otp, allowNets, ip, port, hostname)
+	uds, err := listen(otp, allowNets, ip, port, hostname)
 	if err != nil {
 		return fmt.Errorf("listen: %w", err)
 	}
@@ -63,7 +63,7 @@ func Main(args []string, optPort int, optIP, optAllowHosts, optOTP string, efiUU
 
 // listen listens for incoming requests until a commit message is received.
 // The admin running stprov remote must then give confirmation to proceed.
-func listen(otp string, allowNets []net.IPNet, ip net.IP, port int, hostname st.HostName) (uds *secrets.UniqueDeviceSecret, timestamp int64, err error) {
+func listen(otp string, allowNets []net.IPNet, ip net.IP, port int, hostname st.HostName) (uds *secrets.UniqueDeviceSecret, err error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -77,18 +77,18 @@ func listen(otp string, allowNets []net.IPNet, ip net.IP, port int, hostname st.
 		HostName:   string(hostname),
 	})
 	if err != nil {
-		return uds, timestamp, fmt.Errorf("new server: %v", err)
+		return uds, fmt.Errorf("new server: %v", err)
 	}
 	log.Printf("starting server on %s:%d", srv.RemoteIP, srv.RemotePort)
 	if err := srv.Run(ctx); err != nil {
-		return uds, timestamp, fmt.Errorf("run server: %v", err)
+		return uds, fmt.Errorf("run server: %v", err)
 	}
 	log.Printf("received entropy\n\n%s\n", hexify.Format(srv.Entropy[:]))
 	if _, err := readLine("Press Enter to commit changes, ctrl+c to abort"); err != nil {
-		return uds, timestamp, fmt.Errorf("read confirmation: %v", err)
+		return uds, fmt.Errorf("read confirmation: %v", err)
 	}
 
-	return srv.UDS, srv.Timestamp, err
+	return srv.UDS, nil
 }
 
 func readLine(msg string) (string, error) {
