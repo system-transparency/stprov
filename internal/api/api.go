@@ -24,8 +24,11 @@ type AddDataRequest struct {
 	// Entropy is 256 bits of entropy, used internally by stprov
 	Entropy []byte `json:"entropy"`
 
-	// Timestamp is the current UNIX time, used by stboot:
-	// https://github.com/system-transparency/system-transparency#timestamp---json-number-or-null
+	// Timestamp is obsolete.  The time of provisioning used to be in the
+	// platform's host configuration, but has since been dropped.  See:
+	// https://git.glasklar.is/system-transparency/core/stboot/-/commit/23b78d00f567925dba7b4870116ed77b6c014d50
+	//
+	// The timestamp is kept here until it is clear if it is not coming back.
 	Timestamp int64 `json:"timestamp"`
 }
 
