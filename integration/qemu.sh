@@ -146,8 +146,9 @@ version=$(git describe --tags --always)
 # compilation of stprov above by using the GOWORK environment
 # variable, and then disabled for the rest of this script.
 unset GOWORK
+version=$(go list -m -f '{{.Version}}' github.com/u-root/u-root)
 [[ -d build/u-root ]] ||
-	git clone --depth 1 https://github.com/u-root/u-root build/u-root &&
+	git clone --depth 1 -b "$version" https://github.com/u-root/u-root build/u-root &&
 	(cd build/u-root && go install)
 
 url="https://git.glasklar.is/system-transparency/core/system-transparency/-/raw/main/contrib/linuxboot.vmlinuz"
