@@ -15,11 +15,11 @@ import (
 	"system-transparency.org/stprov/internal/options"
 )
 
-func Config(args []string, optDNS, optInterface, optHostIP, optGateway string, interfaceWait time.Duration, optAutodetect bool, optBondingAuto bool, optBondingInterfaces []string, optBondingMode string, allowConfigQuirks, optTryLastIPForGateway bool) (*host.Config, error) {
+func Config(args []string, optDNS, optInterface, optHostIP, optGateway string, interfaceWait time.Duration, optAutodetect bool, optBondingAuto bool, optBondingInterfaces []string, optBondingMode string, optForceGatewayIP, optTryLastIPForGateway bool) (*host.Config, error) {
 	if len(args) != 0 {
 		return nil, fmt.Errorf("trailing arguments: %v", args)
 	}
-	optGateway, err := options.ValidateHostAndGateway(optHostIP, optGateway, allowConfigQuirks, optTryLastIPForGateway)
+	optGateway, err := options.ValidateHostAndGateway(optHostIP, optGateway, optForceGatewayIP, optTryLastIPForGateway)
 	if err != nil {
 		return nil, err
 	}
