@@ -1,7 +1,10 @@
 ---
+include: integration/ci-images.yml
+
 stages:
   - unit_test
   - integration
+  - images
   - commit
 
 go_test:
@@ -32,6 +35,8 @@ qemu_test:
     when: always
     paths:
     - ./integration/saved/
+    - ./integration/build/stprov.cpio # for stage 'images'
+    - ./integration/build/kernel.vmlinuz # for stage 'images'
 
 # Run tests with HEAD stboot, to detect any breaking changes. One
 # complication is that existence of a go.work file interacts badly

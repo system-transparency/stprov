@@ -1,0 +1,15 @@
+bzip2
+ca-certificates
+curl
+dbus
+file
+iproute2
+iputils-ping
+kmod
+linux-image-amd64
+less
+locales
+man-db
+systemd
+vim-tiny
+xz-utils
