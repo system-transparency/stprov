@@ -182,6 +182,11 @@ done
 
 [[ -n "$ovmf_code" ]] || die "unable to locate OVMF_CODE.fd"
 
+# Our integration test doesn't make use of this certificate (in favor of
+# guestfwd), but stprov needs something valid to read for correct setup.
+openssl genpkey -algorithm ED25519 -out build/tls_key.pem
+openssl req -x509 -key build/tls_key.pem -days 1 -out build/tls_roots.pem -subj "/C=US/ST=Test/L=Test/O=Test/OU=Test Unit/CN=example.com"
+
 ###
 # Run tests
 ###
@@ -216,6 +221,7 @@ for i in "${!remote_configs[@]}"; do
 		-uinitcmd="/bin/sh /bin/uinitcmd.sh"\
 		-files bin/stprov:bin/stprov\
 		-files build/uinitcmd.sh:bin/uinitcmd.sh\
+		-files build/tls_roots.pem:/etc/trust_policy/tls_roots.pem\
 		build/u-root/cmds/core/{init,elvish,shutdown,cat,cp,dd,echo,grep,hexdump,ls,mkdir,mv,ping,pwd,rm,wget,wc}
 
 	# Documentation to understand qemu user networking and these options:
