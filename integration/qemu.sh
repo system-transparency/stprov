@@ -165,7 +165,8 @@ url="https://git.glasklar.is/system-transparency/core/system-transparency/-/raw/
 # Valid formatting of these files are shipped with the system's OVMF package.
 ovmf_locations=(
 	# https://packages.debian.org/bookworm/all/ovmf/filelist
-	"/usr/share/OVMF/OVMF_CODE.fd /usr/share/OVMF/OVMF_VARS.fd"
+	# https://packages.debian.org/trixie/all/ovmf/filelist
+	"/usr/share/OVMF/OVMF_CODE_4M.fd /usr/share/OVMF/OVMF_VARS_4M.fd"
 )
 
 ovmf_code=""
