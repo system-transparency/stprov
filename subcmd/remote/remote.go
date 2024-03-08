@@ -87,6 +87,8 @@ const (
 	efiKeyName  = "STHostKey"
 	efiHostName = "STHostName"
 	httpTimeout = 20 * time.Second
+
+	trustPolicyRootFile = "/etc/trust_policy/tls_roots.pem"
 )
 
 var (
@@ -214,11 +216,10 @@ func Main(args []string) error {
 }
 
 // Checks url for validity, and logs any errors.
-func checkURL(url string) {
+func checkURL(client http.Client, url string) {
 	if strings.Contains(url, options.DefUser+":"+options.DefPassword) {
 		log.Println("WARNING: using default username and password")
 	}
-	client := http.Client{Timeout: httpTimeout}
 	resp, err := client.Head(url)
 	if err != nil {
 		log.Printf("WARNING: HEAD request on %q failed: %v", url, err)
@@ -240,11 +241,15 @@ func commitConfig(optHostName string, config *host.Config, optURL, templateURL, 
 	}
 	hostName := st.HostName(optHostName)
 
+	client, err := network.NewClient(trustPolicyRootFile)
+	if err != nil {
+		return fmt.Errorf("configure tls client: %v", err)
+	}
 	parsedUrl, err := options.ParseProvisioningURL(optURL, templateURL, optUser, optPassword)
 	if err != nil {
 		return err // either invalid option combination or values
 	}
-	checkURL(parsedUrl)
+	checkURL(client, parsedUrl)
 	config.OSPkgPointer = &parsedUrl
 
 	_, efiGuid, err := st.HostConfigEFIVariableName()
