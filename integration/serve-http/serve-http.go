@@ -38,6 +38,7 @@ func response(req *http.Request, dir string) *http.Response {
 	w := httptest.ResponseRecorder{Body: &responseBuffer}
 	http.ServeFile(&w, req, file)
 	response := w.Result()
+	// response.Write needs to know if it was a HEAD request.
 	response.Request = req
 
 	return response
