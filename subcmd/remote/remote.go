@@ -113,21 +113,26 @@ func usage() {
 }
 
 func setOptions(fs *flag.FlagSet) {
-	switch cmd := fs.Name(); cmd {
-	case "help":
-	case "static":
+	// common options for static and dhcp configuration
+	common := func() {
 		options.AddString(fs, &optDNS, "d", "dns", options.DefDNS)
 		options.AddString(fs, &optMAC, "m", "mac", "")
 		options.AddString(fs, &optInterface, "I", "interface", "")
-		options.AddBool(fs, &optAutodetect, "A", "autodetect", false)
 		options.AddString(fs, &optHostName, "h", "host", "")
 		options.AddString(fs, &optFullHostName, "H", "full-host", "")
-		options.AddString(fs, &optHostIP, "i", "ip", "")
-		options.AddString(fs, &optGateway, "g", "gateway", "")
 		options.AddString(fs, &optUser, "u", "user", "")
 		options.AddString(fs, &optPassword, "p", "pass", "")
 		options.AddString(fs, &optURL, "r", "url", "")
 		options.AddString(fs, &optInterfaceWait, "w", "wait", "4s")
+	}
+
+	switch cmd := fs.Name(); cmd {
+	case "help":
+	case "static":
+		common()
+		options.AddBool(fs, &optAutodetect, "A", "autodetect", false)
+		options.AddString(fs, &optHostIP, "i", "ip", "")
+		options.AddString(fs, &optGateway, "g", "gateway", "")
 		options.AddBool(fs, &optForceGatewayIP, "f", "force", false)
 		options.AddBool(fs, &optTryLastGateway, "x", "try-last-gateway", false)
 		//TODO: Include with DHCP
@@ -135,15 +140,7 @@ func setOptions(fs *flag.FlagSet) {
 		options.AddBool(fs, &optBonding, "B", "bonding-auto", false)
 		options.AddString(fs, &optBondingMode, "M", "bonding-mode", options.DefBondingMode)
 	case "dhcp":
-		options.AddString(fs, &optDNS, "d", "dns", options.DefDNS)
-		options.AddString(fs, &optMAC, "m", "mac", "")
-		options.AddString(fs, &optInterface, "I", "interface", "")
-		options.AddString(fs, &optHostName, "h", "host", "")
-		options.AddString(fs, &optFullHostName, "H", "full-host", "")
-		options.AddString(fs, &optUser, "u", "user", "")
-		options.AddString(fs, &optPassword, "p", "pass", "")
-		options.AddString(fs, &optURL, "r", "url", "")
-		options.AddString(fs, &optInterfaceWait, "w", "wait", "4s")
+		common()
 	case "run":
 		options.AddInt(fs, &optPort, "p", "port", 2009)
 		options.AddString(fs, &optHostIP, "i", "ip", "0.0.0.0")
