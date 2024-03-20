@@ -1,8 +1,12 @@
 package options
 
 import (
+	"flag"
+	"fmt"
 	"log"
 	"net"
+	"reflect"
+	"strings"
 	"testing"
 	"time"
 )
@@ -14,6 +18,34 @@ func Example() {
 	}
 	log.Printf("mac addresses of interfaces with state UP: %v", macs)
 	// Output:
+}
+
+func TestAddStringS(t *testing.T) {
+	for _, table := range []struct {
+		desc      string
+		args      string
+		defaultTo string
+		want      []string
+	}{
+		{"default: empty string", "", "", nil},
+		{"default: one value", "", "foo", []string{"foo"}},
+		{"default: multiple values", "", "foo,bar", []string{"foo", "bar"}},
+		{"set: one value", "-l foo", "foo,bar", []string{"foo"}},
+		{"set: multiple values", "-l bar -l foo", "foo,bar", []string{"bar", "foo"}},
+		{"set: no comma split in flag value ", `-l bar,foo`, "foo,bar", []string{"bar,foo"}},
+	} {
+		var got SliceFlag
+		setOptions := func(fs *flag.FlagSet) {
+			AddStringS(fs, &got, "l", "list", table.defaultTo)
+		}
+		usage := func() { fmt.Println("test-cmd is a unit test") }
+		args := append([]string{"test-cmd"}, strings.Split(table.args, " ")...)
+
+		New(args, usage, setOptions)
+		if got, want := got.Values, table.want; !reflect.DeepEqual(got, want) {
+			t.Errorf("%s: got %v but wanted %v", table.desc, got, want)
+		}
+	}
 }
 
 func TestParseProvisioningURL(t *testing.T) {

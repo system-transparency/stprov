@@ -194,7 +194,7 @@ func Main(args []string) error {
 		opt.Usage()
 		return nil
 	case "static":
-		config, err := static.Config(opt.Args(), optDNS, optMAC, optHostIP, optGateway, interfaceWait, optAutodetect, optBonding, optBondingInterfaces, optBondingMode, optForceGatewayIP, optTryLastGateway)
+		config, err := static.Config(opt.Args(), optDNS, optMAC, optHostIP, optGateway, interfaceWait, optAutodetect, optBonding, optBondingInterfaces.Values, optBondingMode, optForceGatewayIP, optTryLastGateway)
 		if err != nil {
 			return fmtErr(err, opt.Name())
 		}

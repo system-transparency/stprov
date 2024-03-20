@@ -77,21 +77,46 @@ func AddString(fs *flag.FlagSet, opt *string, short, long, value string) {
 	fs.StringVar(opt, long, value, "")
 }
 
-type SliceFlag []string
+// SliceFlag supports setting multiple string values by repeating an option.
+// For example, "-e foo -e bar" is a list containing ["foo", "bar"].  Default
+// values are specified as a comma-separated string, see the AddStringS method.
+type SliceFlag struct {
+	Values []string
+
+	// set is false unless the user explicitly set the option. This ensures we
+	// can determine whether the default values should be binned or not.
+	set bool
+}
 
 func (i *SliceFlag) String() string {
 	return "[]string"
 }
 
 func (i *SliceFlag) Set(value string) error {
-	*i = append(*i, value)
+	if !i.set {
+		i.set = true
+		i.Values = nil
+	}
+
+	i.Values = append(i.Values, value)
 	return nil
 }
 
-// AddStringS adds a string slice option to a flag set
+// AddStringS adds a string-slice option to a flag set.  If the default value is
+// the empty string, then no value is appended to the list.  If the default
+// value contains one or more comma characters, it is split to multiple values.
+//
+// Examples:
+// - Default value "" would yield nil
+// - Default value "foo" would yield []string{"foo"}
+// - Default value "foo,bar" would yield []string{"foo", "bar"}
 func AddStringS(fs *flag.FlagSet, opt *SliceFlag, short, long, value string) {
-	fs.Var(opt, short, value)
-	fs.Var(opt, long, value)
+	if value != "" {
+		*opt = SliceFlag{Values: strings.Split(value, ",")}
+	}
+
+	fs.Var(opt, short, "")
+	fs.Var(opt, long, "")
 }
 
 // AddInt adds an int option to a flag set
