@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -60,7 +61,7 @@ const usage_string = `Usage:
     -g, --gateway          Gateway IP address (Default: assuming first address in HOST_ADDR's network)
     -x, --try-last-gateway Override default gateway and instead assume last address in HOST_ADDR's network
     -f, --force            Allow misconfigured gateway address
-    -d, --dns              DNS server IP address (Default: %s)
+    -d, --dns              DNS server IP address (Default: [%s], can be repeated)
 
     The values of -u and -p will be incorporated into a templated
     provisioning URL: "%s".
@@ -92,12 +93,12 @@ const (
 )
 
 var (
-	optDNS, optMAC, optHostName, optUser, optPassword, optURL       string
+	optMAC, optHostName, optUser, optPassword, optURL               string
 	optHostIP, optGateway, optAllowedCIDRs, optOTP, optFullHostName string
 	optInterfaceWait, optInterface                                  string
 	optPort                                                         int
 	optAutodetect, optBonding, optForceGatewayIP, optTryLastGateway bool
-	optBondingInterfaces                                            options.SliceFlag
+	optBondingInterfaces, optDNS                                    options.SliceFlag
 	optBondingMode                                                  string
 )
 
@@ -115,7 +116,7 @@ func usage() {
 func setOptions(fs *flag.FlagSet) {
 	// common options for static and dhcp configuration
 	common := func() {
-		options.AddString(fs, &optDNS, "d", "dns", options.DefDNS)
+		options.AddStringS(fs, &optDNS, "d", "dns", options.DefDNS)
 		options.AddString(fs, &optMAC, "m", "mac", "")
 		options.AddString(fs, &optInterface, "I", "interface", "")
 		options.AddString(fs, &optHostName, "h", "host", "")
@@ -184,6 +185,11 @@ func Main(args []string) error {
 		optMAC = addr.String()
 	}
 
+	dnsServers, err := parseIPs(optDNS.Values)
+	if err != nil {
+		return fmtErr(fmt.Errorf("dns: %v", err), opt.Name())
+	}
+
 	efiConfigName, efiUUID, err := st.HostConfigEFIVariableName()
 	if err != nil {
 		return fmtErr(err, opt.Name())
@@ -194,13 +200,13 @@ func Main(args []string) error {
 		opt.Usage()
 		return nil
 	case "static":
-		config, err := static.Config(opt.Args(), optDNS, optMAC, optHostIP, optGateway, interfaceWait, optAutodetect, optBonding, optBondingInterfaces.Values, optBondingMode, optForceGatewayIP, optTryLastGateway)
+		config, err := static.Config(opt.Args(), dnsServers, optMAC, optHostIP, optGateway, interfaceWait, optAutodetect, optBonding, optBondingInterfaces.Values, optBondingMode, optForceGatewayIP, optTryLastGateway)
 		if err != nil {
 			return fmtErr(err, opt.Name())
 		}
 		return fmtErr(commitConfig(optHostName, config, optURL, options.DefTemplateURL, optUser, optPassword), opt.Name())
 	case "dhcp":
-		config, err := dhcp.Config(opt.Args(), optDNS, optMAC, interfaceWait, optAutodetect)
+		config, err := dhcp.Config(opt.Args(), dnsServers, optMAC, interfaceWait, optAutodetect)
 		if err != nil {
 			return fmtErr(err, opt.Name())
 		}
@@ -210,6 +216,19 @@ func Main(args []string) error {
 	default:
 		return fmt.Errorf("invalid command %q, try \"help\"", opt.Name())
 	}
+}
+
+// parseIPs parses a list of zero or more IP addresses
+func parseIPs(ips []string) ([]*net.IP, error) {
+	var ret []*net.IP
+	for _, ip := range ips {
+		parsedIP := net.ParseIP(ip)
+		if parsedIP == nil {
+			return nil, fmt.Errorf("failed to parse %q as an IP address", ip)
+		}
+		ret = append(ret, &parsedIP)
+	}
+	return ret, nil
 }
 
 // Checks url for validity, and logs any errors.

@@ -21,7 +21,7 @@ import (
 var DefHostname = "localhost.local"
 var DefUser = "stboot"
 var DefPassword = "stboot"
-var DefDNS = "9.9.9.9"
+var DefDNS = "9.9.9.9,149.112.112.112"
 var DefAllowedNetworks = "127.0.0.1/32"
 var DefBondingMode = "balance-rr"
 var DefTemplateURL = "https://user:password@stpackage.example.org/os-stable.json"

@@ -116,7 +116,8 @@ PORT=2009
 IP=10.0.3.200
 MASK=25
 GATEWAY=10.0.3.129
-DNS=10.0.3.130
+DNS0=10.0.3.130
+DNS1=10.0.3.132 # only to test that this is written as expected to hostcfg
 OSPKG_SRV=10.0.3.131
 IFNAME=eth0
 IFADDR=aa:bb:cc:dd:ee:ff
@@ -133,7 +134,7 @@ make -C ../\
 	DEFAULT_DOMAIN="$(cut -d'.' -f2- <<<"$FULLHOST")"\
 	DEFAULT_USER="$USER"\
 	DEFAULT_PASSWORD="$PASSWORD"\
-	DEFAULT_DNS="$DNS"\
+	DEFAULT_DNS="$DNS0,$DNS1"\
 	DEFAULT_ALLOWED_NETWORKS="$GATEWAY/32"
 mv ../stprov bin/
 go install ./serve-http
@@ -195,13 +196,13 @@ local_run="./bin/stprov local run --ip 127.0.0.1 -p $PORT --otp $PASSWORD"
 remote_run="stprov remote run -p $PORT --otp=$PASSWORD" # use compiled-in default set via Makefile
 remote_configs=(
 	# Static network configuration
-	"static -I $IFNAME -d $DNS -i $IP/$MASK -H $FULLHOST -r $URL --gateway $GATEWAY"
-	"static -m $IFADDR -d $DNS -i $IP/$MASK -H $FULLHOST -r $URL        -g $GATEWAY"
-	"static -A         -d $DNS -i $IP/$MASK -h $HOST     -u $USER -p $PASSWORD"
+	"static -I $IFNAME -d $DNS0 -d $DNS1 -i $IP/$MASK -H $FULLHOST -r $URL --gateway $GATEWAY"
+	"static -m $IFADDR -d $DNS0 -d $DNS1 -i $IP/$MASK -H $FULLHOST -r $URL        -g $GATEWAY"
+	"static -A         -d $DNS0 -d $DNS1 -i $IP/$MASK -h $HOST     -u $USER -p $PASSWORD"
 	"static -i $IP/$MASK -h $HOST" # use compiled-in defaults set via Makefile
 	# DHCP network configuration
-	"dhcp --interface $IFNAME --dns $DNS --full-host $FULLHOST --url $URL"
-	"dhcp --mac       $IFADDR --dns $DNS --full-host $FULLHOST --user $USER --pass $PASSWORD"
+	"dhcp --interface $IFNAME --dns $DNS0 --dns $DNS1 --full-host $FULLHOST --url $URL"
+	"dhcp --mac       $IFADDR --dns $DNS0 --dns $DNS1 --full-host $FULLHOST --user $USER --pass $PASSWORD"
 	"dhcp --host $HOST" # use compiled-in defaults set via Makefile
 )
 
@@ -234,7 +235,7 @@ for i in "${!remote_configs[@]}"; do
 	nic_opts="type=user"               # qemu user networking
 	nic_opts="$nic_opts,net=$IP/$MASK" # guest NAT network
 	nic_opts="$nic_opts,host=$GATEWAY" # guest gateway
-	nic_opts="$nic_opts,dns=$DNS"      # guest dns server
+	nic_opts="$nic_opts,dns=$DNS0"     # guest dns server
 	nic_opts="$nic_opts,dhcpstart=$IP" # guest dhcp server assigns this ip first
 	nic_opts="$nic_opts,id=$IFNAME"    # guest interface name
 	nic_opts="$nic_opts,mac=$IFADDR"   # guest mac address
@@ -313,7 +314,8 @@ for i in "${!remote_configs[@]}"; do
 	assert_hostcfg "$i" ".network_mode"                         "\"$mode\""
 	assert_hostcfg "$i" ".host_ip"                                "$want_ip"
 	assert_hostcfg "$i" ".gateway"                                "$want_gw"
-	assert_hostcfg "$i" ".dns[0]"                               "\"$DNS\""
+	assert_hostcfg "$i" ".dns[0]"                               "\"$DNS0\""
+	assert_hostcfg "$i" ".dns[1]"                               "\"$DNS1\""
 	assert_hostcfg "$i" ".network_interfaces[0].interface_name" "\"$IFNAME\""
 	assert_hostcfg "$i" ".network_interfaces[0].mac_address"    "\"$IFADDR\""
 	assert_hostcfg "$i" ".ospkg_pointer"                        "\"$URL\""
