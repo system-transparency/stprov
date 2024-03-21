@@ -13,13 +13,9 @@ import (
 	"system-transparency.org/stprov/internal/options"
 )
 
-func Config(args []string, optDNS, optInterface string, interfaceWait time.Duration, optAutodetect bool) (*host.Config, error) {
+func Config(args []string, dnsServers []*net.IP, optInterface string, interfaceWait time.Duration, optAutodetect bool) (*host.Config, error) {
 	if len(args) != 0 {
 		return nil, fmt.Errorf("trailing arguments: %v", args)
-	}
-	dnsIP := net.ParseIP(optDNS)
-	if dnsIP == nil {
-		return nil, fmt.Errorf("malformed dns address: %s", optDNS)
 	}
 	if optInterface == "" {
 		defaultMACs, err := options.DefaultInterfaces(interfaceWait)
@@ -39,7 +35,7 @@ func Config(args []string, optDNS, optInterface string, interfaceWait time.Durat
 	mode := host.IPDynamic
 	cfg := host.Config{
 		IPAddrMode: &mode,
-		DNSServer:  &[]*net.IP{&dnsIP},
+		DNSServer:  &dnsServers,
 		NetworkInterfaces: &[]*host.NetworkInterface{
 			{InterfaceName: &ifname, MACAddress: &mac},
 		},

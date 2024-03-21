@@ -21,7 +21,7 @@ import (
 var DefHostname = "localhost.local"
 var DefUser = "stboot"
 var DefPassword = "stboot"
-var DefDNS = "9.9.9.9"
+var DefDNS = "9.9.9.9,149.112.112.112"
 var DefAllowedNetworks = "127.0.0.1/32"
 var DefBondingMode = "balance-rr"
 var DefTemplateURL = "https://user:password@stpackage.example.org/os-stable.json"
@@ -77,21 +77,46 @@ func AddString(fs *flag.FlagSet, opt *string, short, long, value string) {
 	fs.StringVar(opt, long, value, "")
 }
 
-type SliceFlag []string
+// SliceFlag supports setting multiple string values by repeating an option.
+// For example, "-e foo -e bar" is a list containing ["foo", "bar"].  It is also
+// possible to set multiple values with comma-separation, e.g., "-e foo,bar".
+type SliceFlag struct {
+	Values []string
+
+	// set is false unless the user explicitly set the option. This ensures we
+	// can determine whether the default values should be binned or not.
+	set bool
+}
 
 func (i *SliceFlag) String() string {
 	return "[]string"
 }
 
 func (i *SliceFlag) Set(value string) error {
-	*i = append(*i, value)
+	if !i.set {
+		i.set = true
+		i.Values = nil
+	}
+
+	i.Values = append(i.Values, strings.Split(value, ",")...)
 	return nil
 }
 
-// AddStringS adds a string slice option to a flag set
+// AddStringS adds a string-slice option to a flag set.  If the default value is
+// the empty string, then no value is appended to the list.  If the default
+// value contains one or more comma characters, it is split to multiple values.
+//
+// Examples:
+// - Default value "" would yield nil
+// - Default value "foo" would yield []string{"foo"}
+// - Default value "foo,bar" would yield []string{"foo", "bar"}
 func AddStringS(fs *flag.FlagSet, opt *SliceFlag, short, long, value string) {
-	fs.Var(opt, short, value)
-	fs.Var(opt, long, value)
+	if value != "" {
+		*opt = SliceFlag{Values: strings.Split(value, ",")}
+	}
+
+	fs.Var(opt, short, "")
+	fs.Var(opt, long, "")
 }
 
 // AddInt adds an int option to a flag set

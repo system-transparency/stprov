@@ -2,7 +2,7 @@ DEFAULT_TEMPLATE_URL=https://user:password@stpackage.example.org/os-stable.json
 DEFAULT_DOMAIN=localhost.local
 DEFAULT_USER=stboot
 DEFAULT_PASSWORD=stboot
-DEFAULT_DNS=9.9.9.9
+DEFAULT_DNS=9.9.9.9,149.112.112.112
 DEFAULT_ALLOWED_NETWORKS=127.0.0.1/32
 DEFAULT_BONDING_MODE=balance-rr
 

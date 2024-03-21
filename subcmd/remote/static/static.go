@@ -15,17 +15,13 @@ import (
 	"system-transparency.org/stprov/internal/options"
 )
 
-func Config(args []string, optDNS, optInterface, optHostIP, optGateway string, interfaceWait time.Duration, optAutodetect bool, optBondingAuto bool, optBondingInterfaces []string, optBondingMode string, optForceGatewayIP, optTryLastIPForGateway bool) (*host.Config, error) {
+func Config(args []string, dnsServers []*net.IP, optInterface, optHostIP, optGateway string, interfaceWait time.Duration, optAutodetect bool, optBondingAuto bool, optBondingInterfaces []string, optBondingMode string, optForceGatewayIP, optTryLastIPForGateway bool) (*host.Config, error) {
 	if len(args) != 0 {
 		return nil, fmt.Errorf("trailing arguments: %v", args)
 	}
 	optGateway, err := options.ValidateHostAndGateway(optHostIP, optGateway, optForceGatewayIP, optTryLastIPForGateway)
 	if err != nil {
 		return nil, err
-	}
-	dnsIP := net.ParseIP(optDNS)
-	if optDNS != "" && dnsIP == nil {
-		return nil, fmt.Errorf("malformed dns address: %s", optDNS)
 	}
 	if optBondingAuto && len(optBondingInterfaces) > 0 {
 		return nil, fmt.Errorf("use -b or -B, not both")
@@ -97,7 +93,7 @@ func Config(args []string, optDNS, optInterface, optHostIP, optGateway string, i
 		HostIP:         hostIP,
 		DefaultGateway: &gateway,
 		IPAddrMode:     &mode,
-		DNSServer:      &[]*net.IP{&dnsIP},
+		DNSServer:      &dnsServers,
 		NetworkInterfaces: &[]*host.NetworkInterface{
 			{InterfaceName: &ifname, MACAddress: &mac},
 		},
