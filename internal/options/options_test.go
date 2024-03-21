@@ -32,7 +32,7 @@ func TestAddStringS(t *testing.T) {
 		{"default: multiple values", "", "foo,bar", []string{"foo", "bar"}},
 		{"set: one value", "-l foo", "foo,bar", []string{"foo"}},
 		{"set: multiple values", "-l bar -l foo", "foo,bar", []string{"bar", "foo"}},
-		{"set: no comma split in flag value ", `-l bar,foo`, "foo,bar", []string{"bar,foo"}},
+		{"set: comma-separated", "-l bar,foo", "foo,bar", []string{"bar", "foo"}},
 	} {
 		var got SliceFlag
 		setOptions := func(fs *flag.FlagSet) {

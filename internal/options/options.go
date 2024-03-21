@@ -78,8 +78,8 @@ func AddString(fs *flag.FlagSet, opt *string, short, long, value string) {
 }
 
 // SliceFlag supports setting multiple string values by repeating an option.
-// For example, "-e foo -e bar" is a list containing ["foo", "bar"].  Default
-// values are specified as a comma-separated string, see the AddStringS method.
+// For example, "-e foo -e bar" is a list containing ["foo", "bar"].  It is also
+// possible to set multiple values with comma-separation, e.g., "-e foo,bar".
 type SliceFlag struct {
 	Values []string
 
@@ -98,7 +98,7 @@ func (i *SliceFlag) Set(value string) error {
 		i.Values = nil
 	}
 
-	i.Values = append(i.Values, value)
+	i.Values = append(i.Values, strings.Split(value, ",")...)
 	return nil
 }
 
