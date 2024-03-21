@@ -22,7 +22,7 @@ import (
 const usage_string = `Usage:
 
   stprov remote dhcp -h HOSTNAME | -H FULL_HOSTNAME
-                     -r PROV_URL | [-u USER] [-p PASSWORD]
+                     -r OSPKG_URL [-r OSPKG_URL ...] [-u USER] [-p PASSWORD]
                      [-m MAC | -I INTERFACE | -w WAIT]
                      [-d DNS]
 
@@ -32,7 +32,7 @@ const usage_string = `Usage:
 
   stprov remote static -i HOST_ADDR
                        -h HOSTNAME | -H FULL_HOSTNAME
-                       -r PROV_URL | [-u USER] [-p PASSWORD]
+                       -r OSPKG_URL [-r OSPKG_URL ...] [-u USER] [-p PASSWORD]
                        [-A | -m MAC | -I INTERFACE | {-B | -b INTERFACE [-b INTERFACE ...]} [-M BONDING_MODE]] [-w WAIT]
                        [-g GATEWAY] [-x] [-f]
                        [-d DNS]
@@ -48,9 +48,9 @@ const usage_string = `Usage:
     -i, --ip               Host address in CIDR notation (e.g., 10.0.2.10/26)
     -h, --host             Host name prefix (full host names becomes HOSTNAME.%s)
     -H, --full-host        Full host name (e.g., host.example.org)
-    -r, --url              URL of the provisioning server (Default: templated URL)
-    -u, --user             User name when using a templated URL (Default: %s)
-    -p, --pass             Password when using a templated URL (Default: %s)
+    -r, --url              OS package URLs (see defaults below; can be repeated)
+    -u, --user             User name when using a templated user:password URL (Default: %s)
+    -p, --pass             Password when using a templated user:password URL (Default: %s)
     -m, --mac              MAC address of network interface to select (e.g., aa:bb:cc:dd:ee:ff)
     -I, --interface        Name of network interface to select (e.g., eth0)
     -A, --autodetect       Autodetect network interface and ping gateway
@@ -63,8 +63,9 @@ const usage_string = `Usage:
     -f, --force            Allow misconfigured gateway address
     -d, --dns              DNS server IP addresses (Default: %s; can be repeated)
 
-    The values of -u and -p will be incorporated into a templated
-    provisioning URL: "%s".
+    The first occurence of the pattern user:password in the specified OS package
+    URL(s) are substituted with the values of -u and -p.  The default URLs are:
+    %s.
 
     Bonding mode (-M) is one of: balance-rr, active-backup, balance-xor,
     broadcast, 802.3ad, balance-tlb, balance-alb.
@@ -93,12 +94,12 @@ const (
 )
 
 var (
-	optMAC, optHostName, optUser, optPassword, optURL               string
+	optMAC, optHostName, optUser, optPassword                       string
 	optHostIP, optGateway, optAllowedCIDRs, optOTP, optFullHostName string
 	optInterfaceWait, optInterface                                  string
 	optPort                                                         int
 	optAutodetect, optBonding, optForceGatewayIP, optTryLastGateway bool
-	optBondingInterfaces, optDNS                                    options.SliceFlag
+	optBondingInterfaces, optDNS, optURL                            options.SliceFlag
 	optBondingMode                                                  string
 )
 
@@ -109,7 +110,7 @@ func usage() {
 		options.DefPassword,
 		options.DefBondingMode,
 		strings.Join(strings.Split(options.DefDNS, ","), ", "),
-		options.DefTemplateURL,
+		strings.Join(strings.Split(options.DefTemplateURL, ","), ",\n    "),
 		options.DefAllowedNetworks)
 }
 
@@ -121,9 +122,9 @@ func setOptions(fs *flag.FlagSet) {
 		options.AddString(fs, &optInterface, "I", "interface", "")
 		options.AddString(fs, &optHostName, "h", "host", "")
 		options.AddString(fs, &optFullHostName, "H", "full-host", "")
-		options.AddString(fs, &optUser, "u", "user", "")
-		options.AddString(fs, &optPassword, "p", "pass", "")
-		options.AddString(fs, &optURL, "r", "url", "")
+		options.AddString(fs, &optUser, "u", "user", options.DefUser)
+		options.AddString(fs, &optPassword, "p", "pass", options.DefPassword)
+		options.AddStringS(fs, &optURL, "r", "url", options.DefTemplateURL)
 		options.AddString(fs, &optInterfaceWait, "w", "wait", "4s")
 	}
 
@@ -204,13 +205,13 @@ func Main(args []string) error {
 		if err != nil {
 			return fmtErr(err, opt.Name())
 		}
-		return fmtErr(commitConfig(optHostName, config, optURL, options.DefTemplateURL, optUser, optPassword), opt.Name())
+		return fmtErr(commitConfig(optHostName, config, optURL.Values, optUser, optPassword), opt.Name())
 	case "dhcp":
 		config, err := dhcp.Config(opt.Args(), dnsServers, optMAC, interfaceWait, optAutodetect)
 		if err != nil {
 			return fmtErr(err, opt.Name())
 		}
-		return fmtErr(commitConfig(optHostName, config, optURL, options.DefTemplateURL, optUser, optPassword), opt.Name())
+		return fmtErr(commitConfig(optHostName, config, optURL.Values, optUser, optPassword), opt.Name())
 	case "run":
 		return fmtErr(run.Main(opt.Args(), optPort, optHostIP, optAllowedCIDRs, optOTP, efiUUID, efiConfigName, efiKeyName, efiHostName), opt.Name())
 	default:
@@ -251,7 +252,7 @@ func checkURL(client http.Client, url string) {
 		resp.ContentLength, resp.Header.Get("content-type"))
 }
 
-func commitConfig(optHostName string, config *host.Config, optURL, templateURL, optUser, optPassword string) error {
+func commitConfig(optHostName string, config *host.Config, optURL []string, optUser, optPassword string) error {
 	if len(optHostName) == 0 {
 		return fmt.Errorf("host name is a required option")
 	}
@@ -261,12 +262,17 @@ func commitConfig(optHostName string, config *host.Config, optURL, templateURL, 
 	if err != nil {
 		return fmt.Errorf("configure tls client: %v", err)
 	}
-	parsedUrl, err := options.ParseProvisioningURL(optURL, templateURL, optUser, optPassword)
-	if err != nil {
-		return err // either invalid option combination or values
+	var urls []string
+	for _, url := range optURL {
+		u, err := options.ConstructURL(url, optUser, optPassword)
+		if err != nil {
+			return err // invalid url
+		}
+		checkURL(client, u)
+		urls = append(urls, u)
 	}
-	checkURL(client, parsedUrl)
-	config.OSPkgPointer = &parsedUrl
+	ospkgPointer := strings.Join(urls, ",")
+	config.OSPkgPointer = &ospkgPointer
 
 	_, efiGuid, err := st.HostConfigEFIVariableName()
 	if err != nil {
