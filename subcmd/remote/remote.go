@@ -61,7 +61,7 @@ const usage_string = `Usage:
     -g, --gateway          Gateway IP address (Default: assuming first address in HOST_ADDR's network)
     -x, --try-last-gateway Override default gateway and instead assume last address in HOST_ADDR's network
     -f, --force            Allow misconfigured gateway address
-    -d, --dns              DNS server IP address (Default: [%s], can be repeated)
+    -d, --dns              DNS server IP addresses (Default: %s; can be repeated)
 
     The values of -u and -p will be incorporated into a templated
     provisioning URL: "%s".
@@ -108,7 +108,7 @@ func usage() {
 		options.DefUser,
 		options.DefPassword,
 		options.DefBondingMode,
-		options.DefDNS,
+		strings.Join(strings.Split(options.DefDNS, ","), ", "),
 		options.DefTemplateURL,
 		options.DefAllowedNetworks)
 }
