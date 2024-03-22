@@ -109,9 +109,9 @@ func usage() {
 		options.DefUser,
 		options.DefPassword,
 		options.DefBondingMode,
-		strings.Join(strings.Split(options.DefDNS, ","), ", "),
-		strings.Join(strings.Split(options.DefTemplateURL, ","), ",\n    "),
-		strings.Join(strings.Split(options.DefAllowedNetworks, ","), ", "))
+		strings.ReplaceAll(options.DefDNS, ",", ", "),
+		strings.ReplaceAll(options.DefTemplateURL, ",", ",\n    "),
+		strings.ReplaceAll(options.DefAllowedNetworks, ",", ", "))
 }
 
 func setOptions(fs *flag.FlagSet) {
