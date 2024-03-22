@@ -18,7 +18,7 @@ import (
 	"system-transparency.org/stprov/internal/st"
 )
 
-func Main(args []string, optPort int, optIP, optAllowHosts, optOTP string, efiUUID *uuid.UUID, efiConfigName, efiKeyName, efiHostName string) error {
+func Main(args []string, optPort int, optIP string, optAllowHosts []string, optOTP string, efiUUID *uuid.UUID, efiConfigName, efiKeyName, efiHostName string) error {
 	if len(args) != 0 {
 		return fmt.Errorf("trailing arguments: %v", args)
 	}
@@ -34,7 +34,7 @@ func Main(args []string, optPort int, optIP, optAllowHosts, optOTP string, efiUU
 		return fmt.Errorf("ip: malformed ip address: %s", optIP)
 	}
 	allowNets := make([]net.IPNet, 0)
-	for _, cidrStr := range strings.Split(optAllowHosts, ",") {
+	for _, cidrStr := range optAllowHosts {
 		if !strings.Contains(cidrStr, "/") {
 			cidrStr += "/32"
 		}
