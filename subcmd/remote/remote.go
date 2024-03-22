@@ -71,7 +71,7 @@ const usage_string = `Usage:
     broadcast, 802.3ad, balance-tlb, balance-alb.
 
 
-  stprov remote run -o OTP [-i IP_ADDR] [-p PORT] [-a ALLOWED_HOSTS]
+  stprov remote run -o OTP [-i IP_ADDR] [-p PORT] [-a ALLOWED_HOST [-a ALLOWED_HOST ...]
 
     Start a server waiting for commands from stprov local.
     A one-time password is used to establish a mutually authenticated HTTPS connection.
@@ -81,8 +81,8 @@ const usage_string = `Usage:
     -o, --otp    One-time password to establish a secure connection
     -i, --ip     Listening address (Default: 0.0.0.0)
     -p, --port   Listenting port (Default: 2009)
-    -a, --allow  Source IP addresses allowed to connect in CIDR notation (can
-                 be multiple comma-separated values, Default: %s)
+    -a, --allow  Source IP addresses allowed to connect in CIDR notation
+                 (Default: %s; can be repeated)
 `
 
 const (
@@ -95,11 +95,11 @@ const (
 
 var (
 	optMAC, optHostName, optUser, optPassword                       string
-	optHostIP, optGateway, optAllowedCIDRs, optOTP, optFullHostName string
+	optHostIP, optGateway, optOTP, optFullHostName                  string
 	optInterfaceWait, optInterface                                  string
 	optPort                                                         int
 	optAutodetect, optBonding, optForceGatewayIP, optTryLastGateway bool
-	optBondingInterfaces, optDNS, optURL                            options.SliceFlag
+	optBondingInterfaces, optDNS, optURL, optAllowedCIDRs           options.SliceFlag
 	optBondingMode                                                  string
 )
 
@@ -111,7 +111,7 @@ func usage() {
 		options.DefBondingMode,
 		strings.Join(strings.Split(options.DefDNS, ","), ", "),
 		strings.Join(strings.Split(options.DefTemplateURL, ","), ",\n    "),
-		options.DefAllowedNetworks)
+		strings.Join(strings.Split(options.DefAllowedNetworks, ","), ", "))
 }
 
 func setOptions(fs *flag.FlagSet) {
@@ -146,7 +146,7 @@ func setOptions(fs *flag.FlagSet) {
 	case "run":
 		options.AddInt(fs, &optPort, "p", "port", 2009)
 		options.AddString(fs, &optHostIP, "i", "ip", "0.0.0.0")
-		options.AddString(fs, &optAllowedCIDRs, "a", "allow", options.DefAllowedNetworks)
+		options.AddStringS(fs, &optAllowedCIDRs, "a", "allow", options.DefAllowedNetworks)
 		options.AddString(fs, &optOTP, "o", "otp", "")
 	}
 }
@@ -213,7 +213,7 @@ func Main(args []string) error {
 		}
 		return fmtErr(commitConfig(optHostName, config, optURL.Values, optUser, optPassword), opt.Name())
 	case "run":
-		return fmtErr(run.Main(opt.Args(), optPort, optHostIP, optAllowedCIDRs, optOTP, efiUUID, efiConfigName, efiKeyName, efiHostName), opt.Name())
+		return fmtErr(run.Main(opt.Args(), optPort, optHostIP, optAllowedCIDRs.Values, optOTP, efiUUID, efiConfigName, efiKeyName, efiHostName), opt.Name())
 	default:
 		return fmt.Errorf("invalid command %q, try \"help\"", opt.Name())
 	}
