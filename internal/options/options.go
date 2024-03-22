@@ -125,25 +125,10 @@ func AddInt(fs *flag.FlagSet, opt *int, short, long string, value int) {
 	fs.IntVar(opt, long, value, "")
 }
 
-// ParseProvisioningURL constructs a provisioning URL from an absolute value or
-// a template where the pattern "user:password" should be replaced with values.
-func ParseProvisioningURL(absoluteURL, templateURL, user, password string) (string, error) {
-	if absoluteURL == "" {
-		if user == "" {
-			user = DefUser
-		}
-		if password == "" {
-			password = DefPassword
-		}
-		return verifyWebPrefix(strings.Replace(templateURL, "user:password", user+":"+password, 1))
-	}
-	if user != "" {
-		return "", fmt.Errorf("cannot have both user and absolute provisiniong url")
-	}
-	if password != "" {
-		return "", fmt.Errorf("cannot have both password and absolute provisiniong url")
-	}
-	return verifyWebPrefix(absoluteURL)
+// ConstructURL constructs a URL to an OS package server, replacing the first
+// occurence of "user:password" with the specified user and password.
+func ConstructURL(url, user, password string) (string, error) {
+	return verifyWebPrefix(strings.Replace(url, "user:password", user+":"+password, 1))
 }
 
 // verifyWebPrefix checks that url starts with "http://" or "https://"

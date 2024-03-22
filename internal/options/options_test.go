@@ -48,26 +48,21 @@ func TestAddStringS(t *testing.T) {
 	}
 }
 
-func TestParseProvisioningURL(t *testing.T) {
+func TestConstructURL(t *testing.T) {
 	for _, table := range []struct {
-		desc    string
-		absURL  string
-		tmplURL string
-		user    string
-		pass    string
-		want    string
+		desc string
+		url  string
+		user string
+		pass string
+		want string
 	}{
-		{"invalid: prefix", "example.org", "", "", "", ""},
-		{"invalid: require user", "", "", "", "", ""},
-		{"invalid: require password", "", "", "1234", "", ""},
-		{"invalid: require no user", "http://example.org", "", "alice", "", ""},
-		{"invalid: require no password", "http://example.org", "", "", "1234", ""},
-		{"valid", "http://example.org", "", "", "", "http://example.org"},
-		{"valid", "https://example.org", "", "", "", "https://example.org"},
-		{"valid", "", "https://user:password@example.org", "alice", "1234", "https://alice:1234@example.org"},
+		{"invalid: prefix", "example.org", "", "", ""},
+		{"valid: http", "http://example.org", "foo", "bar", "http://example.org"},
+		{"valid: https", "https://example.org", "foo", "bar", "https://example.org"},
+		{"valid: substitute", "https://user:password@example.org", "foo", "bar", "https://foo:bar@example.org"},
 	} {
-		url, err := ParseProvisioningURL(table.absURL, table.tmplURL, table.user, table.pass)
-		if got, want := err != nil, table.desc != "valid"; got != want {
+		url, err := ConstructURL(table.url, table.user, table.pass)
+		if got, want := err != nil, table.want == ""; got != want {
 			t.Errorf("%q: got error %v but wanted %v: %v", table.desc, got, want, err)
 		}
 		if err != nil {

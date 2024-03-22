@@ -60,6 +60,9 @@ function assert_headreq() {
 
 	token="HEAD request on provisioning url gave content-length: "
 	grep -q "$token" saved/qemu.log || die "test $test_num: HTTP HEAD provisioning URL"
+
+	token="WARNING: HEAD request on"
+	! grep -q "$token" saved/qemu.log || die "test $test_num: HTTP HEAD provisioning URL"
 }
 
 function mock_operator() {
@@ -126,11 +129,12 @@ FULLHOST=$HOST.example.org
 USER=stprov
 PASSWORD=sikritpassword
 RESOURCE=ospkg.json
-URL=http://$USER:$PASSWORD@$OSPKG_SRV/$RESOURCE
+URL0=http://$USER:$PASSWORD@$OSPKG_SRV/$RESOURCE
+URL1=http://$OSPKG_SRV/$RESOURCE
 
 mkdir -p build saved bin
 make -C ../\
-	DEFAULT_TEMPLATE_URL="http://user:password@$OSPKG_SRV/$RESOURCE"\
+	DEFAULT_TEMPLATE_URL="http://user:password@$OSPKG_SRV/$RESOURCE,$URL1"\
 	DEFAULT_DOMAIN="$(cut -d'.' -f2- <<<"$FULLHOST")"\
 	DEFAULT_USER="$USER"\
 	DEFAULT_PASSWORD="$PASSWORD"\
@@ -196,12 +200,12 @@ local_run="./bin/stprov local run --ip 127.0.0.1 -p $PORT --otp $PASSWORD"
 remote_run="stprov remote run -p $PORT --otp=$PASSWORD" # use compiled-in default set via Makefile
 remote_configs=(
 	# Static network configuration
-	"static -I $IFNAME -d $DNS0 -d $DNS1 -i $IP/$MASK -H $FULLHOST -r $URL --gateway $GATEWAY"
-	"static -m $IFADDR -d $DNS0 -d $DNS1 -i $IP/$MASK -H $FULLHOST -r $URL        -g $GATEWAY"
+	"static -I $IFNAME -d $DNS0 -d $DNS1 -i $IP/$MASK -H $FULLHOST -r $URL0 -r $URL1 --gateway $GATEWAY"
+	"static -m $IFADDR -d $DNS0 -d $DNS1 -i $IP/$MASK -H $FULLHOST -r $URL0 -r $URL1        -g $GATEWAY"
 	"static -A         -d $DNS0 -d $DNS1 -i $IP/$MASK -h $HOST     -u $USER -p $PASSWORD"
 	"static -i $IP/$MASK -h $HOST" # use compiled-in defaults set via Makefile
 	# DHCP network configuration
-	"dhcp --interface $IFNAME --dns $DNS0 --dns $DNS1 --full-host $FULLHOST --url $URL"
+	"dhcp --interface $IFNAME --dns $DNS0 --dns $DNS1 --full-host $FULLHOST --url $URL0,$URL1"
 	"dhcp --mac       $IFADDR --dns $DNS0 --dns $DNS1 --full-host $FULLHOST --user $USER --pass $PASSWORD"
 	"dhcp --host $HOST" # use compiled-in defaults set via Makefile
 )
@@ -318,7 +322,7 @@ for i in "${!remote_configs[@]}"; do
 	assert_hostcfg "$i" ".dns[1]"                               "\"$DNS1\""
 	assert_hostcfg "$i" ".network_interfaces[0].interface_name" "\"$IFNAME\""
 	assert_hostcfg "$i" ".network_interfaces[0].mac_address"    "\"$IFADDR\""
-	assert_hostcfg "$i" ".ospkg_pointer"                        "\"$URL\""
+	assert_hostcfg "$i" ".ospkg_pointer"                        "\"$URL0,$URL1\""
 	assert_hostcfg "$i" ".identity"                             null
 	assert_hostcfg "$i" ".authentication"                       null
 	assert_hostcfg "$i" ".bonding_mode"                         null # only tested manually
