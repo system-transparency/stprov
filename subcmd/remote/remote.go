@@ -24,7 +24,7 @@ const usage_string = `Usage:
   stprov remote dhcp -h HOSTNAME | -H FULL_HOSTNAME
                      -r PROV_URL | [-u USER] [-p PASSWORD]
                      [-m MAC | -I INTERFACE | -w WAIT]
-                     [-d DNS]
+                     [-d DNS [-d DNS ...]]
 
     Configure a DHCP network configuration and persist it to EFI-NVRAM.
     If none of -m and -I are specified, the interface is guessed.
@@ -35,7 +35,7 @@ const usage_string = `Usage:
                        -r PROV_URL | [-u USER] [-p PASSWORD]
                        [-A | -m MAC | -I INTERFACE | {-B | -b INTERFACE [-b INTERFACE ...]} [-M BONDING_MODE]] [-w WAIT]
                        [-g GATEWAY] [-x] [-f]
-                       [-d DNS]
+                       [-d DNS [-d DNS ...]]
 
     Configure a static network configuration and persist it to EFI-NVRAM.
     If none of -m and -I are specified, the network interface is guessed.
