@@ -21,13 +21,36 @@ import (
 
 const usage_string = `Usage:
 
+  stprov remote run -o OTP [-i IP_ADDR] [-p PORT] [-a ALLOWED_HOST [-a ALLOWED_HOST ...]
+
+    Starts a server on a given IP address (-i) and port (-o), waiting for
+    commands from stprov local.  A one-time password (-o) is used to establish
+    a mutually authenticated HTTPS connection.  Connections are only accepted
+    from the allowed hosts (-a), a repeated option that uses CIDR notation.
+
+    An SSH hostkey is written to EFI NVRAM on success.
+
+  Options:
+
+    -o, --otp    One-time password to establish a secure connection
+    -i, --ip     Listening address (Default: 0.0.0.0)
+    -p, --port   Listenting port (Default: 2009)
+    -a, --allow  Source IP addresses allowed to connect in CIDR notation
+                 (Default: %s; can be repeated)
+
+    If the subnet mask is omitted with the -a option, it defaults to "/32"
+    (IPv4) or "/128" (IPv6).  E.g., 10.0.0.1 and 10.0.0.1/32 are equivalent.
+
+
   stprov remote dhcp -h HOSTNAME | -H FULL_HOSTNAME
                      -r OSPKG_URL [-r OSPKG_URL ...] [-u USER] [-p PASSWORD]
                      [-m MAC | -I INTERFACE | -w WAIT]
                      [-d DNS [-d DNS ...]]
 
-    Configure a DHCP network configuration and persist it to EFI-NVRAM.
-    If none of -m and -I are specified, the interface is guessed.
+    Configures the network using DHCP. If none of -m and -I are specified, the
+    interface is guessed.
+
+    A host configuration and a hostname is written to EFI NVRAM on success.
 
 
   stprov remote static -i HOST_ADDR
@@ -37,11 +60,12 @@ const usage_string = `Usage:
                        [-g GATEWAY] [-x] [-f]
                        [-d DNS [-d DNS ...]]
 
-    Configure a static network configuration and persist it to EFI-NVRAM.
-    If none of -m and -I are specified, the network interface is guessed.
-    If -A is specified, the guessing involves pinging the gateway.
-    If -B is specified, the guessing is instead tailored for bonding.
+    Configures a static network configuration and persist it to EFI-NVRAM.  If
+    none of -m and -I are specified, the network interface is guessed.  If -A
+    is specified, the interface guessing involves pinging the gateway.  If -B
+    is specified, the interface guessing is instead tailored for bonding.
 
+    A host configuration and a hostname is written to EFI NVRAM on success.
 
   Options:
 
@@ -63,29 +87,15 @@ const usage_string = `Usage:
     -f, --force            Allow misconfigured gateway address
     -d, --dns              DNS server IP addresses (Default: %s; can be repeated)
 
-    The first occurence of the pattern user:password in the specified OS package
-    URL(s) are substituted with the values of -u and -p.  The default URLs are:
+    The first occurence of the pattern user:password in the specified OS
+    package URL(s) are substituted with the values of -u and -p.  For example,
+    "user:password" might get substituted to "alice:sikritpassword".
+
+    The default OS pckage URL(s) are:
     %s.
 
     Bonding mode (-M) is one of: balance-rr, active-backup, balance-xor,
     broadcast, 802.3ad, balance-tlb, balance-alb.
-
-
-  stprov remote run -o OTP [-i IP_ADDR] [-p PORT] [-a ALLOWED_HOST [-a ALLOWED_HOST ...]
-
-    Start a server waiting for commands from stprov local.
-    A one-time password is used to establish a mutually authenticated HTTPS connection.
-
-  Options:
-
-    -o, --otp    One-time password to establish a secure connection
-    -i, --ip     Listening address (Default: 0.0.0.0)
-    -p, --port   Listenting port (Default: 2009)
-    -a, --allow  Source IP addresses allowed to connect in CIDR notation
-                 (Default: %s; can be repeated)
-
-    If the subnet mask is omitted with the -a option, it defaults to "/32"
-    (IPv4) or "/128" (IPv6).  E.g., 10.0.0.1 and 10.0.0.1/32 are equivalent.
 `
 
 const (
@@ -108,13 +118,14 @@ var (
 
 func usage() {
 	fmt.Fprintf(os.Stderr, usage_string,
+		strings.ReplaceAll(options.DefAllowedNetworks, ",", ", "),
 		options.DefHostname,
 		options.DefUser,
 		options.DefPassword,
 		options.DefBondingMode,
 		strings.ReplaceAll(options.DefDNS, ",", ", "),
 		strings.ReplaceAll(options.DefTemplateURL, ",", ",\n    "),
-		strings.ReplaceAll(options.DefAllowedNetworks, ",", ", "))
+	)
 }
 
 func setOptions(fs *flag.FlagSet) {

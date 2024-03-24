@@ -13,20 +13,10 @@ import (
 
 const usage = `Usage:
 
-  stprov local   Outputs detailed usage of stprov-local
-  stprov remote  Outputs detailed usage of stprov-remote
-  stprov version Outputs the version of this program
-
-Cheat sheet:
-
-  ### REMOTE
-  stprov remote static -h myhostname -i 10.0.2.10/26 -g 10.0.2.2 -b eth0 -b eth1 -u stboot -p ospkg-password
-  stprov remote run -o "operations one-time password"
-  shutdown -r +0
-
-  ### LOCAL
-  go install system-transparency.org/stprov/cmd/stprov@latest
-  stprov local run -i 10.0.2.10 -o "operations one-time password"
+  stprov help
+  stprov version
+  stprov local <SUBCOMMAND> [Options]
+  stprov remote <SUBCOMMAND> [Options]
 `
 
 func main() {

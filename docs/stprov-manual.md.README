@@ -1,0 +1,12 @@
+The current manual is a mix between copy-pasting the rendered stprov usage
+message and additional information.  These are the copy-pasted part:
+
+  - SYNOPSIS: see `stprov help`
+  - COMMANDS: see `stprov local help` and `stprov remote help`.  Note that the
+	"help" and "version" descriptions are only available in the manual.
+  - OPTIONS: see `stprov remote help`
+
+It should be evident what to copy-paste where based on the previous revision of
+the manual.  After pasting, two additional spaces of indentation is needed.
+
+At minimum, we check that the manual is up-to-date before making a release.

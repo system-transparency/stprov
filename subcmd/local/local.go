@@ -13,8 +13,13 @@ const usage = `Usage:
 
   stprov local run -o OTP -i IP_ADDR [-p PORT]
 
-    Connect to stprov remote, taking part in the provisioning of a new platform.
-    A one-time password is used to establish a mutually authenticated HTTPS connection.
+    Contributes entropy to stprov remote, which is listening on a given IP
+    address (-i) and port (-p).  A one-time password (-o) is used to boostrap
+    HTTPS.  Outputs the following key-value pairs on success:
+
+    fingerprint=<the platform's SSH hostkey fingerprint>
+    hostname=<the platform's hostname>
+    ip=<the platform's IP address>
 
   Options:
 
