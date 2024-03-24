@@ -83,6 +83,9 @@ const usage_string = `Usage:
     -p, --port   Listenting port (Default: 2009)
     -a, --allow  Source IP addresses allowed to connect in CIDR notation
                  (Default: %s; can be repeated)
+
+    If the subnet mask is omitted with the -a option, it defaults to "/32"
+    (IPv4) or "/128" (IPv6).  E.g., 10.0.0.1 and 10.0.0.1/32 are equivalent.
 `
 
 const (
