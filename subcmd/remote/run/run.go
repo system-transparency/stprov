@@ -33,16 +33,9 @@ func Main(args []string, optPort int, optIP string, optAllowHosts []string, optO
 	if ip == nil {
 		return fmt.Errorf("ip: malformed ip address: %s", optIP)
 	}
-	allowNets := make([]net.IPNet, 0)
-	for _, cidrStr := range optAllowHosts {
-		if !strings.Contains(cidrStr, "/") {
-			cidrStr += "/32"
-		}
-		_, cidr, err := net.ParseCIDR(cidrStr)
-		if err != nil {
-			return fmt.Errorf("allow: malformed CIDR address: %s", cidrStr)
-		}
-		allowNets = append(allowNets, *cidr)
+	allowNets, err := parseAllowedNets(optAllowHosts)
+	if err != nil {
+		return err
 	}
 	otp := optOTP
 
@@ -59,6 +52,32 @@ func Main(args []string, optPort int, optIP string, optAllowHosts []string, optO
 	}
 
 	return nil
+}
+
+// parseAllowedNets parses a list of addresses in CIDR format.  If an address
+// omits the subnet mask, it will default to "/32" (IPv4) or "/128" (IPv6).
+func parseAllowedNets(addresses []string) ([]net.IPNet, error) {
+	var allowNets []net.IPNet
+	for _, addr := range addresses {
+		if !strings.Contains(addr, "/") {
+			ip := net.ParseIP(addr)
+			if ip == nil {
+				return nil, fmt.Errorf("malformed address: %s", addr)
+			}
+			if ip.To4() != nil {
+				addr += "/32"
+			} else if ip.To16() != nil {
+				addr += "/128"
+			}
+		}
+
+		_, cidr, err := net.ParseCIDR(addr)
+		if err != nil {
+			return nil, fmt.Errorf("malformed address: %s", addr)
+		}
+		allowNets = append(allowNets, *cidr)
+	}
+	return allowNets, nil
 }
 
 // listen listens for incoming requests until a commit message is received.
