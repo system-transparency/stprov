@@ -17,6 +17,8 @@ go_test:
 
 qemu_test:
   stage: integration
+  tags:
+    - longrunning
   image: debian:bookworm-backports # s/bookworm-backports/stable/ when possible
   before_script:
     - apt update
@@ -49,6 +51,8 @@ qemu_test:
 # Debian stable packages a QEMU version that works with guestfwd.
 qemu_head_stboot_test:
   stage: integration
+  tags:
+    - longrunning
   image: debian:bookworm-backports
   allow_failure: true
   before_script:
