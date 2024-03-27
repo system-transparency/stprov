@@ -121,7 +121,7 @@ platform->>Operator: (4.3) Receive system manifest
 The above figure provides an overview of the provisioning flow.  In more detail:
 
   1. The operator first gains access to the platform's console where the stprov
-     program is available.  See "how to make stprov run" as well as the the
+     program is available.  See how to make stprov run as well as the
      introductory figure for an overview of the intended setting.
   2. A static or a dynamic network configuration is then applied based on
      relevant options such as IP address, default gateway, and hostname.  If
