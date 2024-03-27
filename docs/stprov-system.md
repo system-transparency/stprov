@@ -7,20 +7,18 @@ manual](./stprov-manual) for detailed usage of the implemented tool.
 ## Introduction
 
 stprov is a System Transparency provisioning tool designed to lock down initial
-trust in a platform.  The platform to be provisioned is assumed to have an ugly
-and buggy interface.  For example, the operator may be managing the platform
-through a remote web interface that does not support copy-paste, and which
-randomly drops some input characters as well as rendering output in weird ways.
-The platform is further assumed to use the same stboot image as several other
-platforms, meaning it needs to be provisioned with its own host-specific
-configuration to become useful: network settings, cryptographic secrets, etc.
+trust in a platform.  The platform to be provisioned is assumed to have a poor
+management interface.  For example, it may be a remote web console that does not
+support copy-paste.  The platform is further assumed to use the same stboot
+image as several other platforms.  In other words, it needs to be provisioned
+with its own host-specific configuration to become useful.
 
 The stprov architecture is composed of two parts:
 
   1. Local: client-side that the operator runs on, e.g., a provisioning laptop.
   2. Remote: server-side that the operator runs on the platform to provision.
 
-As alluded to above, the operator's user interface to the platform is buggy.
+As alluded to above, the operator's user interface to the platform is poor.
 Therefore, the input and output needed in the remote part is kept to a minimum.
 This amounts to configuring the network and setting up a secure channel to the
 operator's local system that has reliable input and output.
