@@ -91,50 +91,61 @@ All configuration is written to EFI NVRAM, see details in the common [storage
 index]().
 
 ## Provisioning flow
+
+The operator first gains access to the platform's console where the stprov
+program is available, see how to make stprov run and the setting described in
+the introduction.  This is the starting point of the below figure.
+
 ```mermaid
 sequenceDiagram
 
-participant Operator
+participant operator
 participant platform
 
-Operator->>platform: (1) Gain access to console with stprov
+operator->>platform: (1) stprov remote {dhcp,static} [Options]
 
-Operator->>platform: (2) stprov remote {dhcp,static} [Options]
+platform->>platform: (1.1) Configure and verify network
+platform->>platform: (1.2) Write host configuration
+platform->>platform: (1.3) Write hostname
 
-platform->>platform: (2.1) Configure and verify network
-platform->>platform: (2.2) Write host configuration
-platform->>platform: (2.3) Write hostname
-
-Operator->>platform: (3) stprov remote run [Options]
-platform->>platform: (3.1) Start HTTPS service
-
-Operator->>Operator: (4) stprov local [Options]
-Operator->>platform: (4.1) Add 128-bits of entropy
-Operator->>platform: (4.2) Commit
-
-platform->>platform: (3.2) Sample 128-bits of entropy, HKDF
-platform->>platform: (3.3) Derive and write SSH hostkey
-
-platform->>Operator: (4.3) Receive system manifest
+operator->>platform: (2) stprov remote run [Options]
+platform->>platform: (2.1) Start HTTPS service
 ```
 
-The above figure provides an overview of the provisioning flow.  In more detail:
+First, a static or a dynamic network configuration is applied with stprov-remote
+based on relevant options like IP address, default gateway, and hostname.  If
+configuration succeeds, a host configuration and hostname is committed to EFI
+NVRAM.  Provisioning optionally ends here if the SSH hostkey is not essential.
 
-  1. The operator first gains access to the platform's console where the stprov
-     program is available.  See how to make stprov run as well as the
-     introductory figure for an overview of the intended setting.
-  2. A static or a dynamic network configuration is then applied based on
-     relevant options such as IP address, default gateway, and hostname.  If
-     configuration succeeds, a host configuration and hostname is committed to
-     EFI NVRAM.  Provisioning ends here if the SSH hostkey is not essential.
-  3. The stprov-remote program is used again on the platform to start an HTTPS
-     server that awaits further input from stprov-local.  Important options here
-     include a one-time password used to establish a mutually authenticated
-     HTTPS session, as well as allowed networks the operator can connect from.
-  4. The stprov-local program contributes with entropy that stprov-remote mixes
-     into its key derivations.  The operator is prompted to review the changes
-     before generating and committing the derived SSH hostkey to EFI NVRAM.  The
-     returned system manifest most notably includes the SSH hostkey fingerprint.
+Second, the stprov-remote program is used again to start an HTTPS server that
+awaits further input from stprov-local.  Important options here include a
+one-time password used to establish a mutually authenticated HTTPS session, as
+well as an enumeration of allowed networks that the operator can connect from.
+
+At this point the operator can start using their local console for continued
+provisioning.  In other words, the below interactions take place over HTTPS
+rather than the platform's built-in or remotely-accessible console.
+
+```mermaid
+sequenceDiagram
+
+participant operator
+participant platform
+
+operator->>operator: (3) stprov local [Options]
+operator->>platform: (3.1) Add 128-bits of entropy
+operator->>platform: (3.2) Commit
+
+platform->>platform: (2.2) Sample 128-bits of entropy, HKDF
+platform->>platform: (2.3) Derive and write SSH hostkey
+
+platform->>operator: (3.3) Receive system manifest
+```
+
+As shown above, stprov-local contributes with entropy that stprov-remote mixes
+into its key derivations.  The operator is prompted to review the changes before
+generating and committing the derived SSH hostkey to EFI NVRAM on the platform.
+The returned system manifest most notably includes the SSH hostkey fingerprint.
 
 The [stprov manual](./stprov-manual) describes all key-value output from
 stprov-local, which is based on the system manifest received in the final step.
