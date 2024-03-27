@@ -1,8 +1,8 @@
 # System documentation for stprov
 
-This document describes stprov, a solution for provisioning host-specific
-configurations to a platform that is network-booted using stboot.  The [stprov
-manual](./stprov-manual) describes how this has been implemented as a tool.
+This document describes a tool for provisioning host-specific configuration to a
+System-Transparency booted platform.  Refer to the [stprov
+manual](./stprov-manual) for detailed usage of the implemented tool.
 
 ## Introduction
 
