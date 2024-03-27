@@ -30,8 +30,7 @@ the operator can use the stprov-remote program to configure the network and
 start an HTTPS service.  The operator completes the provisioning by connecting to
 this service using stprov-local.  After provisioning, the platform's EFI NVRAM
 contains a [host configuration](), a hostname, and an SSH hostkey.  The SSH
-hostkey can, e.g., be used as authentication by OS packages that were booted by
-stboot.
+hostkey can, e.g., be used by an OS package to provide SSH host authentication.
 
 ```mermaid
 graph LR
