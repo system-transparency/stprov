@@ -227,8 +227,5 @@ https://lists.system-transparency.org/mailman3/postorius/lists/st-discuss.lists.
 
 ## SEE ALSO
 
-TODO: link to something that is helpful wrt. packaging stprov as an ISO or a
-provisioning OS package that can be embedded into stboot's initramfs.
-
-TODO: refer to stprov system documentation, which will describe stprov more from
-a design/system perspective rather than a "the implemented tool" perspective.
+The [stprov system documentation](./stprov-system.md) describes stprov from a
+design and intended usage perspective without being a dense reference manual.
