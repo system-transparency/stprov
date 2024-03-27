@@ -146,6 +146,10 @@ API.  It is not in scope of this document's revision to describe it in detail.
 The short summary would be that stprov-remote has HTTP endpoints that accept
 JSON key-value pairs.  Output is also encoded as JSON key-value pairs (if any).
 
+Interested readers can find more details in the [stprov API package][].
+
+[stprov API package]: https://git.glasklar.is/system-transparency/core/stprov/-/blob/main/internal/api/api.go?ref_type=heads
+
 ## Security considerations
 
 The provisioning itself hinges on the platform's management interface being
