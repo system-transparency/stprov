@@ -139,16 +139,13 @@ operator->>platform: (3.2) Commit
 platform->>platform: (2.2) Sample 128-bits of entropy, HKDF
 platform->>platform: (2.3) Derive and write SSH hostkey
 
-platform->>operator: (3.3) Receive system manifest
+platform->>operator: (3.3) Receive platform information
 ```
 
 As shown above, stprov-local contributes with entropy that stprov-remote mixes
 into its key derivations.  The operator is prompted to review the changes before
 generating and committing the derived SSH hostkey to EFI NVRAM on the platform.
-The returned system manifest most notably includes the SSH hostkey fingerprint.
-
-The [stprov manual](./stprov-manual) describes all key-value output from
-stprov-local, which is based on the system manifest received in the final step.
+The returned platform information notably includes the SSH hostkey fingerprint.
 
 ## Client-server API
 
