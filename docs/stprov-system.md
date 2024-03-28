@@ -1,15 +1,17 @@
 # System documentation for stprov
 
 This document describes a tool for provisioning host-specific configuration to a
-System-Transparency booted platform.  Refer to the [stprov
-manual](./stprov-manual) for detailed usage of the implemented tool.
+System-Transparency booted platform.  Refer to the [stprov manual][] for
+detailed usage of the implemented tool.
+
+[stprov manual]: ./stprov-manual.md
 
 ## Introduction
 
 stprov is a System Transparency provisioning tool designed to lock down initial
 trust in a platform.  The platform to be provisioned is assumed to have a poor
 management interface.  For example, it may be a remote web console that does not
-support copy-paste.  The platform is further assumed to use the same stboot
+support copy-paste.  The platform is further assumed to use the same [stboot][]
 image as several other platforms.  In other words, it needs to be provisioned
 with its own host-specific configuration to become useful.
 
@@ -29,8 +31,8 @@ mounting a provisioning ISO.  When booted, the ISO drops into a terminal where
 the operator can use the stprov-remote program to configure the network and
 start an HTTPS service.  The operator completes the provisioning by connecting to
 this service using stprov-local.  After provisioning, the platform's EFI NVRAM
-contains a [host configuration](), a hostname, and an SSH hostkey.  The SSH
-hostkey can, e.g., be used by an OS package to provide SSH host authentication.
+contains a host configuration, a hostname, and an SSH hostkey.  The SSH hostkey
+can, e.g., be used by an OS package to provide SSH host authentication.
 
 ```mermaid
 graph LR
@@ -59,6 +61,8 @@ graph LR
     operator -- "stprov-local connects"--o router3
 ```
 
+[stboot]: https://git.glasklar.is/system-transparency/project/docs/-/blob/main/content/docs/reference/stboot.md?ref_type=heads
+
 ## How to make stprov run
 
 The stprov-local program is simple to just run on the operator's own system.
@@ -66,14 +70,16 @@ The stprov-local program is simple to just run on the operator's own system.
 The stprov-remote program is typically embedded in a provisioning ISO, or as an
 OS package in stboot's initramfs for use in so-called provisioning mode.  It is
 not within the scope of this document to describe creation of these artifacts,
-but the reader may find [stmgr]() helpful for creating such artifacts.  In lack
+but the reader may find [stmgr][] helpful for creating such artifacts.  In lack
 of other good documentation, considering peeking at the stprov and stboot CI.
+
+[stmgr]: https://git.glasklar.is/system-transparency/project/docs/-/blob/main/content/docs/reference/stmgr-manual.md?ref_type=heads
 
 ## Provisioned configuration
 
 The following configuration is provisioned by stprov-remote:
 
-  - [Host configuration](): primarily used by stboot to network-boot an OS
+  - [Host configuration][]: primarily used by stboot to network-boot an OS
     package.  It can also be used by OS packages to configure their networks.
   - Hostname: an arbitrary hostname that OS packages may use.
 
@@ -88,7 +94,10 @@ again to derive an SSH hostkey deterministically from that.  Assuming it is hard
 to gain access to EFI NVRAM, the derived SSH hostkey never leaves the platform.
 
 All configuration is written to EFI NVRAM, see details in the common [storage
-index]().
+index][].
+
+[Host configuration]: https://git.glasklar.is/system-transparency/project/docs/-/blob/main/content/docs/reference/host_configuration.md?ref_type=heads
+[storage index]: https://git.glasklar.is/system-transparency/project/docs/-/blob/main/content/docs/reference/storage_index.md?ref_type=heads
 
 ## Provisioning flow
 

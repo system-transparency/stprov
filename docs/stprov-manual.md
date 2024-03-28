@@ -154,13 +154,17 @@ subset of these options are supported by "dhcp", see COMMANDS.
 
 ## FILES AND DIRECTORIES
 
-stprov reads TLS roots from the [trust policy]() directory, see the exact
-location in the common [storage index]().  These TLS roots are required, and
+stprov reads TLS roots from the [trust policy][] directory, see the exact
+location in the common [storage index][].  These TLS roots are required, and
 used for sanity checking that all OS package URLs are working as expected.
 
-stprov writes a [host configuration](), a hostname, and an SSH hostkey to EFI
-NVRAM, see the exact location in the common [storage index]().  The SSH hostkey
+stprov writes a [host configuration][], a hostname, and an SSH hostkey to EFI
+NVRAM, see the exact location in the common [storage index][].  The SSH hostkey
 is only written if the "run" subcommand is used for client-server exchanges.
+
+[trust policy]: https://git.glasklar.is/system-transparency/project/docs/-/blob/main/content/docs/reference/trust_policy.md?ref_type=heads
+[storage index]: https://git.glasklar.is/system-transparency/project/docs/-/blob/main/content/docs/reference/storage_index.md?ref_type=heads
+[host configuration]: https://git.glasklar.is/system-transparency/project/docs/-/blob/main/content/docs/reference/host_configuration.md?ref_type=heads
 
 ## VARIABLES
 
@@ -227,5 +231,7 @@ https://lists.system-transparency.org/mailman3/postorius/lists/st-discuss.lists.
 
 ## SEE ALSO
 
-The [stprov system documentation](./stprov-system.md) describes stprov from a
+The [stprov system documentation][] describes stprov from a
 design and intended usage perspective without being a dense reference manual.
+
+[stprov system documentation]: ./stprov-system.md
