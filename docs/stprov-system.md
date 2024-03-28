@@ -161,7 +161,7 @@ Interested readers can find more details in the [stprov API package][].
 ## Security considerations
 
 The provisioning itself hinges on the platform's management interface being
-"secure".  On one side of the spectrum is a management interface requiring real
+secure.  On one side of the spectrum is a management interface requiring real
 physical presence.  On the other side of the spectrum is the type of management
 interface described in the introduction; where a web interface is used to
 connect to a management server, which in turn may send commands in plaintext
