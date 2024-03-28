@@ -1,3 +1,54 @@
+NEWS for stprov v0.3.X
+
+    This release mainly improves documentation, test coverage, and fixes bugs.
+    There are a few minor features added relating to the stprov command-line UI.
+
+    Incompatible changes
+
+    * The -b option no longer accepts interface names that contain comma.
+
+    Security fixes:
+
+    * The -a option in stprov remote-run accepts addresses in CIDR notation,
+      but falls back on /32 if an address omits the subnet mask.  The same
+      subnet mask was used for IPv6, resulting in a much larger subnet.  This
+      issue has been fixed, such that the default IPv6 subnet-mask is /128.
+
+    Bug fixes
+
+    * Produce host configurations that are compatible with stboot (stprov and
+      stboot diverged on how to handle empty values, which has now been fixed).
+    * Correctly set the host configuration fields "bonding_mode" and
+      "bond_name".  The bonded interface name is always set to "bond0".
+    * Add a Makefile option for setting custom OS-package URLs.  The
+      built-in default used to be hardcoded without a good way of changing it.
+    * Read TLS roots from a location that is consistent with stboot.  The
+      consulted location is "/etc/trust_policy/tls_roots.pem".
+    * Several nits and confusions in the stprov usage message were fixed.
+
+    New features:
+
+    * Options with multiple values can be specified as a comma-separated
+      list (-e val,val) and/or by repeating the option (-e val -e val).  This
+      makes the UX consistent for the -a, -b, and other multi-value options.
+    * The -r option can accept multiple OS-package URLs.
+    * The -d option can accept multiple DNS servers.  The built-in default
+      has as a result also been updated to include Quad9's secondary server.
+
+    Miscellaneous:
+
+    * System documentation has been added, see docs/stprov-system.md.
+    * Usage manual has been added, see docs/stprov-manual.md.
+    * The OS package URL (-r) and user/password (-u/-p) options are no longer
+      mutually exclusive.  The user and password options are instead silently
+      ignored for OS package URLs without the "user:password" pattern.
+    * The host configuration fields "authentication" and "identity" were
+      removed.  So, the dummy "foo" and "bar" values are no longer written.
+      Note that stprov never supported any real use of the removed fields.
+    * The host configuration field "timestamp" was removed.  In other words,
+      the platform's host configuration no longer indicates a provisioning date.
+    * Major improvements to the QEMU test coverage, see integration/qemu.sh.
+
 NEWS for stprov v0.2.1
 
     Other than improved documentation and testing, this release brings a few
