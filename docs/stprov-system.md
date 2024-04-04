@@ -90,14 +90,12 @@ The following configuration is provisioned with the help of stprov-local:
 The SSH hostkey is derived from entropy provided by the operator (local) and the
 platform's own entropy (remote).  In more detail, HKDF is used to derive a
 unique secret from 128-bits of local and remote entropy.  HKDF is then used
-again to derive an SSH hostkey deterministically from that.  Assuming it is hard
-to gain access to EFI NVRAM, the derived SSH hostkey never leaves the platform.
+again to derive an SSH hostkey deterministically from that.
 
-All configuration is written to EFI NVRAM, see details in the common [storage
-index][].
+All configuration is written to EFI NVRAM, see the [EFI variables reference][].
 
 [Host configuration]: https://git.glasklar.is/system-transparency/project/docs/-/blob/main/content/docs/reference/host_configuration.md?ref_type=heads
-[storage index]: https://git.glasklar.is/system-transparency/project/docs/-/blob/main/content/docs/reference/storage_index.md?ref_type=heads
+[EFI variables reference]: https://git.glasklar.is/system-transparency/project/docs/-/blob/main/content/docs/reference/efi-variables.md?ref_type=heads
 
 ## Provisioning flow
 
