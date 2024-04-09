@@ -60,9 +60,6 @@ function assert_headreq() {
 
 	token="HEAD request on provisioning url gave content-length: "
 	grep -q "$token" saved/qemu.log || die "test $test_num: HTTP HEAD provisioning URL"
-
-	token="WARNING: HEAD request on"
-	! grep -q "$token" saved/qemu.log || die "test $test_num: HTTP HEAD provisioning URL"
 }
 
 function mock_operator() {

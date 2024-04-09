@@ -139,7 +139,7 @@ subset of these options are supported by "dhcp", see COMMANDS.
     -w, --wait             Wait at most this long for link up (Default: 4s)
     -g, --gateway          Gateway IP address (Default: assuming first address in HOST_ADDR's network)
     -x, --try-last-gateway Override default gateway and instead assume last address in HOST_ADDR's network
-    -f, --force            Allow misconfigured gateway address
+    -f, --force            Proceed despite failing configuration sanity checks, logging ignored issues
     -d, --dns              DNS server IP addresses (Default: 9.9.9.9, 149.112.112.112; can be repeated)
 
     The first occurence of the pattern user:password in the specified OS

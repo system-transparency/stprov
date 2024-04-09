@@ -84,7 +84,7 @@ const usage_string = `Usage:
     -w, --wait             Wait at most this long for link up (Default: 4s)
     -g, --gateway          Gateway IP address (Default: assuming first address in HOST_ADDR's network)
     -x, --try-last-gateway Override default gateway and instead assume last address in HOST_ADDR's network
-    -f, --force            Allow misconfigured gateway address
+    -f, --force            Proceed despite failing configuration sanity checks, logging ignored issues
     -d, --dns              DNS server IP addresses (Default: %s; can be repeated)
 
     The first occurence of the pattern user:password in the specified OS
@@ -107,13 +107,13 @@ const (
 )
 
 var (
-	optMAC, optHostName, optUser, optPassword                       string
-	optHostIP, optGateway, optOTP, optFullHostName                  string
-	optInterfaceWait, optInterface                                  string
-	optPort                                                         int
-	optAutodetect, optBonding, optForceGatewayIP, optTryLastGateway bool
-	optBondingInterfaces, optDNS, optURL, optAllowedCIDRs           options.SliceFlag
-	optBondingMode                                                  string
+	optMAC, optHostName, optUser, optPassword              string
+	optHostIP, optGateway, optOTP, optFullHostName         string
+	optInterfaceWait, optInterface                         string
+	optPort                                                int
+	optAutodetect, optBonding, optTryLastGateway, optForce bool
+	optBondingInterfaces, optDNS, optURL, optAllowedCIDRs  options.SliceFlag
+	optBondingMode                                         string
 )
 
 func usage() {
@@ -140,6 +140,7 @@ func setOptions(fs *flag.FlagSet) {
 		options.AddString(fs, &optPassword, "p", "pass", options.DefPassword)
 		options.AddStringS(fs, &optURL, "r", "url", options.DefTemplateURL)
 		options.AddString(fs, &optInterfaceWait, "w", "wait", "4s")
+		options.AddBool(fs, &optForce, "f", "force", false)
 	}
 
 	switch cmd := fs.Name(); cmd {
@@ -149,7 +150,6 @@ func setOptions(fs *flag.FlagSet) {
 		options.AddBool(fs, &optAutodetect, "A", "autodetect", false)
 		options.AddString(fs, &optHostIP, "i", "ip", "")
 		options.AddString(fs, &optGateway, "g", "gateway", "")
-		options.AddBool(fs, &optForceGatewayIP, "f", "force", false)
 		options.AddBool(fs, &optTryLastGateway, "x", "try-last-gateway", false)
 		//TODO: Include with DHCP
 		options.AddStringS(fs, &optBondingInterfaces, "b", "bonding", "")
@@ -215,17 +215,17 @@ func Main(args []string) error {
 		opt.Usage()
 		return nil
 	case "static":
-		config, err := static.Config(opt.Args(), dnsServers, optMAC, optHostIP, optGateway, interfaceWait, optAutodetect, optBonding, optBondingInterfaces.Values, optBondingMode, optForceGatewayIP, optTryLastGateway)
+		config, err := static.Config(opt.Args(), dnsServers, optMAC, optHostIP, optGateway, interfaceWait, optAutodetect, optBonding, optBondingInterfaces.Values, optBondingMode, optForce, optTryLastGateway)
 		if err != nil {
 			return fmtErr(err, opt.Name())
 		}
-		return fmtErr(commitConfig(optHostName, config, optURL.Values, optUser, optPassword), opt.Name())
+		return fmtErr(commitConfig(optHostName, config, optURL.Values, optUser, optPassword, optForce), opt.Name())
 	case "dhcp":
 		config, err := dhcp.Config(opt.Args(), dnsServers, optMAC, interfaceWait, optAutodetect)
 		if err != nil {
 			return fmtErr(err, opt.Name())
 		}
-		return fmtErr(commitConfig(optHostName, config, optURL.Values, optUser, optPassword), opt.Name())
+		return fmtErr(commitConfig(optHostName, config, optURL.Values, optUser, optPassword, optForce), opt.Name())
 	case "run":
 		return fmtErr(run.Main(opt.Args(), optPort, optHostIP, optAllowedCIDRs.Values, optOTP, efiUUID, efiConfigName, efiKeyName, efiHostName), opt.Name())
 	default:
@@ -246,27 +246,27 @@ func parseIPs(ips []string) ([]*net.IP, error) {
 	return ret, nil
 }
 
-// Checks url for validity, and logs any errors.
-func checkURL(client http.Client, url string) {
+// checkURL checks url for validity, logging success or returning
+// error
+func checkURL(client http.Client, url string) error {
 	if strings.Contains(url, options.DefUser+":"+options.DefPassword) {
 		log.Println("WARNING: using default username and password")
 	}
 	resp, err := client.Head(url)
 	if err != nil {
-		log.Printf("WARNING: HEAD request on %q failed: %v", url, err)
-		return
+		return fmt.Errorf("HEAD request on %q failed: %v", url, err)
 	}
 	// Ignore any response body
 	resp.Body.Close()
 	if resp.StatusCode != 200 {
-		log.Printf("WARNING: HEAD request on %q returned status: %q", url, resp.Status)
-		return
+		return fmt.Errorf("HEAD request on %q failed, returned status: %q", url, resp.Status)
 	}
 	log.Printf("HEAD request on provisioning url gave content-length: %d, content-type: %q",
 		resp.ContentLength, resp.Header.Get("content-type"))
+	return nil
 }
 
-func commitConfig(optHostName string, config *host.Config, optURL []string, optUser, optPassword string) error {
+func commitConfig(optHostName string, config *host.Config, optURL []string, optUser, optPassword string, optForce bool) error {
 	if len(optHostName) == 0 {
 		return fmt.Errorf("host name is a required option")
 	}
@@ -282,7 +282,12 @@ func commitConfig(optHostName string, config *host.Config, optURL []string, optU
 		if err != nil {
 			return err // invalid url
 		}
-		checkURL(client, u)
+		if err := checkURL(client, u); err != nil {
+			if !optForce {
+				return fmt.Errorf("HEAD test failed: %w", err)
+			}
+			log.Printf("force flag: ignoring: %v", err)
+		}
 		urls = append(urls, u)
 	}
 	ospkgPointer := strings.Join(urls, ",")
