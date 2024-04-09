@@ -172,6 +172,8 @@ ovmf_locations=(
 	# https://packages.debian.org/bookworm/all/ovmf/filelist
 	# https://packages.debian.org/trixie/all/ovmf/filelist
 	"/usr/share/OVMF/OVMF_CODE_4M.fd /usr/share/OVMF/OVMF_VARS_4M.fd"
+	# https://archlinux.org/packages/extra/any/edk2-ovmf/files/
+	"/usr/share/OVMF/x64/OVMF_CODE.4m.fd /usr/share/OVMF/x64/OVMF_VARS.4m.fd"
 )
 
 ovmf_code=""
