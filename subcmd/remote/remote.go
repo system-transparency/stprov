@@ -34,7 +34,7 @@ const usage_string = `Usage:
 
     -o, --otp    One-time password to establish a secure connection
     -i, --ip     Listening address (Default: 0.0.0.0)
-    -p, --port   Listenting port (Default: 2009)
+    -p, --port   Listening port (Default: 2009)
     -a, --allow  Source IP addresses allowed to connect in CIDR notation
                  (Default: %s; can be repeated)
 
@@ -87,11 +87,11 @@ const usage_string = `Usage:
     -f, --force            Proceed despite failing configuration sanity checks, logging ignored issues
     -d, --dns              DNS server IP addresses (Default: %s; can be repeated)
 
-    The first occurence of the pattern user:password in the specified OS
+    The first occurrence of the pattern user:password in the specified OS
     package URL(s) are substituted with the values of -u and -p.  For example,
     "user:password" might get substituted to "alice:sikritpassword".
 
-    The default OS pckage URL(s) are:
+    The default OS package URL(s) are:
     %s.
 
     Bonding mode (-M) is one of: balance-rr, active-backup, balance-xor,

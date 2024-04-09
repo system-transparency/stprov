@@ -14,7 +14,7 @@ const usage = `Usage:
   stprov local run -o OTP -i IP_ADDR [-p PORT]
 
     Contributes entropy to stprov remote, which is listening on a given IP
-    address (-i) and port (-p).  A one-time password (-o) is used to boostrap
+    address (-i) and port (-p).  A one-time password (-o) is used to bootstrap
     HTTPS.  Outputs the following key-value pairs on success:
 
     fingerprint=<the platform's SSH hostkey fingerprint>
@@ -25,7 +25,7 @@ const usage = `Usage:
 
     -o, --otp   One-time password to establish a secure connection
     -i, --ip    Listening address (e.g., 10.0.2.10)
-    -p, --port  Listenting port (Default: 2009)
+    -p, --port  Listening port (Default: 2009)
 `
 
 var (

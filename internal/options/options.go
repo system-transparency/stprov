@@ -127,7 +127,7 @@ func AddInt(fs *flag.FlagSet, opt *int, short, long string, value int) {
 }
 
 // ConstructURL constructs a URL to an OS package server, replacing the first
-// occurence of "user:password" with the specified user and password.
+// occurrence of "user:password" with the specified user and password.
 func ConstructURL(url, user, password string) (string, error) {
 	return verifyWebPrefix(strings.Replace(url, "user:password", user+":"+password, 1))
 }
