@@ -59,7 +59,7 @@ There are multiple ways to specify the same option.  For example, `-A val` and
     stprov local run -o OTP -i IP_ADDR [-p PORT]
 
       Contributes entropy to stprov remote, which is listening on a given IP
-      address (-i) and port (-p).  A one-time password (-o) is used to boostrap
+      address (-i) and port (-p).  A one-time password (-o) is used to bootstrap
       HTTPS.  Outputs the following key-value pairs on success:
 
       fingerprint=<the platform's SSH hostkey fingerprint>
@@ -108,13 +108,13 @@ The options of "stprov local run" are listed below.
 
     -o, --otp   One-time password to establish a secure connection
     -i, --ip    Listening address (e.g., 10.0.2.10)
-    -p, --port  Listenting port (Default: 2009)
+    -p, --port  Listening port (Default: 2009)
 
 The options of "stprov remote run" are listed below.
 
     -o, --otp    One-time password to establish a secure connection
     -i, --ip     Listening address (Default: 0.0.0.0)
-    -p, --port   Listenting port (Default: 2009)
+    -p, --port   Listening port (Default: 2009)
     -a, --allow  Source IP addresses allowed to connect in CIDR notation
                  (Default: 127.0.0.1/32; can be repeated)
 
@@ -139,14 +139,14 @@ subset of these options are supported by "dhcp", see COMMANDS.
     -w, --wait             Wait at most this long for link up (Default: 4s)
     -g, --gateway          Gateway IP address (Default: assuming first address in HOST_ADDR's network)
     -x, --try-last-gateway Override default gateway and instead assume last address in HOST_ADDR's network
-    -f, --force            Allow misconfigured gateway address
+    -f, --force            Proceed despite failing configuration sanity checks, logging ignored issues
     -d, --dns              DNS server IP addresses (Default: 9.9.9.9, 149.112.112.112; can be repeated)
 
-    The first occurence of the pattern user:password in the specified OS
+    The first occurrence of the pattern user:password in the specified OS
     package URL(s) are substituted with the values of -u and -p.  For example,
     "user:password" might get substituted to "alice:sikritpassword".
 
-    The default OS pckage URL(s) are:
+    The default OS package URL(s) are:
     https://user:password@stpackage.example.org/os-stable.json.
 
     Bonding mode (-M) is one of: balance-rr, active-backup, balance-xor,

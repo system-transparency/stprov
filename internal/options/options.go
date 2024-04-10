@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
 	"math/big"
 	"net"
 	"net/netip"
@@ -126,7 +127,7 @@ func AddInt(fs *flag.FlagSet, opt *int, short, long string, value int) {
 }
 
 // ConstructURL constructs a URL to an OS package server, replacing the first
-// occurence of "user:password" with the specified user and password.
+// occurrence of "user:password" with the specified user and password.
 func ConstructURL(url, user, password string) (string, error) {
 	return verifyWebPrefix(strings.Replace(url, "user:password", user+":"+password, 1))
 }
@@ -178,7 +179,7 @@ func DefaultInterfaces(waitForInterface time.Duration) ([]net.HardwareAddr, erro
 	return candidates, nil
 }
 
-func ValidateHostAndGateway(optHostIP, optGateway string, allowMinorQuirks, optTryLastIPForGateway bool) (string, error) {
+func ValidateHostAndGateway(optHostIP, optGateway string, optForce, optTryLastIPForGateway bool) (string, error) {
 	if len(optHostIP) == 0 {
 		return "", fmt.Errorf("host ip is a required option")
 	}
@@ -193,8 +194,12 @@ func ValidateHostAndGateway(optHostIP, optGateway string, allowMinorQuirks, optT
 		if err != nil {
 			return "", fmt.Errorf("%s: parsing gateway address: %v", optGateway, err)
 		}
-		if !allowMinorQuirks && !hostIPPrefix.Contains(gwIPAddr) {
-			return "", fmt.Errorf("%s: gateway not within host IP network (%s)", gwIPAddr.String(), hostIPPrefix.String())
+		if !hostIPPrefix.Contains(gwIPAddr) {
+			msg := fmt.Sprintf("%s: gateway not within host IP network (%s)", gwIPAddr.String(), hostIPPrefix.String())
+			if !optForce {
+				return "", fmt.Errorf(msg)
+			}
+			log.Printf("force flag: ignoring: %s", msg)
 		}
 	} else {
 		if optTryLastIPForGateway {
@@ -212,8 +217,12 @@ func ValidateHostAndGateway(optHostIP, optGateway string, allowMinorQuirks, optT
 	if err != nil {
 		return "", fmt.Errorf("%s: parsing gateway address: %v", optGateway, err)
 	}
-	if !allowMinorQuirks && hostIPAddr.Equal(gwIPAddr) {
-		return "", fmt.Errorf("%v: host address must be distinct from gateway address", hostIPAddr)
+	if hostIPAddr.Equal(gwIPAddr) {
+		msg := fmt.Sprintf("%v: host address must be distinct from gateway address", hostIPAddr)
+		if !optForce {
+			return "", fmt.Errorf(msg)
+		}
+		log.Printf("force flag: ignoring: %s", msg)
 	}
 
 	return optGateway, nil
