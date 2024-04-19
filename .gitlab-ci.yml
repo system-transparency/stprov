@@ -79,8 +79,8 @@ commitlint:
     - npm install --save-dev @commitlint/config-conventional @commitlint/cli
   script:
     - git fetch origin "${CI_MERGE_REQUEST_TARGET_BRANCH_NAME:=main}"
-    - for i in 5 10 20 40; do if git merge-base HEAD "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"; then break; else git fetch --deepen=$i origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"; fi; done
-    - base_commit_id="$(git merge-base HEAD "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME")"
+    - for i in 5 10 20 40; do if git merge-base HEAD origin/"$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"; then break; else git fetch --deepen=$i origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"; fi; done
+    - base_commit_id="$(git merge-base HEAD origin/"$CI_MERGE_REQUEST_TARGET_BRANCH_NAME")"
     - commit_ids=$(git rev-list --no-merges "$base_commit_id"..)
     - for commit_id in $commit_ids; do git log --format=%B -n1 "$commit_id" | npx commitlint; done
   allow_failure: true
