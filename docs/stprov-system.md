@@ -61,7 +61,7 @@ graph LR
     operator -- "stprov-local connects"--o router3
 ```
 
-[stboot]: https://git.glasklar.is/system-transparency/project/docs/-/blob/main/content/docs/reference/stboot.md?ref_type=heads
+[stboot]: https://git.glasklar.is/system-transparency/core/stboot/-/blob/main/docs/stboot-system.md?ref_type=heads
 
 ## How to make stprov run
 
@@ -73,7 +73,7 @@ not within the scope of this document to describe creation of these artifacts,
 but the reader may find [stmgr][] helpful for creating such artifacts.  In lack
 of other good documentation, considering peeking at the stprov and stboot CI.
 
-[stmgr]: https://git.glasklar.is/system-transparency/project/docs/-/blob/main/content/docs/reference/stmgr-manual.md?ref_type=heads
+[stmgr]: https://git.glasklar.is/system-transparency/core/stmgr/-/blob/main/docs/manual.md?ref_type=heads
 
 ## Provisioned configuration
 
