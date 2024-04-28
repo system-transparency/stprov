@@ -101,7 +101,6 @@ const usage_string = `Usage:
 const (
 	efiKeyName  = "STHostKey"
 	efiHostName = "STHostName"
-	httpTimeout = 20 * time.Second
 
 	trustPolicyRootFile = "/etc/trust_policy/tls_roots.pem"
 )
