@@ -9,6 +9,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"time"
 
 	"system-transparency.org/stprov/internal/secrets"
 )
@@ -52,6 +53,7 @@ func NewClient(cfg *ClientConfig) (*Client, error) {
 					ServerName: secrets.DummyServerName,
 				},
 			},
+			Timeout: 15 * time.Second,
 		},
 		basicAuthPassword: basicAuthPassword,
 		serverURL:         fmt.Sprintf("https://%s:%d/%s/", cfg.RemoteIP, cfg.RemotePort, Protocol),
