@@ -25,18 +25,21 @@ qemu_test:
     # Backporting QEMU version 8.1.1 makes the guestfwd option work though.  We
     # did not hunt down what the bug is, just the (non-)working versions.
     - apt install -qqy -t bookworm-backports qemu-system-x86 qemu-system-common qemu-system-data
-    - apt install -qqy git golang-1.19 python3 curl jq openssh-client make openssl
+    - apt install -qqy git golang-1.19 python3 curl jq openssh-client make openssl unzip cpio gzip
     - apt install -qqy --no-install-recommends python3-pip
     - pip install --break-system-packages --user virt-firmware
     - export PATH=/usr/lib/go-1.19/bin:$PATH
     - export PATH=$PATH:$HOME/.local/bin/
+    - export GOBIN="$HOME/.local/bin"
+    - go install system-transparency.org/stmgr@v0.3.2
   script:
     - ./integration/qemu.sh
+    - ./integration/supermicro-x11scl.sh
   artifacts:
     when: always
     paths:
     - ./integration/saved/
-    - ./integration/build/stprov.cpio # for stage 'images'
+    - ./integration/build/stprov.cpio.gz # for stage 'images'
     - ./integration/build/kernel.vmlinuz # for stage 'images'
 
 # Run tests with HEAD stboot, to detect any breaking changes. One
@@ -57,7 +60,7 @@ qemu_head_stboot_test:
   before_script:
     - apt update
     - apt install -qqy -t bookworm-backports qemu-system-x86 qemu-system-common qemu-system-data
-    - apt install -qqy git golang-1.19 python3 curl jq openssh-client make openssl
+    - apt install -qqy git golang-1.19 python3 curl jq openssh-client make openssl unzip cpio
     - apt install -qqy --no-install-recommends python3-pip
     - pip install --break-system-packages --user virt-firmware
     - export PATH=/usr/lib/go-1.19/bin:$PATH
