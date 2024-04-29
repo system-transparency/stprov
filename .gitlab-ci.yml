@@ -65,7 +65,8 @@ qemu_head_stboot_test:
     - git clone https://git.glasklar.is/system-transparency/core/stboot.git
     - go work init && go work use . ./stboot && mv go.work go.work.local
   script:
-    - GOWORK=$(pwd)/go.work.local ./integration/qemu.sh
+    - GOWORK=$(pwd)/go.work.local SINGLE_TEST=0 ./integration/qemu.sh # static
+    - GOWORK=$(pwd)/go.work.local SINGLE_TEST=4 ./integration/qemu.sh # dhcp
   artifacts:
     when: always
     paths:
