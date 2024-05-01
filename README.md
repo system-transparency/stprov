@@ -21,15 +21,18 @@ pre-defined defaults are good enough, you may use Go's tooling directly:
 
 ## Provisioning
 
-One way to use `stprov` for platform provisioning is by building a minimal OS
-package that contains it.  This OS package can then be written to the `stboot`
-initramfs, and be loaded by default using so called _provisioning mode_.
+One way to use `stprov` for platform provisioning is by building an OS package
+that contains it.  This OS package can then be written to the `stboot`
+initramfs, and be loaded by default using so called [provisioning mode][].  In
+other words, on missing EFI-NVRAM configuration the stboot image would drop into
+a provisioning environment where the `stprov remote` program is available.
+Another way to achieve the same thing is to have a separate image just for
+provisioning, e.g., built as an ISO that can be mounted on the platform.
 
-In other words, on missing EFI-NVRAM configuration the `stboot` ISO would boot
-into a provisioning environment where the `stprov remote` program is available.
+The [stprov CI](./integration/ci-images.yml) contains examples of how to build
+provisioning OS packages and separate ISOs that use u-root's shell environment.
 
-TODO: expand this subsection with an appropriate amount of detail, and/or link
-to further documentation related to this.  We're also missing a good overview.
+[provisioning mode]: https://git.glasklar.is/system-transparency/core/stboot/-/blob/v0.3.6/docs/stboot-system.md?ref_type=tags#host-configuration
 
 ## Development
 
