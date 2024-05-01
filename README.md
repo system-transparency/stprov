@@ -1,8 +1,7 @@
 # System Transparency provisioning tool
 
 This repository provides `stprov`, a System Transparency provisioning tool that
-can be used for writing necessary [stboot][] configurations to EFI-NVRAM.  A
-future version of `stprov` will likely add additional provisioning features.
+can be used for writing necessary [stboot][] configurations to EFI-NVRAM.
 
 [stboot]: https://git.glasklar.is/system-transparency/core/stboot/
 
