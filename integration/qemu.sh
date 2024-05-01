@@ -66,9 +66,9 @@ function mock_operator() {
 	local configure=$1; shift
 	local run=$1; shift
 
+	echo "#!/bin/elvish"
+	echo "mount -t efivarfs none /sys/firmware/efi/efivars"
 	if [[ "$INTERACTIVE" == true ]]; then
-		echo "#!/bin/elvish"
-		echo "mount -t efivarfs none /sys/firmware/efi/efivars"
 		return
 	fi
 
@@ -77,9 +77,6 @@ function mock_operator() {
 	# are templated so that we can easily loop over several different options.
 	# The printed messages help us figure out how it's going, see reach_stage.
 	cat << EOF
-#!/bin/elvish
-
-mount -t efivarfs none /sys/firmware/efi/efivars
 
 printf "stage:boot\n"
 $configure
