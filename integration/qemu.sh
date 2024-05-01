@@ -15,8 +15,8 @@
 set -eu
 trap clean_up EXIT
 
-cd "$(dirname "$0")" # Change directory to where script is located
-GOBIN="$(pwd)"/bin   # Use local directory for built go tools
+cd "$(dirname "$0")"      # Change directory to where script is located
+GOBIN="$(pwd)"/cache/bin  # Use local directory for built go tools
 export GOBIN
 
 INTERACTIVE=${INTERACTIVE:-false}
@@ -130,7 +130,7 @@ URL0=http://$USER:$PASSWORD@$OSPKG_SRV/$RESOURCE
 URL1=http://$OSPKG_SRV/$RESOURCE
 
 rm -rf build/modules
-mkdir -p bin cache build/modules saved
+mkdir -p cache/bin build/modules saved
 
 make -C ../\
 	DEFAULT_TEMPLATE_URL="http://user:password@$OSPKG_SRV/$RESOURCE,$URL1"\
@@ -139,11 +139,11 @@ make -C ../\
 	DEFAULT_PASSWORD="$PASSWORD"\
 	DEFAULT_DNS="$DNS0,$DNS1"\
 	DEFAULT_ALLOWED_NETWORKS="$GATEWAY/32"
-mv ../stprov bin/
+mv ../stprov cache/bin/
 go install ./serve-http
 
 version=$(git describe --tags --always)
-[[ "$(./bin/stprov version)" == "$version" ]] || die "invalid stprov version"
+[[ "$(./cache/bin/stprov version)" == "$version" ]] || die "invalid stprov version"
 
 # go work interacts badly with building u-root itself and with
 # u-root's building of included commands. It can be enabled for
@@ -151,9 +151,9 @@ version=$(git describe --tags --always)
 # variable, and then disabled for the rest of this script.
 unset GOWORK
 version=$(go list -m -f '{{.Version}}' github.com/u-root/u-root)
-[[ -d build/u-root ]] ||
-	git clone --depth 1 -b "$version" https://github.com/u-root/u-root build/u-root &&
-	(cd build/u-root && go install)
+[[ -d cache/u-root ]] ||
+	git clone --depth 1 -b "$version" https://github.com/u-root/u-root cache/u-root &&
+	(cd cache/u-root && go install)
 
 url=https://st.glasklar.is/st/qa/qa-debian-bookworm-amd64.zip
 ospkg=$(basename "$url")
@@ -242,7 +242,7 @@ openssl req -x509 -key build/tls_key.pem -days 1 -out build/tls_roots.pem -subj 
 ###
 # Run tests
 ###
-local_run="./bin/stprov local run --ip 127.0.0.1 -p $PORT --otp $PASSWORD"
+local_run="./cache/bin/stprov local run --ip 127.0.0.1 -p $PORT --otp $PASSWORD"
 remote_run="stprov remote run -p $PORT --otp=$PASSWORD" # use compiled-in default set via Makefile
 remote_configs=(
 	# Static network configuration
@@ -267,16 +267,16 @@ for i in "${!remote_configs[@]}"; do
 	remote_cfg="stprov remote ${remote_configs[$i]}"
 	mock_operator "$remote_cfg" "$remote_run" > build/uinitcmd.sh
 
-	./bin/u-root\
+	./cache/bin/u-root\
 		-o build/stprov.cpio\
-		-uroot-source=build/u-root\
+		-uroot-source=cache/u-root\
 		-uinitcmd="/bin/sh /bin/uinitcmd.sh"\
 		-files build/1-modules.conf:lib/modules-load.d/1-modules.conf\
 		-files build/modules/usr/lib/modules:lib/modules\
-		-files bin/stprov:bin/stprov\
+		-files cache/bin/stprov:bin/stprov\
 		-files build/uinitcmd.sh:bin/uinitcmd.sh\
 		-files build/tls_roots.pem:/etc/trust_policy/tls_roots.pem\
-		build/u-root/cmds/core/{init,elvish,shutdown,cat,cp,dd,echo,grep,hexdump,ls,mkdir,mv,ping,pwd,rm,wget,wc,ip,mount}
+		cache/u-root/cmds/core/{init,elvish,shutdown,cat,cp,dd,echo,grep,hexdump,ls,mkdir,mv,ping,pwd,rm,wget,wc,ip,mount}
 
 	# Documentation to understand qemu user networking and these options:
 	# - https://wiki.qemu.org/Documentation/Networking#User_Networking_(SLIRP)
@@ -293,7 +293,7 @@ for i in "${!remote_configs[@]}"; do
 	nic_opts="$nic_opts,mac=$IFADDR"   # guest mac address
 	nic_opts="$nic_opts,restrict=yes"  # guest is isolated inside its NAT network
 	nic_opts="$nic_opts,hostfwd=tcp:127.0.0.1:$PORT-$IP:$PORT"
-	nic_opts="$nic_opts,guestfwd=tcp:$OSPKG_SRV:80-cmd:./bin/serve-http -d saved"
+	nic_opts="$nic_opts,guestfwd=tcp:$OSPKG_SRV:80-cmd:./cache/bin/serve-http -d saved"
 
 	qemu_opts=(
 		-nographic -no-reboot -m 512M -M q35

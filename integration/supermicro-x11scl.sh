@@ -10,7 +10,7 @@
 set -eu
 cd "$(dirname "$0")"
 
-if [[ ! -x bin/u-root ]]; then
+if [[ ! -x cache/bin/u-root ]]; then
     echo "FAIL: run qemu.sh before using this build script" >&2
     exit 1
 fi
@@ -28,23 +28,23 @@ make -C ../\
     DEFAULT_DOMAIN=st.glasklar.is\
     DEFAULT_DNS=9.9.9.9,149.112.112.112\
     DEFAULT_BONDING_MODE=802.3ad
-mv ../stprov bin/
+mv ../stprov cache/bin/
 
 # It appears that u-root's init doesn't mount EFI variables correctly when using
 # modules.  So, we will need to mount it on our own after u-root's init exited.
 echo "#!/bin/elvish" > build/uinitcmd.sh
 echo "mount -t efivarfs none /sys/firmware/efi/efivars" >> build/uinitcmd.sh
 
-./bin/u-root\
+./cache/bin/u-root\
     -o build/stprov.cpio\
-    -uroot-source=build/u-root\
+    -uroot-source=cache/u-root\
     -uinitcmd="/bin/sh /bin/uinitcmd.sh"\
     -files build/uinitcmd.sh:bin/uinitcmd.sh\
     -files build/1-modules.conf:lib/modules-load.d/1-modules.conf\
     -files build/modules/usr/lib/modules:lib/modules\
-    -files bin/stprov:bin/stprov\
+    -files cache/bin/stprov:bin/stprov\
     -files isrgrootx1.pem:/etc/trust_policy/tls_roots.pem\
-    build/u-root/cmds/core/{init,elvish,shutdown,cat,cp,dd,echo,grep,hexdump,ls,mkdir,mv,ping,pwd,rm,wget,wc,ip,mount}
+    cache/u-root/cmds/core/{init,elvish,shutdown,cat,cp,dd,echo,grep,hexdump,ls,mkdir,mv,ping,pwd,rm,wget,wc,ip,mount}
 
 rm -f build/stprov.iso
 gzip -f build/stprov.cpio
