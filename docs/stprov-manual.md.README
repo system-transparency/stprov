@@ -7,6 +7,6 @@ message and additional information.  These are the copy-pasted part:
   - OPTIONS: see `stprov remote help`
 
 It should be evident what to copy-paste where based on the previous revision of
-the manual.  After pasting, two additional spaces of indentation is needed.
+the manual.  After pasting, ensure there's enough spacing to get a codeblock.
 
 At minimum, we check that the manual is up-to-date before making a release.
