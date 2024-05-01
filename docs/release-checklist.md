@@ -1,4 +1,4 @@
-# Cheat-sheet on releases
+# Releases checklist
 
 This document is intended for maintainers that make releases.
 
