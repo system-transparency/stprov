@@ -2,25 +2,24 @@
 
 This document is intended for maintainers that make releases.
 
-## Checklist
+## Making a release
 
-Making a release:
-
-  - [ ] README, RELEASES, and MAINTAINER files are up-to-date
-  - [ ] Test the procedure of upgrading from the previous release (if any)
-  - [ ] Test and document which other System Transparency components are
-    interoperable.  We currently test that stboot provision mode works, which
-    means stprov is able to produce EFI-NVRAM configurations for network-boot in
-    QEMU.  See [detailed manual testing notes](./cheat-sheet-smoke-test.md).
-  - [ ] Test/check that the tutorial, how-to, and explanation sections of
-    docs.system-transparency.org (branch main) are up-to-date for stprov
+  - [ ] The README.md, RELEASES.md, and MAINTAINER files are up-to-date
+  - [ ] The copy-pasted parts of the stprov manual is up-to-date, see
+    [instructions](./stprov-manual.README)
+  - [ ] All links in the [stprov manual](./stprov-manual) and [stprov system
+    document](./stprov-system.md) are consistent and pointing at the reference
+    specifications that are currently being implemented (with commits or tags).
+  - [ ] List reference specifications and their versions in the NEWS file.
+  - [ ] All release tests pass, see [test docs](./testing-stprov.md)
+  - [ ] List the interoperability-tested versions of stboot and stmgr in the
+    NEWS file.  The versions to use should match the above release testing.
   - [ ] After finalizing the release documentation (in particular the NEWS
     file), create a new tag.  Usually, this means incrementing the third number
     for the most recent tag that was used during our interoperability tests.
-  - [ ] Create release page
-  - [ ] Send announcement email
+  - [ ] Sign the release tag and send an announcement email
 
-## RELEASES-file checklist
+## RELEASES-file 
 
   - [ ] What in the repository is released and supported
   - [ ] The overall release process is described, e.g., where are releases
@@ -30,36 +29,42 @@ Making a release:
     described, e.g., what we intend to (not) break in the future or any
     relevant pointers on how we ensure that things are "working".
 
-## NEWS-file checklist
+## NEWS-file 
 
   - [ ] The previous NEWS entry is for the previous release
   - [ ] Explain what changed
-  - [ ] Detailed instructions on how to upgrade on breaking changes
+  - [ ] Detailed instructions on how to upgrade on breaking changes, listed
+    under the section named "Incompatible changes"
   - [ ] List interoperable repositories and tools, specify commits or tags
   - [ ] List implemented reference specifications, specify commits or tags
+
+Note that the NEWS file is created manually from the git-commit history.
 
 ## Announcement email template
 
 ```
 The ST team is happy to announce a new release of the stprov software,
-tag v0.2.1, which succeeds the previous release at tag v0.1.1.  The
-source code is available as an archive on our GitLab's release page:
+tag vX.X.X, which succeeds the previous release at tag vY.Y.Y.  The
+source code for this release is available from the git repository:
 
-  https://git.glasklar.is/system-transparency/core/stprov/-/releases
+  git clone -b vX.X.X
+  https://git.glasklar.is/system-transparency/core/stprov.git
 
-Alternatively, you can checkout the git-repository:
+Authoritative ST release signing keys are published at
 
-  git clone -b v0.2.1 https://git.glasklar.is/system-transparency/core/stprov.git
+  https://www.system-transparency.org/keys/
 
-Or install using Go's tooling:
+and the tag signature can be verified using the command
 
-  go install system-transparency.org/stprov/cmd/stprov@v0.2.1
+  git -c gpg.format=ssh \
+      -c gpg.ssh.allowedSignersFile=allowed-ST-release-signers \
+      tag --verify vX.X.X
 
 The expectations and intended use of the stprov software is documented
 in the repository's RELEASES file.  This RELEASES file also contains
 more information concerning the overall release process, see:
 
-  https://git.glasklar.is/system-transparency/core/stprov/-/blob/main/RELEASES.md
+  https://git.glasklar.is/system-transparency/core/stprov/-/blob/vX.X.X/RELEASES.md
 
 Learn about what's new in a release from the repository's NEWS file.  An
 excerpt from the latest NEWS-file entry is listed below for convenience.
@@ -69,6 +74,7 @@ discuss list or open an issue on GitLab in the stprov repository:
 
   https://lists.system-transparency.org/mailman3/postorius/lists/st-discuss.lists.system-transparency.org/
   https://git.glasklar.is/system-transparency/core/stprov/-/issues
+  mailto:system-transparency-core-stprov-issues@incoming.glasklar.is
 
 Cheers,
 The ST team
