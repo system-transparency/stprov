@@ -284,7 +284,7 @@ func commitConfig(optHostName string, config *host.Config, optURL []string, optU
 		}
 		if err := checkURL(client, u); err != nil {
 			if !optForce {
-				return fmt.Errorf("HEAD test failed: %w", err)
+				return fmt.Errorf("HEAD request failed: %w", err)
 			}
 			log.Printf("force flag: ignoring: %v", err)
 		}
