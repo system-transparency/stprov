@@ -28,9 +28,9 @@ qemu_test:
     - apt install -qqy git golang-1.19 python3 curl jq openssh-client make openssl unzip cpio gzip
     - apt install -qqy --no-install-recommends python3-pip
     - pip install --break-system-packages --user virt-firmware
-    - export PATH=/usr/lib/go-1.19/bin:$PATH
+    - export GOPATH=$PWD/.go
+    - export PATH=$PATH:/usr/lib/go-1.19/bin:$GOPATH/bin
     - export PATH=$PATH:$HOME/.local/bin/
-    - export GOBIN="$HOME/.local/bin"
     - go install system-transparency.org/stmgr@v0.3.2
   script:
     - ./integration/qemu.sh
