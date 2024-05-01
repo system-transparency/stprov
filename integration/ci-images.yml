@@ -33,12 +33,11 @@ build_bootimages:
     BUILD: integration/build
   before_script:
     - apt update
-    - apt install -qqy git golang-1.19 pigz
+    - apt install -qqy git golang-1.19
     - export GOPATH=$PWD/.go
     - export PATH=$PATH:/usr/lib/go-1.19/bin:$GOPATH/bin
     - go install system-transparency.org/stmgr@$STMGR_VERSION
   script:
-    - pigz $BUILD/stprov.cpio
     - stmgr uki create -format iso -kernel $BUILD/kernel.vmlinuz -initramfs $BUILD/stprov.cpio.gz -out $BUILD/stprov.iso
     - stmgr uki create -format iso -kernel $BUILD/kernel.vmlinuz -initramfs $BUILD/stprov.cpio.gz -out $BUILD/stprov.ttyS0.iso -cmdline console=ttyS0,115200
   artifacts:
