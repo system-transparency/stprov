@@ -11,20 +11,32 @@ changed in each release is documented in a [NEWS file](./NEWS).  The NEWS file
 also specifies which other System Transparency components are known to be
 interoperable, as well as which reference specifications are being implemented.
 
-Note that a release is simply a git-tag specified on our mailing list.  The
-source for this git-tag becomes available on the repository's release page:
+Note that a release is simply a signed git-tag specified on our mailing list,
+accessed from the [stprov repository][].  To verify tag signatures, get the
+`allowed-ST-release-signers` file published at the [signing-key page][], and
+verify the tag `vX.Y.Z` using the following command:
 
-  https://git.glasklar.is/system-transparency/core/stprov/-/releases
+    git -c gpg.format=ssh -c gpg.ssh.allowedSignersFile=allowed-ST-release-signers tag --verify vX.Y.Z
+
+The above configuration can be stored permanently using `git config`.
 
 The stprov Go module is **not** considered stable before a v1.0.0 release.  By
 the terms of the LICENSE file you are free to use this code "as is" in almost
 any way you like, but for now, we support its use _only_ via the above program.
 We don't aim to provide any backwards-compatibility for internal interfaces.
 
-We encourage use of `stprov` to provision new platforms.  It is up to you to
-make `stprov` available to the platform, e.g., as a provisioning OS package.
+We encourage use of stprov to provision new platforms.  Make stprov available to
+the platform as a provisioning OS package or a separate image.  The stprov
+[README](./README.md#provisioning) refers to some examples related to this.
 
 [announce list]: https://lists.system-transparency.org/mailman3/postorius/lists/st-announce.lists.system-transparency.org/
+[stprov repoistory]: https://git.glasklar.is/system-transparency/core/stprov
+[signing-key page]: https://www.system-transparency.org/keys/
+
+## Release testing
+
+See the [test documentation](./docs/testing-stboot.md) for information on how
+stprov is tested with unit tests, in QEMU, and on real hardware.
 
 ## What release cycle is used?
 
@@ -33,27 +45,14 @@ feature releases will not happen more often than once per month.
 
 In case critical bugs are discovered, we intend to provide bug-fix-only updates
 for the latest release in a timely manner.  Backporting bug-fixes to older
-releases than the latest one will be considered on a case-by-case basis.  Such
-consideration is most likely if the latest feature release is very recent or
-upgrading to it is particularly disruptive due to the changes that it brings.
+releases than the latest one will be considered on a case-by-case basis.
 
 ## Upgrading
 
-You are expected to upgrade linearly from one advertised release to the next
-advertised release, e.g., from v0.1.1 to v0.2.1.  We strive to make such linear
-upgrades easy and well-documented to help with forward-compatibility.  Any
-complications that are caused by changed reference specifications, command-line
-flags, or similar will be clearly outlined in the [NEWS files](./NEWS).  Pay
-close attention to the "Breaking changes" section for these migration notes.
+We strive to make stprov upgrades easy and well-documented.  Any complications
+that are caused by changed configuration syntax, command-line flags, or similar
+will be clearly outlined in the [NEWS file](./NEWS).  Pay close attention to
+the "Incompatible changes" section before upgrading to a new version.
 
-Downgrading is in general not supported.  It is further assumed that `stprov`
-clients and servers use the same release.  Mixed releases are not tested.
-
-## Expected changes in upcoming releases
-
-  - Changes to the `stprov` command-line interface are likely to happen (as part
-    of refactoring).
-  - Any changes to the System Transparency reference specifications will be
-    implemented.  This could for example affect the format or configuration
-    being stored in EFI-NVRAM.
-  - New provisioning features, such as remote attestation.
+Downgrading is in general not supported.  Mixing stprov-local and stprov-remote
+version is in general also not supported.
