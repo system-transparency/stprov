@@ -11,13 +11,15 @@ This document is intended for maintainers that make releases.
     document](./stprov-system.md) are consistent and pointing at the reference
     specifications that are currently being implemented (with commits or tags).
   - [ ] List reference specifications and their versions in the NEWS file.
+  - [ ] All direct dependencies are up to date, or are explicitly kept at older
+    versions we want.  Look for updates with `go list -m -u example.org/MODULE`.
   - [ ] All release tests pass, see [test docs](./testing-stprov.md)
   - [ ] List the interoperability-tested versions of stboot and stmgr in the
     NEWS file.  The versions to use should match the above release testing.
   - [ ] After finalizing the release documentation (in particular the NEWS
-    file), create a new tag.  Usually, this means incrementing the third number
-    for the most recent tag that was used during our interoperability tests.
-  - [ ] Sign the release tag and send an announcement email
+    file), create a new signed tag.  Usually, this means incrementing the third
+    number for the most recent tag that was used for interoperability testing.
+  - [ ] Send an announcement email
 
 ## RELEASES-file 
 
@@ -47,8 +49,7 @@ The ST team is happy to announce a new release of the stprov software,
 tag vX.X.X, which succeeds the previous release at tag vY.Y.Y.  The
 source code for this release is available from the git repository:
 
-  git clone -b vX.X.X
-  https://git.glasklar.is/system-transparency/core/stprov.git
+  git clone -b vX.X.X https://git.glasklar.is/system-transparency/core/stprov.git
 
 Authoritative ST release signing keys are published at
 
