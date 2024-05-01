@@ -1,7 +1,8 @@
 NEWS for stprov v0.3.X
 
     This release mainly improves documentation, test coverage, and fixes bugs.
-    There are a few minor features added relating to the stprov command-line UI.
+    There are a few minor features added relating to the stprov command-line UI,
+    and a little bit of clean-up as summarized in the miscellaneous section.
 
     Incompatible changes
 
@@ -34,11 +35,14 @@ NEWS for stprov v0.3.X
     * The -r option can accept multiple OS-package URLs.
     * The -d option can accept multiple DNS servers.  The built-in default
       has as a result also been updated to include Quad9's secondary server.
-
-    Miscellaneous:
+    
+    New documentation:
 
     * System documentation has been added, see docs/stprov-system.md.
     * Usage manual has been added, see docs/stprov-manual.md.
+
+    Miscellaneous:
+
     * The OS package URL (-r) and user/password (-u/-p) options are no longer
       mutually exclusive.  The user and password options are instead silently
       ignored for OS package URLs without the "user:password" pattern.
@@ -47,7 +51,24 @@ NEWS for stprov v0.3.X
       Note that stprov never supported any real use of the removed fields.
     * The host configuration field "timestamp" was removed.  In other words,
       the platform's host configuration no longer indicates a provisioning date.
+    * Failing HEAD requests on OS package URLs are treated as errors rather
+      than warnings.  This behavior can be overridden with the force flag (-f).
     * Major improvements to the QEMU test coverage, see integration/qemu.sh.
+
+    This release implements the following specifications:
+
+    * The system documentation in this repository (docs/stprov-system.md)
+    * https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.2.0/content/docs/reference/efi-variables.md
+    * https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.2.0/content/docs/reference/host_configuration.md
+    * https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.2.0/content/docs/reference/trust_policy.md
+
+    This release has been tested to work with:
+
+    * stboot's provision mode, release tag v0.3.6:
+      https://git.glasklar.is/system-transparency/core/stboot/-/tree/v0.3.6
+    * ISO building using stmgr, pre-release tag v0.3.2:
+      https://git.glasklar.is/system-transparency/core/stmgr/-/tree/v0.3.2
+
 
 NEWS for stprov v0.2.1
 
