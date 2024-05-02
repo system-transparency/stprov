@@ -17,6 +17,8 @@ const usage = `Usage:
   stprov version
   stprov local <SUBCOMMAND> [Options]
   stprov remote <SUBCOMMAND> [Options]
+
+The local and remote commands accept the subcommand "help".
 `
 
 func main() {

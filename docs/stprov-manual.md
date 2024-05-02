@@ -11,6 +11,8 @@ stprov---a System Transparency provisioning tool
     stprov local <SUBCOMMAND> [Options]
     stprov remote <SUBCOMMAND> [Options]
 
+The local and remote commands accept the subcommand "help".
+
 ## VERSION
 
 This manual describes stprov v0.3.X.
