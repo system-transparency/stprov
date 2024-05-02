@@ -1,14 +1,14 @@
 module system-transparency.org/stprov
 
-go 1.18
+go 1.19
 
 require (
 	github.com/go-ping/ping v1.1.0
 	github.com/google/uuid v1.6.0
 	github.com/u-root/u-root v0.12.0
 	github.com/vishvananda/netlink v1.2.1-beta.2
-	golang.org/x/crypto v0.19.0
-	system-transparency.org/stboot v0.3.5
+	golang.org/x/crypto v0.22.0
+	system-transparency.org/stboot v0.3.6
 )
 
 require (
@@ -22,5 +22,5 @@ require (
 	github.com/vishvananda/netns v0.0.4 // indirect
 	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
-	golang.org/x/sys v0.17.0 // indirect
+	golang.org/x/sys v0.19.0 // indirect
 )
