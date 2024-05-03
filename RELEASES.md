@@ -30,12 +30,12 @@ the platform as a provisioning OS package or a separate image.  The stprov
 [README](./README.md#provisioning) refers to some examples related to this.
 
 [announce list]: https://lists.system-transparency.org/mailman3/postorius/lists/st-announce.lists.system-transparency.org/
-[stprov repoistory]: https://git.glasklar.is/system-transparency/core/stprov
+[stprov repository]: https://git.glasklar.is/system-transparency/core/stprov
 [signing-key page]: https://www.system-transparency.org/keys/
 
 ## Release testing
 
-See the [test documentation](./docs/testing-stboot.md) for information on how
+See the [test documentation](./docs/testing-stprov.md) for information on how
 stprov is tested with unit tests, in QEMU, and on real hardware.
 
 ## What release cycle is used?
