@@ -15,7 +15,7 @@ The local and remote commands accept the subcommand "help".
 
 ## VERSION
 
-This manual describes stprov v0.3.X.
+This manual describes stprov v0.3.5.
 
 ## DESCRIPTION
 
