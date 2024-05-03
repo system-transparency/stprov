@@ -123,7 +123,7 @@ The options of "stprov remote run" are listed below.
     If the subnet mask is omitted with the -a option, it defaults to "/32"
     (IPv4) or "/128" (IPv6).  E.g., 10.0.0.1 and 10.0.0.1/32 are equivalent.
 
-The options of "stprov remote {dhcp,static}" are listed below.  Note that only a
+The options of "stprov remote dhcp|static" are listed below.  Note that only a
 subset of these options are supported by "dhcp", see COMMANDS.
 
     -i, --ip               Host address in CIDR notation (e.g., 10.0.2.10/26)

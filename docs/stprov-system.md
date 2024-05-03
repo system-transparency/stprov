@@ -109,7 +109,7 @@ sequenceDiagram
 participant operator
 participant platform
 
-operator->>platform: (1) stprov remote {dhcp,static} [Options]
+operator->>platform: (1) stprov remote dhcp|static [Options]
 
 platform->>platform: (1.1) Configure and verify network
 platform->>platform: (1.2) Write host configuration
