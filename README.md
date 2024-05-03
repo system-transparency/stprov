@@ -53,8 +53,8 @@ your name to the list of authors at the bottom in a separate commit.
 
 Our [CI configuration](./gitlab-ci) builds the `stprov` program, runs (most)
 unit tests, and performs a QEMU integration test.  The QEMU integration test
-contains a working example of `stprov remote static` and `stprov local`.  See
-the [testing stprov](./docs/testing-stprov.md) document for further details.
+contains a working example of `stprov remote` and `stprov local`.  See the
+[testing stprov](./docs/testing-stprov.md) document for further details.
 
 Please make sure that all CI tests pass before requesting review.
 
@@ -87,7 +87,7 @@ message format is as follows:
 
 Pick `<type>` from the following list:
 
-  - **build:** changes that are tooling related
+  - **build:** changes that are tooling/building related
   - **chore:** housekeeping, dependency management, go.mod, etc.
   - **ci:** continuous integration, workflows, etc.
   - **docs:** README, .md files, documentation in code, etc.

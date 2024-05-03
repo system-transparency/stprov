@@ -123,11 +123,11 @@ The options of "stprov remote run" are listed below.
     If the subnet mask is omitted with the -a option, it defaults to "/32"
     (IPv4) or "/128" (IPv6).  E.g., 10.0.0.1 and 10.0.0.1/32 are equivalent.
 
-The options of "stprov remote {dhcp,static}" are listed below.  Note that only a
+The options of "stprov remote dhcp|static" are listed below.  Note that only a
 subset of these options are supported by "dhcp", see COMMANDS.
 
     -i, --ip               Host address in CIDR notation (e.g., 10.0.2.10/26)
-    -h, --host             Host name prefix (full host names becomes HOSTNAME.localhost.local)
+    -h, --host             Host name prefix (full host name becomes HOSTNAME.localhost.local)
     -H, --full-host        Full host name (e.g., host.example.org)
     -r, --url              OS package URLs (see defaults below; can be repeated)
     -u, --user             User name when using a templated user:password URL (Default: stboot)
@@ -183,22 +183,22 @@ A non-zero return code is used to indicate failure.
 Configure a DHCP network using the eth0 interface, hostname "st.example.org",
 two OS package URLs, and two DNS servers.
 
-    stprov remote dhcp -I eth0 -h st.example.org\
-        -r ospkg-01.example.org/bookworm.json -r ospkg-02.example.org/bookworm.json\
+    stprov remote dhcp -I eth0 -H st.example.org\
+        -r https://ospkg-01.example.org/bookworm.json -r https://ospkg-02.example.org/bookworm.json\
         -d 9.9.9.9 -d 149.112.112.112
 
 Configure a static network using the eth0 interface, host network
 192.168.0.4/24, hostname "st.example.org", two OS package URLs, and two DNS
 servers.  The default gateway defaults to 192.168.0.1 in this example.
 
-    stprov remote static -I eth0 -i 192.168.0.4/24 -h st.example.org\
-        -r ospkg-01.example.org/bookworm.json -r ospkg-02.example.org/bookworm.json\
+    stprov remote static -I eth0 -i 192.168.0.4/24 -H st.example.org\
+        -r https://ospkg-01.example.org/bookworm.json -r https://ospkg-02.example.org/bookworm.json\
         -d 9.9.9.9 -d 149.112.112.112
 
 Configure a static network configuration with bonding while typing as little as
 possible.  This depends on appropriate compile-time defaults, see VARIABLES.
 
-    stprov remote static -i 192.168.0.4/24 -H st -B
+    stprov remote static -i 192.168.0.4/24 -h st -B
 
 Wait for commands from "stprov local", which connects from 192.168.0.1/26.
 
