@@ -127,7 +127,7 @@ The options of "stprov remote dhcp|static" are listed below.  Note that only a
 subset of these options are supported by "dhcp", see COMMANDS.
 
     -i, --ip               Host address in CIDR notation (e.g., 10.0.2.10/26)
-    -h, --host             Host name prefix (full host names becomes HOSTNAME.localhost.local)
+    -h, --host             Host name prefix (full host name becomes HOSTNAME.localhost.local)
     -H, --full-host        Full host name (e.g., host.example.org)
     -r, --url              OS package URLs (see defaults below; can be repeated)
     -u, --user             User name when using a templated user:password URL (Default: stboot)
