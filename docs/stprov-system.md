@@ -61,7 +61,7 @@ graph LR
     operator -- "stprov-local connects"--o router3
 ```
 
-[stboot]: https://git.glasklar.is/system-transparency/core/stboot/-/blob/main/docs/stboot-system.md?ref_type=heads
+[stboot]: https://git.glasklar.is/system-transparency/core/stboot/-/blob/v0.3.6/docs/stboot-system.md
 
 ## How to make stprov run
 
@@ -73,7 +73,7 @@ not within the scope of this document to describe creation of these artifacts,
 but the reader may find [stmgr][] helpful for creating such artifacts.  In lack
 of other good documentation, considering peeking at the stprov and stboot CI.
 
-[stmgr]: https://git.glasklar.is/system-transparency/core/stmgr/-/blob/main/docs/manual.md?ref_type=heads
+[stmgr]: https://git.glasklar.is/system-transparency/core/stmgr/-/tree/v0.3.2
 
 ## Provisioned configuration
 
@@ -94,8 +94,8 @@ again to derive an SSH hostkey deterministically from that.
 
 All configuration is written to EFI NVRAM, see the [EFI variables reference][].
 
-[Host configuration]: https://git.glasklar.is/system-transparency/project/docs/-/blob/main/content/docs/reference/host_configuration.md?ref_type=heads
-[EFI variables reference]: https://git.glasklar.is/system-transparency/project/docs/-/blob/main/content/docs/reference/efi-variables.md?ref_type=heads
+[Host configuration]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.2.0/content/docs/reference/host_configuration.md
+[EFI variables reference]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.2.0/content/docs/reference/efi-variables.md
 
 ## Provisioning flow
 
