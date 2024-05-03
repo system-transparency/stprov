@@ -183,22 +183,22 @@ A non-zero return code is used to indicate failure.
 Configure a DHCP network using the eth0 interface, hostname "st.example.org",
 two OS package URLs, and two DNS servers.
 
-    stprov remote dhcp -I eth0 -h st.example.org\
-        -r ospkg-01.example.org/bookworm.json -r ospkg-02.example.org/bookworm.json\
+    stprov remote dhcp -I eth0 -H st.example.org\
+        -r https://ospkg-01.example.org/bookworm.json -r https://ospkg-02.example.org/bookworm.json\
         -d 9.9.9.9 -d 149.112.112.112
 
 Configure a static network using the eth0 interface, host network
 192.168.0.4/24, hostname "st.example.org", two OS package URLs, and two DNS
 servers.  The default gateway defaults to 192.168.0.1 in this example.
 
-    stprov remote static -I eth0 -i 192.168.0.4/24 -h st.example.org\
-        -r ospkg-01.example.org/bookworm.json -r ospkg-02.example.org/bookworm.json\
+    stprov remote static -I eth0 -i 192.168.0.4/24 -H st.example.org\
+        -r https://ospkg-01.example.org/bookworm.json -r https://ospkg-02.example.org/bookworm.json\
         -d 9.9.9.9 -d 149.112.112.112
 
 Configure a static network configuration with bonding while typing as little as
 possible.  This depends on appropriate compile-time defaults, see VARIABLES.
 
-    stprov remote static -i 192.168.0.4/24 -H st -B
+    stprov remote static -i 192.168.0.4/24 -h st -B
 
 Wait for commands from "stprov local", which connects from 192.168.0.1/26.
 
