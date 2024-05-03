@@ -276,7 +276,7 @@ for i in "${!remote_configs[@]}"; do
 		-files cache/bin/stprov:bin/stprov\
 		-files build/uinitcmd.sh:bin/uinitcmd.sh\
 		-files build/tls_roots.pem:/etc/trust_policy/tls_roots.pem\
-		cache/u-root/cmds/core/{init,elvish,shutdown,cat,cp,dd,echo,grep,hexdump,ls,mkdir,mv,ping,pwd,rm,wget,wc,ip,mount}
+		cache/u-root/cmds/core/{init,elvish,shutdown,cat,cp,dd,echo,grep,hexdump,ls,mkdir,mv,ping,pwd,rm,wget,wc,ip,mount,more}
 
 	# Documentation to understand qemu user networking and these options:
 	# - https://wiki.qemu.org/Documentation/Networking#User_Networking_(SLIRP)
