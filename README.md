@@ -87,7 +87,7 @@ message format is as follows:
 
 Pick `<type>` from the following list:
 
-  - **build:** changes that are tooling related
+  - **build:** changes that are tooling/building related
   - **chore:** housekeeping, dependency management, go.mod, etc.
   - **ci:** continuous integration, workflows, etc.
   - **docs:** README, .md files, documentation in code, etc.
