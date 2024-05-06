@@ -23,7 +23,7 @@ fi
 # Build stprov with default values that make sense for the supermicro test
 # server in Glasklar's lab as well as the published stimages.
 make -C ../\
-    DEFAULT_ALLOWED_NETWORKS=91.223.231.1/24\
+    DEFAULT_ALLOWED_NETWORKS=91.223.231.0/24\
     DEFAULT_TEMPLATE_URL=https://st.glasklar.is/st/qa/qa-debian-bookworm-amd64.json\
     DEFAULT_DOMAIN=st.glasklar.is\
     DEFAULT_DNS=9.9.9.9,149.112.112.112\
