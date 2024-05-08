@@ -55,8 +55,8 @@ just a single failing test or no test at all (to debug in QEMU interactively).
 There is no automatic CI test that checks interoperability with a particular
 stboot (pre)release tag.  Perform such a test manually by running the
 [provision-mode demo][] in the core/system-transparency repository.  Ensure that
-the appropriate stboot and stmgr git-tag is set in the `go.mod` file.  Notice
-that you may need to run demo-1 first due to buggy task dependencies.
+the appropriate stprov, stboot, and stmgr tags are set in the `go.mod` file.
+Notice that you may need to run demo-1 first due to buggy task dependencies.
 
 This test is considered successful if stboot boots (expect a login prompt).
 
