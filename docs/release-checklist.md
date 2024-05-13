@@ -4,43 +4,45 @@ This document is intended for maintainers that make releases.
 
 ## Making a release
 
-  - [ ] The README.md, RELEASES.md, and MAINTAINER files are up-to-date
+  - [ ] All files in docs/ looks reasonable on a read through.
+  - [ ] RELEASES.md is up-to-date, see expectations below.
+  - [ ] README.md is up-to-date.
   - [ ] The copy-pasted parts of the stprov manual is up-to-date, see
-    [instructions](./stprov-manual.README)
+    [instructions](./stprov-manual.README) on what needs to be done.
   - [ ] All links in the [stprov manual](./stprov-manual) and [stprov system
     document](./stprov-system.md) are consistent and pointing at the reference
     specifications that are currently being implemented (with commits or tags).
-  - [ ] List reference specifications and their versions in the NEWS file.
+  - [ ] Reference specifications and their versions are listed in the NEWS file.
   - [ ] All direct dependencies are up to date, or are explicitly kept at older
     versions we want.  Look for updates with `go list -m -u example.org/MODULE`.
-  - [ ] All release tests pass, see [test docs](./testing-stprov.md)
-  - [ ] List the interoperability-tested versions of stboot and stmgr in the
-    NEWS file.  The versions to use should match the above release testing.
-  - [ ] After finalizing the release documentation (in particular the NEWS
-    file), create a new signed tag.  Usually, this means incrementing the third
-    number for the most recent tag that was used for interoperability testing.
+  - [ ] All release tests pass, see [test docs](./testing-stprov.md).  You may
+    need to create a new intermediate tag for stprov before doing these tests.
+  - [ ] The interoperability-tested versions of stprov, stboot, stmgr are listed
+    in the NEWS file.
+  - [ ] Finalize the NEWS file, see expectations below.  In the MR that bumps
+    the NEWS version, ensure to also set the same version in stprov's manual.
+  - [ ] Create a signed tag.  Usually, this means incrementing the third number
+    for the most recent tag that was used during interoperability testing.
   - [ ] Send an announcement email
 
 ## RELEASES-file 
 
-  - [ ] What in the repository is released and supported
+  - [ ] It is specified what in the repository is released and supported.
   - [ ] The overall release process is described, e.g., where are releases
     announced, how often do we make releases, what type of releases, etc.
-  - [ ] The expectation we as maintainers have on users is described
-  - [ ] The expectations users can have on us as maintainers is
-    described, e.g., what we intend to (not) break in the future or any
-    relevant pointers on how we ensure that things are "working".
+  - [ ] The expectation we as maintainers have on users is described.
+  - [ ] The expectations users can have on us as maintainers is described, e.g.,
+    what we intend to (not) break in the future or any relevant pointers on how
+    we ensure that things are "working".
 
 ## NEWS-file 
 
-  - [ ] The previous NEWS entry is for the previous release
-  - [ ] Explain what changed
-  - [ ] Detailed instructions on how to upgrade on breaking changes, listed
-    under the section named "Incompatible changes"
-  - [ ] List interoperable repositories and tools, specify commits or tags
-  - [ ] List implemented reference specifications, specify commits or tags
-
-Note that the NEWS file is created manually from the git-commit history.
+  - [ ] The previous NEWS entry is for the previous release.
+  - [ ] It is explained what changed since the previous release.
+  - [ ] There are detailed instructions on how to upgrade on breaking changes,
+    listed under the section named "Incompatible changes".
+  - [ ] Interoperable repositories and tools are listed with commits or tags.
+  - [ ] Implemented reference specifications are listed with commits or tags.
 
 ## Announcement email template
 
@@ -75,7 +77,7 @@ discuss list or open an issue on GitLab in the stprov repository:
 
   https://lists.system-transparency.org/mailman3/postorius/lists/st-discuss.lists.system-transparency.org/
   https://git.glasklar.is/system-transparency/core/stprov/-/issues
-  mailto:system-transparency-core-stprov-issues@incoming.glasklar.is
+  system-transparency-core-stprov-issues@incoming.glasklar.is
 
 Cheers,
 The ST team
