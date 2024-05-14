@@ -11,10 +11,10 @@
 extends:
   - "@commitlint/config-conventional"
 
-# Override type-enum to just use types that are relevant to this project.  Also
-# disable scopes and enforce capital letters to enforce formatting like below.
+# Override type-enum to just use types that are relevant to this project, and
+# enforce formatting of first line of commit message to look like
 #
-#   <type>: <Description starting with a capital letter>
+#   <type>: Description starting with a capital letter
 #
 rules:
   type-enum:
@@ -32,6 +32,7 @@ rules:
   scope-empty: 
     - 2
     - always
+  # Require initial capital letter
   subject-case:
     - 2
     - always
