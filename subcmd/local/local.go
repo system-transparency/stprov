@@ -24,8 +24,8 @@ const usage = `Usage:
   Options:
 
     -o, --otp   One-time password to establish a secure connection
-    -i, --ip    Listening address (e.g., 10.0.2.10)
-    -p, --port  Listening port (Default: 2009)
+    -i, --ip    Remote stprov address (e.g., 10.0.2.10)
+    -p, --port  Remote stprov port (Default: 2009)
 `
 
 var (
