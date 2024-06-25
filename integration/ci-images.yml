@@ -1,6 +1,6 @@
 ---
 variables:
-  STMGR_VERSION: latest
+  STMGR_VERSION: v0.4.0
   STIMAGES_VERSION: v0.0.2
 
 # Build an ST image on a Debian system with stprov installed

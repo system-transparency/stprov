@@ -73,7 +73,7 @@ not within the scope of this document to describe creation of these artifacts,
 but the reader may find [stmgr][] helpful for creating such artifacts.  In lack
 of other good documentation, considering peeking at the stprov and stboot CI.
 
-[stmgr]: https://git.glasklar.is/system-transparency/core/stmgr/-/tree/v0.3.2
+[stmgr]: https://git.glasklar.is/system-transparency/core/stmgr/-/tree/v0.4.0
 
 ## Provisioned configuration
 
