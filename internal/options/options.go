@@ -147,8 +147,9 @@ func verifyWebPrefix(url string) (string, error) {
 const flagRunning = 1 << 6
 
 // DefaultInterfaces outputs a list with one or more MAC addresses.  The
-// associated interfaces have state UP and can thus be used as sane defaults.
-// This corresponds to the network interface flags IFF_UP and IFF_RUNNING.
+// associated interfaces have state UP and a non-empty MAC address, and
+// can thus be used as sane defaults.  This corresponds to the network
+// interface flags IFF_UP and IFF_RUNNING.
 //
 // Interfaces are put into state UP on a best-effort level.  If the appropriate
 // permissions are lacking, an interface is simply skipped without any error.
@@ -165,6 +166,10 @@ func DefaultInterfaces(waitForInterface time.Duration) ([]net.HardwareAddr, erro
 	network.ForEachInterface(func(link netlink.Link) error {
 		// Skip bonding interfaces
 		if strings.HasPrefix(link.Attrs().Name, "bond") {
+			return nil
+		}
+		// Skip interface with empty MAC address
+		if link.Attrs().HardwareAddr.String() == "" {
 			return nil
 		}
 		if link.Attrs().Flags&net.FlagUp != 0 && link.Attrs().RawFlags&flagRunning != 0 {
