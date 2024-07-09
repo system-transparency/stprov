@@ -12,6 +12,7 @@ This document is intended for maintainers that make releases.
   - [ ] All links in the [stprov manual](./stprov-manual) and [stprov system
     document](./stprov-system.md) are consistent and pointing at the reference
     specifications that are currently being implemented (with commits or tags).
+    Also check the links that contain versions in the [README](../README.md).
   - [ ] Reference specifications and their versions are listed in the NEWS file.
   - [ ] All direct dependencies are up to date, or are explicitly kept at older
     versions we want.  Look for updates with `go list -m -u example.org/MODULE`.
