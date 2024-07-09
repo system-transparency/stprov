@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/x509"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -45,6 +47,16 @@ func main() {
 		}
 
 		fmt.Fprintf(os.Stderr, format, opt.Name(), err.Error())
+
+		if opt.Name() == "local" {
+			// Detect the err we get when user runs:
+			// stprov local run -o incorrect-password
+			testErr := x509.UnknownAuthorityError{}
+			if ok := errors.As(err, &testErr); ok {
+				fmt.Fprintf(os.Stderr, "The one-time password may be incorrect.\n")
+			}
+		}
+
 		os.Exit(1)
 	}
 }

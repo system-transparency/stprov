@@ -35,15 +35,15 @@ func Main(args []string, optPort int, optIP, optOTP string) error {
 		RemotePort: port,
 	})
 	if err != nil {
-		return fmt.Errorf("new client: %v", err)
+		return fmt.Errorf("new client: %w", err)
 	}
 	data, err := cli.AddData()
 	if err != nil {
-		return fmt.Errorf("add data: %v", err)
+		return fmt.Errorf("add data: %w", err)
 	}
 	cr, err := cli.Commit()
 	if err != nil {
-		return fmt.Errorf("commit: %v", err)
+		return fmt.Errorf("commit: %w", err)
 	}
 
 	log.Printf("added entropy\n\n%s\n", hexify.Format(data.Entropy))
