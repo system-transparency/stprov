@@ -1,3 +1,15 @@
+NEWS for stprov v0.3.X
+
+    This release fixes two bugs during stprov's network setup.
+
+    Bug fixes
+
+    * Skip network interfaces without MAC addresses during autoselect.
+    * Ensure the selected network interface is in state UP before doing a
+      one-off HTTP HEAD request on the OS package URL.  This fixes a bug where
+      stprov sometimes fails to santity-check the OS package URL, in particular
+      when there's no DNS resolution which masks temporary errors with retries.
+
 NEWS for stprov v0.3.5
 
     This release mainly improves documentation, test coverage, and fixes bugs.
