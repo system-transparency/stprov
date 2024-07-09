@@ -4,6 +4,8 @@ This document is intended for maintainers that make releases.
 
 ## Making a release
 
+  - [ ] All direct dependencies are up to date, or are explicitly kept at older
+    versions we want.  Look for updates with `go list -m -u example.org/MODULE`.
   - [ ] All files in docs/ looks reasonable on a read through.
   - [ ] RELEASES.md is up-to-date, see expectations below.
   - [ ] README.md is up-to-date.
@@ -14,8 +16,6 @@ This document is intended for maintainers that make releases.
     specifications that are currently being implemented (with commits or tags).
     Also check the links that contain versions in the [README](../README.md).
   - [ ] Reference specifications and their versions are listed in the NEWS file.
-  - [ ] All direct dependencies are up to date, or are explicitly kept at older
-    versions we want.  Look for updates with `go list -m -u example.org/MODULE`.
   - [ ] All release tests pass, see [test docs](./testing-stprov.md).  You may
     need to create a new intermediate tag for stprov before doing these tests.
   - [ ] The interoperability-tested versions of stprov, stboot, stmgr are listed
