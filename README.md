@@ -31,7 +31,7 @@ provisioning, e.g., built as an ISO that can be mounted on the platform.
 The [stprov CI](./integration/ci-images.yml) contains examples of how to build
 provisioning OS packages and separate ISOs that use u-root's shell environment.
 
-[provisioning mode]: https://git.glasklar.is/system-transparency/core/stboot/-/blob/v0.3.6/docs/stboot-system.md?ref_type=tags#host-configuration
+[provisioning mode]: https://git.glasklar.is/system-transparency/core/stboot/-/blob/v0.4.1/docs/stboot-system.md?ref_type=tags#host-configuration
 
 ## Development
 

@@ -163,9 +163,9 @@ stprov writes a [host configuration][], a hostname, and an SSH hostkey to EFI
 NVRAM, see the [EFI variables reference][].  The SSH hostkey is only written if
 the "run" subcommand is used for client-server exchanges.
 
-[trust policy]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.2.0/content/docs/reference/trust_policy.md
-[EFI variables reference]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.2.0/content/docs/reference/efi-variables.md
-[host configuration]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.2.0/content/docs/reference/host_configuration.md
+[trust policy]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.3.0/content/docs/reference/trust_policy.md
+[EFI variables reference]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.3.0/content/docs/reference/efi-variables.md
+[host configuration]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.3.0/content/docs/reference/host_configuration.md
 
 ## VARIABLES
 

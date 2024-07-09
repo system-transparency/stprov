@@ -52,15 +52,11 @@ just a single failing test or no test at all (to debug in QEMU interactively).
 
 ### stboot smoke test
 
-There is no automatic CI test that checks interoperability with a particular
-stboot (pre)release tag.  Perform such a test manually by running the
-[provision-mode demo][] in the core/system-transparency repository.  Ensure that
-the appropriate stprov, stboot, and stmgr tags are set in the `go.mod` file.
-Notice that you may need to run demo-1 first due to buggy task dependencies.
+There is an automatic CI test that checks interoperability with stboot, see
+<https://git.glasklar.is/system-transparency/core/stboot/-/blob/main/integration/qemu-provision.sh>.
 
-This test is considered successful if stboot boots (expect a login prompt).
-
-[provision-mode demo]: https://git.glasklar.is/system-transparency/core/system-transparency#demo-2-including-stprov-in-stboots-initramfs
+Ensure the stboot CI passes for the appropriate versions of stprov, stboot, and
+stmgr.  For stprov and stmgr versions, see stboot's `integration/go.mod` file.
 
 ## Testing on real hardware
 

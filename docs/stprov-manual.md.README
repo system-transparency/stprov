@@ -3,7 +3,7 @@ message and additional information.  These are the copy-pasted part:
 
   - SYNOPSIS: see `stprov help`
   - COMMANDS: see `stprov local help` and `stprov remote help`.  Note that the
-	"help" and "version" descriptions are only available in the manual.
+    "help" and "version" descriptions are only available in the manual.
   - OPTIONS: see `stprov remote help`
 
 It should be evident what to copy-paste where based on the previous revision of
