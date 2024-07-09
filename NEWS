@@ -10,7 +10,22 @@ NEWS for stprov v0.3.X
       stprov sometimes fails to santity-check the OS package URL, in particular
       when there's no DNS resolution which masks temporary errors with retries.
 
-    TODO: specify stmgr v0.4.0, stboot v0.4.1, docs v0.3.0
+    This release implements the following specifications:
+
+    * The system documentation in this repository (docs/stprov-system.md)
+    * https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.3.0/content/docs/reference/efi-variables.md
+    * https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.3.0/content/docs/reference/host_configuration.md
+    * https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.3.0/content/docs/reference/trust_policy.md
+
+    Note that the above specifications are semantically the same as in the
+    previous stprov release (bumping docs to v0.3.0 is unrelated to stprov).
+
+    This release has been tested to work with:
+
+    * stboot's provision mode, release tag v0.4.1:
+      https://git.glasklar.is/system-transparency/core/stboot/-/tree/v0.4.1
+    * ISO building using stmgr, pre-release tag v0.4.0:
+      https://git.glasklar.is/system-transparency/core/stmgr/-/tree/v0.4.0
 
 NEWS for stprov v0.3.5
 
