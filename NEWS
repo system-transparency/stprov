@@ -1,4 +1,4 @@
-NEWS for stprov v0.3.X
+NEWS for stprov v0.3.9
 
     This release fixes two bugs during stprov's network setup.
 
@@ -17,13 +17,10 @@ NEWS for stprov v0.3.X
     * https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.3.0/content/docs/reference/host_configuration.md
     * https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.3.0/content/docs/reference/trust_policy.md
 
-    Note that the above specifications are semantically the same as in the
-    previous stprov release (bumping docs to v0.3.0 is unrelated to stprov).
-
     This release has been tested to work with:
 
-    * stboot's provision mode, release tag v0.4.1:
-      https://git.glasklar.is/system-transparency/core/stboot/-/tree/v0.4.1
+    * stboot's provision mode, release tag v0.4.2:
+      https://git.glasklar.is/system-transparency/core/stboot/-/tree/v0.4.2
     * ISO building using stmgr, pre-release tag v0.4.0:
       https://git.glasklar.is/system-transparency/core/stmgr/-/tree/v0.4.0
 
