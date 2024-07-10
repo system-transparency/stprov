@@ -61,7 +61,7 @@ graph LR
     operator -- "stprov-local connects"--o router3
 ```
 
-[stboot]: https://git.glasklar.is/system-transparency/core/stboot/-/blob/v0.4.1/docs/stboot-system.md
+[stboot]: https://git.glasklar.is/system-transparency/core/stboot/-/blob/v0.4.2/docs/stboot-system.md
 
 ## How to make stprov run
 
