@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -86,7 +87,7 @@ func (srv *Server) Run(ctx context.Context) error {
 	})
 
 	defer close(srv.commit)
-	if err := srv.ListenAndServeTLS("", ""); err != http.ErrServerClosed {
+	if err := srv.ListenAndServeTLS("", ""); !errors.Is(err, http.ErrServerClosed) {
 		return fmt.Errorf("server died: %w", err)
 	}
 	return nil
