@@ -258,7 +258,7 @@ func checkURL(client http.Client, url string) error {
 	}
 	// Ignore any response body
 	resp.Body.Close()
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("HEAD request on %q failed, returned status: %q", url, resp.Status)
 	}
 	log.Printf("HEAD request on provisioning url gave content-length: %d, content-type: %q",
