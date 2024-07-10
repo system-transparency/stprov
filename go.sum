@@ -52,5 +52,5 @@ golang.org/x/term v0.21.0 h1:WVXCp+/EBEHOj53Rvu+7KiT/iElMrO8ACK16SMZ3jaA=
 golang.org/x/text v0.3.3/go.mod h1:5Zoc/QRtKVWzQhOtBMvqHzDpF6irO9z98xDceosuGiQ=
 golang.org/x/tools v0.0.0-20180917221912-90fa682c2a6e/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
-system-transparency.org/stboot v0.4.1 h1:IzQCZhboSIDmIxXZWbpigF+lytMy0fDhadc6jUGM7q4=
-system-transparency.org/stboot v0.4.1/go.mod h1:pQT5hl2sPAb9Ya6AWEnm3Jj8a4TvnKW7qEZ6NoSsRWk=
+system-transparency.org/stboot v0.4.2 h1:umwr2TRPT3OAxVeKcAsQPKapo5GXJP+q9Fhx7wHlg5o=
+system-transparency.org/stboot v0.4.2/go.mod h1:pQT5hl2sPAb9Ya6AWEnm3Jj8a4TvnKW7qEZ6NoSsRWk=
