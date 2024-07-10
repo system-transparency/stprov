@@ -34,7 +34,7 @@ func Config(args []string, dnsServers []*net.IP, optInterface, optHostIP, optGat
 		firstIf := bondedInterfaces[0]
 		link, err := netlink.LinkByName(firstIf)
 		if err != nil {
-			return nil, fmt.Errorf("%s: invalid first bonded interface: %v", firstIf, err)
+			return nil, fmt.Errorf("%s: invalid first bonded interface: %w", firstIf, err)
 		}
 		optInterface = link.Attrs().HardwareAddr.String()
 	}
@@ -76,7 +76,7 @@ func Config(args []string, dnsServers []*net.IP, optInterface, optHostIP, optGat
 	}
 	hostIP, err := netlink.ParseAddr(optHostIP)
 	if err != nil {
-		return nil, fmt.Errorf("malformed host address: %s", err)
+		return nil, fmt.Errorf("malformed host address: %w", err)
 	}
 	gateway := net.ParseIP(optGateway)
 	if gateway == nil {
@@ -84,7 +84,7 @@ func Config(args []string, dnsServers []*net.IP, optInterface, optHostIP, optGat
 	}
 
 	if err := mptnetwork.ResetInterfaces(); err != nil {
-		return nil, fmt.Errorf("failed to reset network interfaces: %v", err)
+		return nil, fmt.Errorf("failed to reset network interfaces: %w", err)
 	}
 
 	ifname := mptnetwork.GetInterfaceName(&mac)

@@ -20,7 +20,7 @@ func WaitForDeviceEvent(ctx context.Context, iface string, state netlink.LinkOpe
 	done := make(chan struct{})
 	links := make(chan netlink.LinkUpdate)
 	if err := netlink.LinkSubscribe(links, done); err != nil {
-		return fmt.Errorf("linksubscribe failed: %v", err)
+		return fmt.Errorf("linksubscribe failed: %w", err)
 	}
 	defer close(done)
 	select {
