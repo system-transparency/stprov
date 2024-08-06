@@ -191,13 +191,13 @@ func ValidateHostAndGateway(optHostIP, optGateway string, optForce, optTryLastIP
 
 	hostIPAddr, hostIPPrefix, err := net.ParseCIDR(optHostIP)
 	if err != nil {
-		return "", fmt.Errorf("parsing host address: %v", err)
+		return "", fmt.Errorf("parsing host address: %w", err)
 	}
 
 	if len(optGateway) != 0 {
 		gwIPAddr, _, err := net.ParseCIDR(appendPrefixLength(optGateway))
 		if err != nil {
-			return "", fmt.Errorf("%s: parsing gateway address: %v", optGateway, err)
+			return "", fmt.Errorf("%s: parsing gateway address: %w", optGateway, err)
 		}
 		if !hostIPPrefix.Contains(gwIPAddr) {
 			msg := fmt.Sprintf("%s: gateway not within host IP network (%s)", gwIPAddr.String(), hostIPPrefix.String())
@@ -212,7 +212,7 @@ func ValidateHostAndGateway(optHostIP, optGateway string, optForce, optTryLastIP
 		} else {
 			addr, err := netip.ParseAddr(hostIPPrefix.IP.String())
 			if err != nil {
-				return "", fmt.Errorf("parsing host prefix: %v", err)
+				return "", fmt.Errorf("parsing host prefix: %w", err)
 			}
 			optGateway = addr.Next().String()
 		}
@@ -220,7 +220,7 @@ func ValidateHostAndGateway(optHostIP, optGateway string, optForce, optTryLastIP
 
 	gwIPAddr, _, err := net.ParseCIDR(appendPrefixLength(optGateway))
 	if err != nil {
-		return "", fmt.Errorf("%s: parsing gateway address: %v", optGateway, err)
+		return "", fmt.Errorf("%s: parsing gateway address: %w", optGateway, err)
 	}
 	if hostIPAddr.Equal(gwIPAddr) {
 		msg := fmt.Sprintf("%v: host address must be distinct from gateway address", hostIPAddr)

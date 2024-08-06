@@ -202,7 +202,7 @@ func Main(args []string) error {
 
 	dnsServers, err := parseIPs(optDNS.Values)
 	if err != nil {
-		return fmtErr(fmt.Errorf("dns: %v", err), opt.Name())
+		return fmtErr(fmt.Errorf("dns: %w", err), opt.Name())
 	}
 
 	efiConfigName, efiUUID, err := st.HostConfigEFIVariableName()
@@ -254,11 +254,11 @@ func checkURL(client http.Client, url string) error {
 	}
 	resp, err := client.Head(url)
 	if err != nil {
-		return fmt.Errorf("HEAD request on %q failed: %v", url, err)
+		return fmt.Errorf("HEAD request on %q failed: %w", url, err)
 	}
 	// Ignore any response body
 	resp.Body.Close()
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("HEAD request on %q failed, returned status: %q", url, resp.Status)
 	}
 	log.Printf("HEAD request on provisioning url gave content-length: %d, content-type: %q",
@@ -274,7 +274,7 @@ func commitConfig(optHostName string, config *host.Config, optURL []string, optU
 
 	client, err := network.NewClient(trustPolicyRootFile)
 	if err != nil {
-		return fmt.Errorf("configure tls client: %v", err)
+		return fmt.Errorf("configure tls client: %w", err)
 	}
 	var urls []string
 	for _, url := range optURL {

@@ -44,7 +44,7 @@ type CommitResponse struct {
 func NewAddDataRequest() (*AddDataRequest, error) {
 	entropy, err := secrets.NewEntropy()
 	if err != nil {
-		return nil, fmt.Errorf("api: %v", err)
+		return nil, fmt.Errorf("api: %w", err)
 	}
 	return &AddDataRequest{entropy[:], time.Now().Unix()}, nil
 }

@@ -29,7 +29,7 @@ func Config(args []string, dnsServers []*net.IP, optInterface string, interfaceW
 		return nil, fmt.Errorf("malformed mac address: %s", optInterface)
 	}
 	if err := mptnetwork.ResetInterfaces(); err != nil {
-		return nil, fmt.Errorf("failed to reset network interfaces: %v", err)
+		return nil, fmt.Errorf("failed to reset network interfaces: %w", err)
 	}
 	ifname := mptnetwork.GetInterfaceName(&mac)
 	mode := host.IPDynamic

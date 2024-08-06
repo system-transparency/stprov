@@ -96,15 +96,15 @@ func listen(otp string, allowNets []net.IPNet, ip net.IP, port int, hostname st.
 		HostName:   string(hostname),
 	})
 	if err != nil {
-		return uds, fmt.Errorf("new server: %v", err)
+		return uds, fmt.Errorf("new server: %w", err)
 	}
 	log.Printf("starting server on %s:%d", srv.RemoteIP, srv.RemotePort)
 	if err := srv.Run(ctx); err != nil {
-		return uds, fmt.Errorf("run server: %v", err)
+		return uds, fmt.Errorf("run server: %w", err)
 	}
 	log.Printf("received entropy\n\n%s\n", hexify.Format(srv.Entropy[:]))
 	if _, err := readLine("Press Enter to commit changes, ctrl+c to abort"); err != nil {
-		return uds, fmt.Errorf("read confirmation: %v", err)
+		return uds, fmt.Errorf("read confirmation: %w", err)
 	}
 
 	return srv.UDS, nil

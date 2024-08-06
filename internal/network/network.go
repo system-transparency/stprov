@@ -16,7 +16,7 @@ import (
 func ForEachInterface(f func(link netlink.Link) error) error {
 	interfaces, err := net.Interfaces()
 	if err != nil {
-		return fmt.Errorf("failed accessing interfaces: %v", err)
+		return fmt.Errorf("failed accessing interfaces: %w", err)
 	}
 	for _, i := range interfaces {
 		if i.Flags&net.FlagLoopback != 0 {
@@ -118,15 +118,15 @@ func ResetInterfaces() error {
 	return ForEachInterface(func(link netlink.Link) error {
 		addrs, err := netlink.AddrList(link, netlink.FAMILY_ALL)
 		if err != nil {
-			return fmt.Errorf("%s: failed accessing address: %v", link.Attrs().Name, err)
+			return fmt.Errorf("%s: failed accessing address: %w", link.Attrs().Name, err)
 		}
 		for _, addr := range addrs {
 			if err := netlink.AddrDel(link, &addr); err != nil {
-				return fmt.Errorf("%s: failed resetting address: %v", link.Attrs().Name, err)
+				return fmt.Errorf("%s: failed resetting address: %w", link.Attrs().Name, err)
 			}
 		}
 		if err := netlink.LinkSetDown(link); err != nil {
-			return fmt.Errorf("%s: set link down: %v", link.Attrs().Name, err)
+			return fmt.Errorf("%s: set link down: %w", link.Attrs().Name, err)
 		}
 		return nil
 	})
