@@ -160,7 +160,7 @@ func TestInterfaces(gw, addr string, interfaceWait time.Duration) ([]netlink.Lin
 		} else {
 			duplex := GetDeviceDuplex(link.Attrs().Name)
 			speed := GetDeviceSpeed(link.Attrs().Name)
-			log.Printf("link is available! speed: %s duplex: %s\n", speed, duplex)
+			log.Printf("link is available! speed: %s duplex: %s\n", speed.str, duplex)
 			testedDevices = append(testedDevices, link)
 		}
 		ResetInterfaces()
