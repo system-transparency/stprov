@@ -8,7 +8,7 @@ stages:
 
 go_test:
   stage: unit_test
-  image: golang:1.19
+  image: golang:1.22
   script:
     - go build ./...
     - go test -v -race ./...
@@ -18,18 +18,18 @@ qemu_test:
   stage: integration
   tags:
     - longrunning
-  image: debian:bookworm-backports # s/bookworm-backports/stable/ when possible
+  image: debian:bookworm-backports
   before_script:
     - apt update
-    # The guestfwd option is broken on Debian stable with QEMU version 7.2.7.
+    # The guestfwd option is broken on Debian bookworm with QEMU version 7.2.7.
     # Backporting QEMU version 8.1.1 makes the guestfwd option work though.  We
     # did not hunt down what the bug is, just the (non-)working versions.
-    - apt install -qqy -t bookworm-backports qemu-system-x86 qemu-system-common qemu-system-data
-    - apt install -qqy git golang-1.19 python3 curl jq openssh-client make openssl unzip cpio gzip
+    - apt install -qqy -t bookworm-backports qemu-system-x86 qemu-system-common qemu-system-data golang-1.22
+    - apt install -qqy git python3 curl jq openssh-client make openssl unzip cpio gzip
     - apt install -qqy --no-install-recommends python3-pip
     - pip install --break-system-packages --user virt-firmware
     - export GOPATH=$PWD/.go
-    - export PATH=$PATH:/usr/lib/go-1.19/bin:$GOPATH/bin
+    - export PATH=$PATH:/usr/lib/go-1.22/bin:$GOPATH/bin
     - export PATH=$PATH:$HOME/.local/bin/
     - go install system-transparency.org/stmgr@v0.4.0
   script:
@@ -49,8 +49,8 @@ qemu_test:
 # via the GOWORK environment variable; that way, it can be enabled
 # only when building stprov, and disabled for u-root.
 #
-# Same comment here as for the above qemu_test job: clean-up the backport once
-# Debian stable packages a QEMU version that works with guestfwd.
+# Same comment here as for the above qemu_test job: the the guestfwd
+# feature appears broken in the bookworm version of QEMU.
 qemu_head_stboot_test:
   stage: integration
   tags:
@@ -59,11 +59,11 @@ qemu_head_stboot_test:
   allow_failure: true
   before_script:
     - apt update
-    - apt install -qqy -t bookworm-backports qemu-system-x86 qemu-system-common qemu-system-data
-    - apt install -qqy git golang-1.19 python3 curl jq openssh-client make openssl unzip cpio
+    - apt install -qqy -t bookworm-backports qemu-system-x86 qemu-system-common qemu-system-data golang-1.22
+    - apt install -qqy git python3 curl jq openssh-client make openssl unzip cpio
     - apt install -qqy --no-install-recommends python3-pip
     - pip install --break-system-packages --user virt-firmware
-    - export PATH=/usr/lib/go-1.19/bin:$PATH
+    - export PATH=/usr/lib/go-1.22/bin:$PATH
     - export PATH=$PATH:$HOME/.local/bin/
     - git clone https://git.glasklar.is/system-transparency/core/stboot.git
     - go work init && go work use . ./stboot && mv go.work go.work.local

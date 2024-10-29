@@ -1,6 +1,6 @@
 module system-transparency.org/stprov
 
-go 1.19
+go 1.22
 
 require (
 	github.com/go-ping/ping v1.1.0
