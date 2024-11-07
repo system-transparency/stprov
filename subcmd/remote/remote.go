@@ -107,13 +107,13 @@ const (
 )
 
 var (
-	optMAC, optHostName, optUser, optPassword              string
-	optHostIP, optGateway, optOTP, optFullHostName         string
-	optInterfaceWait, optInterface                         string
-	optPort                                                int
-	optAutodetect, optBonding, optTryLastGateway, optForce bool
-	optBondingInterfaces, optDNS, optURL, optAllowedCIDRs  options.SliceFlag
-	optBondingMode                                         string
+	optMAC, optHostName, optUser, optPassword                  string
+	optHostIP, optGateway, optOTP, optFullHostName             string
+	optInterfaceWait, optInterface                             string
+	optPort                                                    int
+	optAutodetect, optBondingAuto, optTryLastGateway, optForce bool
+	optBondingInterfaces, optDNS, optURL, optAllowedCIDRs      options.SliceFlag
+	optBondingMode                                             string
 )
 
 func usage() {
@@ -153,7 +153,7 @@ func setOptions(fs *flag.FlagSet) {
 		options.AddBool(fs, &optTryLastGateway, "x", "try-last-gateway", false)
 		//TODO: Include with DHCP
 		options.AddStringS(fs, &optBondingInterfaces, "b", "bonding", "")
-		options.AddBool(fs, &optBonding, "B", "bonding-auto", false)
+		options.AddBool(fs, &optBondingAuto, "B", "bonding-auto", false)
 		options.AddString(fs, &optBondingMode, "M", "bonding-mode", options.DefBondingMode)
 	case "dhcp":
 		common()
@@ -182,6 +182,22 @@ func Main(args []string) error {
 	var interfaceWait time.Duration
 
 	opt := options.New(args, usage, setOptions)
+	countTrue := func(b ...bool) int {
+		n := 0
+		for _, v := range b {
+			if v {
+				n++
+			}
+		}
+		return n
+	}
+
+	if optHostName != "" && optFullHostName != "" {
+		return fmtErr(fmt.Errorf("-h and -H options are mutually exclusive"), opt.Name())
+	}
+	if countTrue(optAutodetect, optMAC != "", optInterface != "", optBondingAuto, len(optBondingInterfaces.Values) > 0) > 1 {
+		return fmtErr(fmt.Errorf("-A, -m, -I, -B, and -b options are mutually exclusive"), opt.Name())
+	}
 	optHostName = fmt.Sprintf("%s.%s", optHostName, options.DefHostname)
 	if optFullHostName != "" {
 		optHostName = optFullHostName
@@ -215,7 +231,7 @@ func Main(args []string) error {
 		opt.Usage()
 		return nil
 	case "static":
-		config, err := static.Config(opt.Args(), dnsServers, optMAC, optHostIP, optGateway, interfaceWait, optAutodetect, optBonding, optBondingInterfaces.Values, optBondingMode, optForce, optTryLastGateway)
+		config, err := static.Config(opt.Args(), dnsServers, optMAC, optHostIP, optGateway, interfaceWait, optAutodetect, optBondingAuto, optBondingInterfaces.Values, optBondingMode, optForce, optTryLastGateway)
 		if err != nil {
 			return fmtErr(err, opt.Name())
 		}
