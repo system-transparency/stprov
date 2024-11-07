@@ -177,21 +177,21 @@ func fmtErr(err error, name string) error {
 	return err
 }
 
+func countTrue(b ...bool) int {
+	n := 0
+	for _, v := range b {
+		if v {
+			n++
+		}
+	}
+	return n
+}
+
 func Main(args []string) error {
 	var err error
 	var interfaceWait time.Duration
 
 	opt := options.New(args, usage, setOptions)
-	countTrue := func(b ...bool) int {
-		n := 0
-		for _, v := range b {
-			if v {
-				n++
-			}
-		}
-		return n
-	}
-
 	if optHostName != "" && optFullHostName != "" {
 		return fmtErr(fmt.Errorf("-h and -H options are mutually exclusive"), opt.Name())
 	}
