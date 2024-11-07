@@ -23,10 +23,6 @@ func Config(args []string, dnsServers []*net.IP, optInterface, optHostIP, optGat
 	if err != nil {
 		return nil, err
 	}
-	if optBondingAuto && len(optBondingInterfaces) > 0 {
-		return nil, fmt.Errorf("use -b or -B, not both")
-	}
-
 	bondingName := "bond0"
 	var bondedInterfaces = make([]string, 0, 10)
 	if len(optBondingInterfaces) > 0 {
