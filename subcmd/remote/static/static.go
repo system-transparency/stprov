@@ -35,7 +35,7 @@ func Config(args []string, dnsServers []*net.IP, optInterface, optHostIP, optGat
 		optInterface = link.Attrs().HardwareAddr.String()
 	}
 
-	if optInterface == "" && optAutodetect || optBondingAuto {
+	if optInterface == "" && (optAutodetect || optBondingAuto) {
 		devices, err := mptnetwork.TestInterfaces(optGateway, optHostIP, interfaceWait)
 		if err != nil {
 			log.Printf("failed autodetection: %v\n", err)
