@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path"
+	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/vishvananda/netlink"
@@ -38,57 +39,63 @@ func WaitForDeviceEvent(ctx context.Context, iface string, state netlink.LinkOpe
 
 // Taken from the linux kernel
 // https://github.com/torvalds/linux/blob/v6.0/drivers/net/phy/phy-core.c#L14
-func speedToStr(speed string) string {
+func speedToStr(speed int64) string {
 	switch speed {
-	case "10":
+	case 10:
 		return "10Mbps"
-	case "100":
+	case 100:
 		return "100Mbps"
-	case "1000":
+	case 1000:
 		return "1Gbps"
-	case "2500":
+	case 2500:
 		return "2.5Gbps"
-	case "5000":
+	case 5000:
 		return "5Gbps"
-	case "10000":
+	case 10000:
 		return "10Gbps"
-	case "14000":
+	case 14000:
 		return "14Gbps"
-	case "20000":
+	case 20000:
 		return "20Gbps"
-	case "25000":
+	case 25000:
 		return "25Gbps"
-	case "40000":
+	case 40000:
 		return "40Gbps"
-	case "50000":
+	case 50000:
 		return "50Gbps"
-	case "56000":
+	case 56000:
 		return "56Gbps"
-	case "100000":
+	case 100000:
 		return "100Gbps"
-	case "unknown":
-		return "Unknown"
-	case "-1":
+	case -1:
 		return "Unknown"
 	default:
-		return "Unsupported (update stprov)"
+		return fmt.Sprintf("Unknown %d Mbps (update stprov)", speed)
 	}
 }
 
-func GetDeviceSpeed(device string) string {
-	base := path.Join("/sys/class/net", device)
-	f := path.Join(base, "speed")
-	b, err := os.ReadFile(f)
+// Keeps both integer for numerical comparison, and human-friendly
+// string representation.
+type linkSpeed struct {
+	str           string
+	bitsPerSecond int64 // -1 for Unknown
+}
+
+func GetDeviceSpeed(device string) linkSpeed {
+	b, err := os.ReadFile(filepath.Join("/sys/class/net", device, "speed"))
 	if err != nil {
-		return "Unknown"
+		return linkSpeed{str: "Unknown", bitsPerSecond: -1}
 	}
-	return speedToStr(strings.TrimSpace(string(b)))
+	s := strings.TrimSpace(string(b))
+	i, err := strconv.ParseInt(s, 10, 64) // In units of Mbit/s.
+	if err != nil {
+		return linkSpeed{str: fmt.Sprintf("Unknown (%q)", s), bitsPerSecond: -1}
+	}
+	return linkSpeed{bitsPerSecond: 1000000 * i, str: speedToStr(i)}
 }
 
 func GetDeviceDuplex(device string) string {
-	base := path.Join("/sys/class/net", device)
-	f := path.Join(base, "duplex")
-	b, err := os.ReadFile(f)
+	b, err := os.ReadFile(filepath.Join("/sys/class/net", device, "duplex"))
 	if err != nil {
 		return "unknown"
 	}
