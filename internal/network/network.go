@@ -83,7 +83,7 @@ func testGateway(gw *net.IP) error {
 		return err
 	}
 	if pinger.Pinger.Statistics().PacketsRecv == 0 {
-		return fmt.Errorf("couldn't ping gateway")
+		return fmt.Errorf("couldn't ping gateway address %s", gw)
 	}
 	return nil
 }
