@@ -267,17 +267,18 @@ for i in "${!remote_configs[@]}"; do
 	remote_cfg="stprov remote ${remote_configs[$i]}"
 	mock_operator "$remote_cfg" "$remote_run" > build/uinitcmd.sh
 
-	./cache/bin/u-root\
-		-o build/stprov.cpio\
-		-uroot-source=cache/u-root\
+        (cd cache/u-root &&
+	     ../bin/u-root\
+		-o ../../build/stprov.cpio\
 		-uinitcmd="/bin/sh /bin/uinitcmd.sh"\
-		-files build/1-modules.conf:lib/modules-load.d/1-modules.conf\
-		-files build/modules/usr/lib/modules:lib/modules\
-		-files cache/bin/stprov:bin/stprov\
-		-files build/uinitcmd.sh:bin/uinitcmd.sh\
-		-files build/tls_roots.pem:/etc/trust_policy/tls_roots.pem\
-		cache/u-root/cmds/core/{init,elvish,shutdown,cat,cp,dd,echo,grep,hexdump,ls,mkdir,mv,ping,pwd,rm,wget,wc,ip,mount,more}
-
+		-defaultsh="elvish"\
+		-files ../../build/1-modules.conf:lib/modules-load.d/1-modules.conf\
+		-files ../../build/modules/usr/lib/modules:lib/modules\
+		-files ../bin/stprov:bin/stprov\
+		-files ../../build/uinitcmd.sh:bin/uinitcmd.sh\
+		-files ../../build/tls_roots.pem:etc/trust_policy/tls_roots.pem\
+		./cmds/core/{init,elvish,shutdown,cat,cp,dd,echo,grep,hexdump,ls,mkdir,mv,ping,pwd,rm,wget,wc,ip,mount,more}
+	)
 	# Documentation to understand qemu user networking and these options:
 	# - https://wiki.qemu.org/Documentation/Networking#User_Networking_(SLIRP)
 	# - https://www.qemu.org/docs/master/system/invocation.html#hxtool-5
