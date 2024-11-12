@@ -6,12 +6,13 @@ variables:
 # Build an ST image on a Debian system with stprov installed
 build_stimage:
   stage: images
-  image: debian:bookworm
+  image: debian:bookworm-backports
   before_script:
-    - apt update
-    - apt install -qqy git golang-1.19 pigz
+    - apt-get update
+    - apt-get install -qqy golang-1.22
+    - apt-get install -qqy git pigz
     - export GOPATH=$PWD/.go
-    - export PATH=$PATH:/usr/lib/go-1.19/bin:$GOPATH/bin
+    - export PATH=$PATH:/usr/lib/go-1.22/bin:$GOPATH/bin
     - go install system-transparency.org/stmgr@$STMGR_VERSION
   script:
     - apt install -qqy sudo make mmdebstrap cpio
@@ -28,14 +29,15 @@ build_stimage:
 # Build an ISO on u-root userland with stprov installed
 build_bootimages:
   stage: images
-  image: debian:bookworm
+  image: debian:bookworm-backports
   variables:
     BUILD: integration/build
   before_script:
-    - apt update
-    - apt install -qqy git golang-1.19
+    - apt-get update
+    - apt-get install -qqy golang-1.22
+    - apt-get install -qqy git
     - export GOPATH=$PWD/.go
-    - export PATH=$PATH:/usr/lib/go-1.19/bin:$GOPATH/bin
+    - export PATH=$PATH:/usr/lib/go-1.22/bin:$GOPATH/bin
     - go install system-transparency.org/stmgr@$STMGR_VERSION
   script:
     - stmgr uki create -format iso -kernel $BUILD/kernel.vmlinuz -initramfs $BUILD/stprov.cpio.gz -out $BUILD/stprov.iso
