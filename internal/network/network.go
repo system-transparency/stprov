@@ -133,11 +133,31 @@ func ResetInterfaces() error {
 	})
 }
 
-func TestInterfaces(gw, addr string, interfaceWait time.Duration) ([]netlink.Link, error) {
-	type linkWithSpeed struct {
-		link          netlink.Link
-		bitsPerSecond int64
+type linkWithSpeed struct {
+	link          netlink.Link
+	bitsPerSecond int64
+}
+
+// Sort in order of descending speed. (Unknown, -1, is sorted last).
+// Note: The input slice is reordered in the process.
+func linksByDescendingSpeed(devices []linkWithSpeed) []netlink.Link {
+	slices.SortStableFunc(devices, func(a, b linkWithSpeed) int {
+		if a.bitsPerSecond > b.bitsPerSecond {
+			return -1
+		}
+		if a.bitsPerSecond < b.bitsPerSecond {
+			return 1
+		}
+		return 0
+	})
+	links := make([]netlink.Link, len(devices))
+	for i, dev := range devices {
+		links[i] = dev.link
 	}
+	return links
+}
+
+func TestInterfaces(gw, addr string, interfaceWait time.Duration) ([]netlink.Link, error) {
 	var testedDevices []linkWithSpeed
 
 	gwIP := net.ParseIP(gw)
@@ -172,21 +192,7 @@ func TestInterfaces(gw, addr string, interfaceWait time.Duration) ([]netlink.Lin
 		ResetInterfaces()
 		return nil
 	})
-	// Sort in order of descending speed. (Unknown, -1, is sorted last).
-	slices.SortStableFunc(testedDevices, func(a, b linkWithSpeed) int {
-		if a.bitsPerSecond > b.bitsPerSecond {
-			return -1
-		}
-		if a.bitsPerSecond < b.bitsPerSecond {
-			return 1
-		}
-		return 0
-	})
-	links := make([]netlink.Link, len(testedDevices))
-	for i, dev := range testedDevices {
-		links[i] = dev.link
-	}
-	return links, err
+	return linksByDescendingSpeed(testedDevices), nil
 }
 
 func GetInterfaceName(mac *net.HardwareAddr) string {
