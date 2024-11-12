@@ -31,7 +31,6 @@ qemu_test:
     - export GOPATH=$PWD/.go
     - export PATH=$PATH:/usr/lib/go-1.22/bin:$GOPATH/bin
     - export PATH=$PATH:$HOME/.local/bin/
-    - go install system-transparency.org/stmgr@v0.4.0
   script:
     - ./integration/qemu.sh
     - ./integration/supermicro-x11scl.sh
