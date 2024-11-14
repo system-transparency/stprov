@@ -10,13 +10,10 @@
 set -eu
 cd "$(dirname "$0")"
 
+STMGR=system-transparency.org/stmgr@v0.4.1
+
 if [[ ! -x cache/bin/u-root ]]; then
     echo "FAIL: run qemu.sh before using this build script" >&2
-    exit 1
-fi
-
-if ! command -v stmgr >/dev/null 2>&1; then
-    echo "FAIL: stmgr is not installed" >&2
     exit 1
 fi
 
@@ -35,20 +32,22 @@ mv ../stprov cache/bin/
 echo "#!/bin/elvish" > build/uinitcmd.sh
 echo "mount -t efivarfs none /sys/firmware/efi/efivars" >> build/uinitcmd.sh
 
-./cache/bin/u-root\
-    -o build/stprov.cpio\
-    -uroot-source=cache/u-root\
+(cd cache/u-root &&
+    ../bin/u-root\
+    -o ../../build/stprov.cpio\
     -uinitcmd="/bin/sh /bin/uinitcmd.sh"\
-    -files build/uinitcmd.sh:bin/uinitcmd.sh\
-    -files build/1-modules.conf:lib/modules-load.d/1-modules.conf\
-    -files build/modules/usr/lib/modules:lib/modules\
-    -files cache/bin/stprov:bin/stprov\
-    -files isrgrootx1.pem:/etc/trust_policy/tls_roots.pem\
-    cache/u-root/cmds/core/{init,elvish,shutdown,cat,cp,dd,echo,grep,hexdump,ls,mkdir,mv,ping,pwd,rm,wget,wc,ip,mount}
+    -defaultsh="elvish"\
+    -files ../../build/uinitcmd.sh:bin/uinitcmd.sh\
+    -files ../../build/1-modules.conf:lib/modules-load.d/1-modules.conf\
+    -files ../../build/modules/usr/lib/modules:lib/modules\
+    -files ../bin/stprov:bin/stprov\
+    -files ../../isrgrootx1.pem:/etc/trust_policy/tls_roots.pem\
+    ./cmds/core/{init,elvish,shutdown,cat,cp,dd,echo,grep,hexdump,ls,mkdir,mv,ping,pwd,rm,wget,wc,ip,mount}
+)
 
 rm -f build/stprov.iso
 gzip -f build/stprov.cpio
-stmgr uki create -format iso\
+go run "${STMGR}" uki create -format iso\
     -kernel build/kernel.vmlinuz\
     -initramfs build/stprov.cpio.gz\
     -cmdline '-- -v'\
