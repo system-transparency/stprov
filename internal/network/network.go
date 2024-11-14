@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"slices"
 	"strings"
 	"time"
 
@@ -83,7 +84,7 @@ func testGateway(gw *net.IP) error {
 		return err
 	}
 	if pinger.Pinger.Statistics().PacketsRecv == 0 {
-		return fmt.Errorf("couldn't ping gateway")
+		return fmt.Errorf("couldn't ping gateway address %s", gw)
 	}
 	return nil
 }
@@ -132,8 +133,33 @@ func ResetInterfaces() error {
 	})
 }
 
+type linkWithSpeed struct {
+	link          netlink.Link
+	bitsPerSecond int64
+}
+
+// Sort in order of descending speed. (Unknown, -1, is sorted last).
+// Note: The input slice is reordered in the process.
+func linksByDescendingSpeed(devices []linkWithSpeed) []netlink.Link {
+	slices.SortStableFunc(devices, func(a, b linkWithSpeed) int {
+		if a.bitsPerSecond > b.bitsPerSecond {
+			return -1
+		}
+		if a.bitsPerSecond < b.bitsPerSecond {
+			return 1
+		}
+		return 0
+	})
+	links := make([]netlink.Link, len(devices))
+	for i, dev := range devices {
+		links[i] = dev.link
+	}
+	return links
+}
+
 func TestInterfaces(gw, addr string, interfaceWait time.Duration) ([]netlink.Link, error) {
-	var testedDevices []netlink.Link
+	var testedDevices []linkWithSpeed
+
 	gwIP := net.ParseIP(gw)
 	addrIP, err := netlink.ParseAddr(addr)
 	if err != nil {
@@ -161,12 +187,12 @@ func TestInterfaces(gw, addr string, interfaceWait time.Duration) ([]netlink.Lin
 			duplex := GetDeviceDuplex(link.Attrs().Name)
 			speed := GetDeviceSpeed(link.Attrs().Name)
 			log.Printf("link is available! speed: %s duplex: %s\n", speed.str, duplex)
-			testedDevices = append(testedDevices, link)
+			testedDevices = append(testedDevices, linkWithSpeed{link: link, bitsPerSecond: speed.bitsPerSecond})
 		}
 		ResetInterfaces()
 		return nil
 	})
-	return testedDevices, err
+	return linksByDescendingSpeed(testedDevices), nil
 }
 
 func GetInterfaceName(mac *net.HardwareAddr) string {

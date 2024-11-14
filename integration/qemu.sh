@@ -169,6 +169,7 @@ e1000
 igb
 igc
 tg3
+8139cp
 virtio-rng
 bonding
 efivarfs
@@ -189,6 +190,8 @@ unzip -p "cache/$ospkg" "*${ospkg%.zip}.cpio.gz" | gzip -d |\
         'usr/lib/modules/*/kernel/drivers/net/*/tg3.ko'\
         'usr/lib/modules/*/kernel/drivers/net/*/libphy.ko'\
         'usr/lib/modules/*/kernel/drivers/net/*/bonding.ko'\
+        'usr/lib/modules/*/kernel/drivers/net/mii.ko'\
+        'usr/lib/modules/*/kernel/drivers/net/*/8139cp.ko'\
         'usr/lib/modules/*/kernel/net/*/tls.ko'\
         'usr/lib/modules/*/kernel/drivers/virtio/virtio.ko'\
         'usr/lib/modules/*/kernel/drivers/virtio/virtio_ring.ko'\
@@ -302,6 +305,8 @@ for i in "${!remote_configs[@]}"; do
 		-object "rng-random,filename=/dev/urandom,id=rng0"
 		-device "virtio-rng-pci,rng=rng0"
 		-nic "$nic_opts"
+		# Additional, slow, network. Should be ignored by autodetect.
+		-nic type=user,model=rtl8139,net="$IP/$MASK",host="$GATEWAY"
 		-drive "if=pflash,format=raw,readonly=on,file=$ovmf_code"
 		-drive "if=pflash,format=raw,file=saved/OVMF_VARS.fd"
 		-kernel "build/kernel.vmlinuz"
