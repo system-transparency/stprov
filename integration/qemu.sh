@@ -256,7 +256,7 @@ remote_configs=(
 	# DHCP network configuration
 	"dhcp --interface $IFNAME --dns $DNS0 --dns $DNS1 --full-host $FULLHOST --url $URL0,$URL1"
 	"dhcp --mac       $IFADDR --dns $DNS0 --dns $DNS1 --full-host $FULLHOST --user $USER --pass $PASSWORD"
-	"dhcp --host $HOST" # use compiled-in defaults set via Makefile
+	"dhcp" # use compiled-in defaults set via Makefile
 )
 
 printf '{"desc": "dummy ospkg"}' > "saved/$RESOURCE"
@@ -341,13 +341,17 @@ for i in "${!remote_configs[@]}"; do
 	[[ "$got" == "127.0.0.1" ]] || die "test $i: stprov local ip: got $got, want 127.0.0.1"
 
 	#
-	# Check hostname
+	# Check hostname. It's always the same full host name expect in the
+	# all-default test, in which case we expect the compiled in default.
 	#
+	want_hostname="$FULLHOST"
+	[[ "$remote_cfg" =~ - ]] || want_hostname=example.org
+
 	got=$(grep ^hostname saved/stprov.log | cut -d'=' -f2)
-	[[ "$got" == "$FULLHOST" ]] || die "test $i: stprov local hostname: got $got, want $FULLHOST"
+	[[ "$got" == "$want_hostname" ]] || die "test $i: stprov local hostname: got $got, want $FULLHOST"
 
 	got=$(cat saved/hostname)
-	[[ "$got" == "$FULLHOST" ]] || die "test $i: EFI NVRAM hostname: got $got, want $FULLHOST"
+	[[ "$got" == "$want_hostname" ]] || die "test $i: EFI NVRAM hostname: got $got, want $FULLHOST"
 
 	#
 	# Check SSH key
