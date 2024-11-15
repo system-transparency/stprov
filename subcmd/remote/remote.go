@@ -54,8 +54,8 @@ const usage_string = `Usage:
 
 
   stprov remote static -i HOST_ADDR
-                       -h HOSTNAME | -H FULL_HOSTNAME
                        -r OSPKG_URL [-r OSPKG_URL ...] [-u USER] [-p PASSWORD]
+                       [-h HOSTNAME | -H FULL_HOSTNAME]
                        [-A | -m MAC | -I INTERFACE | {-B | -b INTERFACE [-b INTERFACE ...]} [-M BONDING_MODE]] [-w WAIT]
                        [-g GATEWAY] [-x] [-f]
                        [-d DNS [-d DNS ...]]
@@ -198,10 +198,15 @@ func Main(args []string) error {
 	if countTrue(optAutodetect, optMAC != "", optInterface != "", optBondingAuto, len(optBondingInterfaces.Values) > 0) > 1 {
 		return fmtErr(fmt.Errorf("-A, -m, -I, -B, and -b options are mutually exclusive"), opt.Name())
 	}
-	optHostName = fmt.Sprintf("%s.%s", optHostName, options.DefHostname)
+
 	if optFullHostName != "" {
 		optHostName = optFullHostName
+	} else if optHostName != "" {
+		optHostName = fmt.Sprintf("%s.%s", optHostName, options.DefHostname)
+	} else {
+		optHostName = options.DefHostname
 	}
+
 	if opt.Name() == "static" || opt.Name() == "dhcp" {
 		if interfaceWait, err = time.ParseDuration(optInterfaceWait); err != nil {
 			return fmtErr(err, opt.Name())
