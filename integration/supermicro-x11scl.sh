@@ -10,8 +10,6 @@
 set -eu
 cd "$(dirname "$0")"
 
-STMGR=system-transparency.org/stmgr@v0.4.1
-
 if [[ ! -x cache/bin/u-root ]]; then
     echo "FAIL: run qemu.sh before using this build script" >&2
     exit 1
@@ -47,7 +45,7 @@ echo "mount -t efivarfs none /sys/firmware/efi/efivars" >> build/uinitcmd.sh
 
 rm -f build/stprov.iso
 gzip -f build/stprov.cpio
-go run "${STMGR}" uki create -format iso\
+go run system-transparency.org/stmgr uki create -format iso\
     -kernel build/kernel.vmlinuz\
     -initramfs build/stprov.cpio.gz\
     -cmdline '-- -v'\
