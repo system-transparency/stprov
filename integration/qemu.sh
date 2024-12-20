@@ -140,16 +140,18 @@ make -C ../\
 	DEFAULT_DNS="$DNS0,$DNS1"\
 	DEFAULT_ALLOWED_NETWORKS="$GATEWAY/32"
 mv ../stprov cache/bin/
-go install ./serve-http/serve-http.go
+
+# go work interacts badly with building u-root and other tools in this
+# subdirectory. The go work mechanism can be enabled for compilation
+# of stprov above by using the GOWORK environment variable, but we
+# then disable it for the rest of this script.
+unset GOWORK
+
+go install ./serve-http
 
 version=$(git describe --tags --always)
 [[ "$(./cache/bin/stprov version)" == "$version" ]] || die "invalid stprov version"
 
-# go work interacts badly with building u-root itself and with
-# u-root's building of included commands. It can be enabled for
-# compilation of stprov above by using the GOWORK environment
-# variable, and then disabled for the rest of this script.
-unset GOWORK
 version=$(go list -m -f '{{.Version}}' github.com/u-root/u-root)
 [[ -d cache/u-root ]] ||
 	git clone --depth 1 -b "$version" https://github.com/u-root/u-root cache/u-root &&
