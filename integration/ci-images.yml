@@ -1,6 +1,5 @@
 ---
 variables:
-  STMGR_VERSION: v0.4.0
   STIMAGES_VERSION: v0.0.2
 
 # Build an ST image on a Debian system with stprov installed
@@ -13,7 +12,7 @@ build_stimage:
     - apt-get install -qqy git pigz
     - export GOPATH=$PWD/.go
     - export PATH=$PATH:/usr/lib/go-1.22/bin:$GOPATH/bin
-    - go install system-transparency.org/stmgr@$STMGR_VERSION
+    - (cd integration && go install system-transparency.org/stmgr)
   script:
     - apt install -qqy sudo make mmdebstrap cpio
     - git clone -b $STIMAGES_VERSION https://git.glasklar.is/system-transparency/core/stimages
@@ -38,7 +37,7 @@ build_bootimages:
     - apt-get install -qqy git
     - export GOPATH=$PWD/.go
     - export PATH=$PATH:/usr/lib/go-1.22/bin:$GOPATH/bin
-    - go install system-transparency.org/stmgr@$STMGR_VERSION
+    - (cd integration && go install system-transparency.org/stmgr)
   script:
     - stmgr uki create -format iso -kernel $BUILD/kernel.vmlinuz -initramfs $BUILD/stprov.cpio.gz -out $BUILD/stprov.iso
     - stmgr uki create -format iso -kernel $BUILD/kernel.vmlinuz -initramfs $BUILD/stprov.cpio.gz -out $BUILD/stprov.ttyS0.iso -cmdline console=ttyS0,115200

@@ -140,7 +140,7 @@ make -C ../\
 	DEFAULT_DNS="$DNS0,$DNS1"\
 	DEFAULT_ALLOWED_NETWORKS="$GATEWAY/32"
 mv ../stprov cache/bin/
-go install ./serve-http
+go install ./serve-http/serve-http.go
 
 version=$(git describe --tags --always)
 [[ "$(./cache/bin/stprov version)" == "$version" ]] || die "invalid stprov version"
