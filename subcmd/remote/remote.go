@@ -1,6 +1,7 @@
 package remote
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"system-transparency.org/stboot/host"
+	"system-transparency.org/stboot/stlog"
 	"system-transparency.org/stprov/internal/network"
 	"system-transparency.org/stprov/internal/options"
 	"system-transparency.org/stprov/internal/st"
@@ -273,7 +275,12 @@ func checkURL(client http.Client, url string) error {
 	if strings.Contains(url, options.DefUser+":"+options.DefPassword) {
 		log.Println("WARNING: using default username and password")
 	}
-	resp, err := client.Head(url)
+	ctx := stlog.WithClientTrace(context.Background())
+	req, err := http.NewRequestWithContext(ctx, http.MethodHead, url, nil)
+	if err != nil {
+		return err
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("HEAD request on %q failed: %w", url, err)
 	}
