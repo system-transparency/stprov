@@ -1,9 +1,9 @@
 package remote
 
 import (
+	"context"
 	"flag"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"system-transparency.org/stboot/host"
+	"system-transparency.org/stboot/stlog"
 	"system-transparency.org/stprov/internal/network"
 	"system-transparency.org/stprov/internal/options"
 	"system-transparency.org/stprov/internal/st"
@@ -271,9 +272,15 @@ func parseIPs(ips []string) ([]*net.IP, error) {
 // error
 func checkURL(client http.Client, url string) error {
 	if strings.Contains(url, options.DefUser+":"+options.DefPassword) {
-		log.Println("WARNING: using default username and password")
+		stlog.Warn("Using default username and password")
 	}
-	resp, err := client.Head(url)
+	// Enable logging of IP addresses used for the request.
+	ctx := stlog.WithClientTrace(context.Background())
+	req, err := http.NewRequestWithContext(ctx, http.MethodHead, url, nil)
+	if err != nil {
+		return err
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("HEAD request on %q failed: %w", url, err)
 	}
@@ -282,7 +289,7 @@ func checkURL(client http.Client, url string) error {
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("HEAD request on %q failed, returned status: %q", url, resp.Status)
 	}
-	log.Printf("HEAD request on provisioning url gave content-length: %d, content-type: %q",
+	stlog.Info("HEAD request on provisioning url gave content-length: %d, content-type: %q",
 		resp.ContentLength, resp.Header.Get("content-type"))
 	return nil
 }
@@ -307,7 +314,7 @@ func commitConfig(optHostName string, config *host.Config, optURL []string, optU
 			if !optForce {
 				return fmt.Errorf("HEAD request failed: %w", err)
 			}
-			log.Printf("force flag: ignoring: %v", err)
+			stlog.Warn("force flag: ignoring: %v", err)
 		}
 		urls = append(urls, u)
 	}
