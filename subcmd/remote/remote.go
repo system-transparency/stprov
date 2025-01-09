@@ -274,6 +274,7 @@ func checkURL(client http.Client, url string) error {
 	if strings.Contains(url, options.DefUser+":"+options.DefPassword) {
 		stlog.Warn("Using default username and password")
 	}
+	// Enable logging of IP addresses used for the request.
 	ctx := stlog.WithClientTrace(context.Background())
 	req, err := http.NewRequestWithContext(ctx, http.MethodHead, url, nil)
 	if err != nil {
