@@ -54,6 +54,16 @@ function assert_hostcfg() {
 	[[ "$got" == "$want" ]] || die "test $test_num: host config: wrong $key: got $got, want $want"
 }
 
+function assert_hostcfg_regexp() {
+	local test_num=$1; shift
+	local key=$1; shift
+	local want=$1; shift
+	local got
+
+	got=$(jq "$key" saved/hostcfg.json)
+	[[ "$got" =~ $want ]] || die "test $test_num: host config: wrong $key: got $got, want $want"
+}
+
 function assert_headreq() {
 	local test_num=$1; shift
 	local token
@@ -387,4 +397,6 @@ for i in "${!remote_configs[@]}"; do
 	assert_hostcfg "$i" ".authentication"                       null
 	assert_hostcfg "$i" ".bonding_mode"                         null # only tested manually
 	assert_hostcfg "$i" ".bonding_name"                         null # only tested manually
+	assert_hostcfg_regexp "$i" ".description" \
+		'^"stprov version v[^ ]*; timestamp 2[0-9]{3}-[01][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-6][0-9]Z"$'
 done
