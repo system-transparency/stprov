@@ -15,6 +15,7 @@ import (
 	"system-transparency.org/stprov/internal/network"
 	"system-transparency.org/stprov/internal/options"
 	"system-transparency.org/stprov/internal/st"
+	"system-transparency.org/stprov/internal/version"
 	"system-transparency.org/stprov/subcmd/remote/dhcp"
 	"system-transparency.org/stprov/subcmd/remote/run"
 	"system-transparency.org/stprov/subcmd/remote/static"
@@ -232,6 +233,7 @@ func Main(args []string) error {
 		return fmtErr(err, opt.Name())
 	}
 
+	description := formatDescription(version.Version, time.Now())
 	switch opt.Name() {
 	case "help", "":
 		opt.Usage()
@@ -241,12 +243,14 @@ func Main(args []string) error {
 		if err != nil {
 			return fmtErr(err, opt.Name())
 		}
+		config.Description = &description
 		return fmtErr(commitConfig(optHostName, config, optURL.Values, optUser, optPassword, optForce), opt.Name())
 	case "dhcp":
 		config, err := dhcp.Config(opt.Args(), dnsServers, optMAC, interfaceWait, optAutodetect)
 		if err != nil {
 			return fmtErr(err, opt.Name())
 		}
+		config.Description = &description
 		return fmtErr(commitConfig(optHostName, config, optURL.Values, optUser, optPassword, optForce), opt.Name())
 	case "run":
 		return fmtErr(run.Main(opt.Args(), optPort, optHostIP, optAllowedCIDRs.Values, optOTP, efiUUID, efiConfigName, efiKeyName, efiHostName), opt.Name())
@@ -292,6 +296,10 @@ func checkURL(client http.Client, url string) error {
 	stlog.Info("HEAD request on provisioning url gave content-length: %d, content-type: %q",
 		resp.ContentLength, resp.Header.Get("content-type"))
 	return nil
+}
+
+func formatDescription(version string, timestamp time.Time) string {
+	return fmt.Sprintf("stprov version %s; timestamp %s", version, timestamp.UTC().Format(time.RFC3339))
 }
 
 func commitConfig(optHostName string, config *host.Config, optURL []string, optUser, optPassword string, optForce bool) error {
