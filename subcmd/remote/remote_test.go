@@ -1,6 +1,8 @@
 package remote
 
 import (
+	"time"
+
 	"testing"
 )
 
@@ -22,5 +24,16 @@ func TestCountTrue(t *testing.T) {
 			t.Errorf("countTrue failed for input %v: got %d, want %d",
 				table.in, got, want)
 		}
+	}
+}
+
+func TestFormatDescription(t *testing.T) {
+	timestamp, err := time.Parse(time.RFC3339, "2025-01-30T14:49:01+01:00")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := formatDescription("foo", timestamp),
+		"stprov version foo; timestamp 2025-01-30T13:49:01Z"; got != want {
+		t.Errorf("Unexpected description string, got %q, want %q", got, want)
 	}
 }
