@@ -1,3 +1,35 @@
+NEWS for stprov v0.4.x
+
+    Bug fixes:
+
+    * Without -h and -H, use default hostname, e.g.,
+      "localhost.local", without prepending an extra dot.
+
+    New features:
+
+    * For network autoselect (-A), prefer the fastest network interface.
+
+    * Log the IP addresses used for the OS package HEAD request.
+
+    * Populate the new host config description field with stprov version
+      and timestamp, e.g.,
+        "stprov version v0.4.0-13-g50ea7c2; timestamp 2025-01-30T13:49:01Z"
+      This replaces the timestamp field that was removed in v0.3.5.
+
+    Incompatible changes:
+
+    * This version requires go version 1.22 or later when building.
+
+    This release implements the specifications at
+    https://git.glasklar.is/system-transparency/project/docs/-/tree/v0.4.0/content/docs/reference
+
+    This release has been tested to work with:
+
+    * stboot's provision mode, release tag v0.5.2:
+      https://git.glasklar.is/system-transparency/core/stboot/-/tree/v0.5.2
+    * ISO building using stmgr, pre-release tag v0.5.0:
+      https://git.glasklar.is/system-transparency/core/stmgr/-/tree/v0.5.0
+
 NEWS for stprov v0.3.9
 
     This release fixes two bugs during stprov's network setup.
