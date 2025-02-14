@@ -2,7 +2,7 @@ module testonly
 
 go 1.22
 
-require system-transparency.org/stmgr v0.4.1
+require system-transparency.org/stmgr v0.5.0
 
 require (
 	github.com/diskfs/go-diskfs v1.3.0 // indirect
