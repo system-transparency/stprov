@@ -558,5 +558,5 @@ src.elv.sh v0.16.0-rc1.0.20220116211855-fda62502ad7f h1:pjVeIo9Ba6K1Wy+rlwX91zT7
 src.elv.sh v0.16.0-rc1.0.20220116211855-fda62502ad7f/go.mod h1:kPbhv5+fBeUh85nET3wWhHGUaUQ64nZMJ8FwA5v5Olg=
 system-transparency.org/stboot v0.4.0 h1:5sa3q4YEYVZwzZG30atyM6DzJJsG/UazPE2uDwUE3qc=
 system-transparency.org/stboot v0.4.0/go.mod h1:pQT5hl2sPAb9Ya6AWEnm3Jj8a4TvnKW7qEZ6NoSsRWk=
-system-transparency.org/stmgr v0.4.1 h1:imXvnE/m4cUFb2WyEPop3rTAKIzPl3Ca+pgLsExkEos=
-system-transparency.org/stmgr v0.4.1/go.mod h1:NLSL483k3xQeh4zen38YpWWoQn3D1T+mvbQMd1MW+R8=
+system-transparency.org/stmgr v0.5.0 h1:JAISncgzm1o0txG1Ac+tKgAGER3C9QuikkfPSFZq4Dk=
+system-transparency.org/stmgr v0.5.0/go.mod h1:xbbsd7HCVKeJBPj51t+hl3SbVkuMTs7lVilQhivZYQY=
