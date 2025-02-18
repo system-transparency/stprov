@@ -14,7 +14,8 @@ NEWS for stprov v0.4.x
     * Populate the new host config description field with stprov version
       and timestamp, e.g.,
         "stprov version v0.4.0-13-g50ea7c2; timestamp 2025-01-30T13:49:01Z"
-      This replaces the timestamp field that was removed in v0.3.5.
+      This is the successor of the timestamp field, that was removed
+      in v0.3.5.
 
     Incompatible changes:
 
