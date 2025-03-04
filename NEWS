@@ -22,7 +22,7 @@ NEWS for stprov v0.4.x
     * This version requires go version 1.22 or later when building.
 
     This release implements the specifications at
-    https://git.glasklar.is/system-transparency/project/docs/-/tree/v0.4.0/content/docs/reference
+    https://git.glasklar.is/system-transparency/project/docs/-/tree/v0.4.1/content/docs/reference
 
     This release has been tested to work with:
 

@@ -15,7 +15,7 @@ The local and remote commands accept the subcommand "help".
 
 ## VERSION
 
-This manual describes stprov v0.3.9.
+This manual describes stprov v0.4.x.
 
 ## DESCRIPTION
 
@@ -91,8 +91,8 @@ There are multiple ways to specify the same option.  For example, `-A val` and
 
 
     stprov remote static -i HOST_ADDR
-                         -h HOSTNAME | -H FULL_HOSTNAME
                          -r OSPKG_URL [-r OSPKG_URL ...] [-u USER] [-p PASSWORD]
+                         [-h HOSTNAME | -H FULL_HOSTNAME]
                          [-A | -m MAC | -I INTERFACE | {-B | -b INTERFACE [-b INTERFACE ...]} [-M BONDING_MODE]] [-w WAIT]
                          [-g GATEWAY] [-x] [-f]
                          [-d DNS [-d DNS ...]]
@@ -163,9 +163,9 @@ stprov writes a [host configuration][], a hostname, and an SSH hostkey to EFI
 NVRAM, see the [EFI variables reference][].  The SSH hostkey is only written if
 the "run" subcommand is used for client-server exchanges.
 
-[trust policy]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.3.0/content/docs/reference/trust_policy.md
-[EFI variables reference]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.3.0/content/docs/reference/efi-variables.md
-[host configuration]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.3.0/content/docs/reference/host_configuration.md
+[trust policy]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.4.1/content/docs/reference/trust_policy.md
+[EFI variables reference]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.4.1/content/docs/reference/efi-variables.md
+[host configuration]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.4.1/content/docs/reference/host_configuration.md
 
 ## VARIABLES
 
