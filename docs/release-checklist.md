@@ -10,7 +10,7 @@ This document is intended for maintainers that make releases.
   - [ ] RELEASES.md is up-to-date, see expectations below.
   - [ ] README.md is up-to-date.
   - [ ] The copy-pasted parts of the stprov manual is up-to-date, see
-    [instructions](./stprov-manual.README) on what needs to be done.
+    [instructions](./stprov-manual.md.README) on what needs to be done.
   - [ ] All links in the [stprov manual](./stprov-manual) and [stprov system
     document](./stprov-system.md) are consistent and pointing at the reference
     specifications that are currently being implemented (with commits or tags).
