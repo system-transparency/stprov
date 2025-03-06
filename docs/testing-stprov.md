@@ -124,7 +124,7 @@ mainly want to be sure that the writes succeeded to non-emulated EFI NVRAM.)
 Use the same interface as in the DHCP test.  Look at the [test server][]
 documentation to learn the static IP address, network prefix, and gateway.
 
-    # stprov remote static -h qa2 -I eth1 -i 91.223.231.250/29 -g 91.223.231.249
+    # stprov remote static -h qa2 -I eth1 -i 91.223.231.242/29 -g 91.223.231.241
 
 Expect to see the HEAD request on the OS package succeed again.  Expect to see
 that the hostname and host configuration EFI variables changed appropriately.
@@ -136,7 +136,7 @@ server][] documentation says the MAC addresses of these interfaces are
 `00:0a:f7:2a:59:bc` and `00:0a:f7:2a:59:bd`.  Look at the [test server][]
 documentation to learn the static IP address, network prefix, and gateway.
 
-    # stprov remote static -h qa3 -b eth2 -b eth3 -i 91.223.231.250/29 -g 91.223.231.249
+    # stprov remote static -h qa3 -b eth2 -b eth3 -i 91.223.231.242/29 -g 91.223.231.241
 
 Expect to see the HEAD request on the OS package succeed again.  Expect to see
 that the hostname and host configuration EFI variables changed appropriately.
