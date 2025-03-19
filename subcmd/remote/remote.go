@@ -244,16 +244,28 @@ func Main(args []string) error {
 			return fmtErr(err, opt.Name())
 		}
 		config.Description = &description
-		return fmtErr(commitConfig(optHostName, config, optURL.Values, optUser, optPassword, optForce), opt.Name())
+		err = fmtErr(commitConfig(optHostName, config, optURL.Values, optUser, optPassword, optForce), opt.Name())
+		if err == nil {
+			stlog.Info("command remote %q succeeded", opt.Name())
+		}
+		return err
 	case "dhcp":
 		config, err := dhcp.Config(opt.Args(), dnsServers, optMAC, interfaceWait, optAutodetect)
 		if err != nil {
 			return fmtErr(err, opt.Name())
 		}
 		config.Description = &description
-		return fmtErr(commitConfig(optHostName, config, optURL.Values, optUser, optPassword, optForce), opt.Name())
+		err = fmtErr(commitConfig(optHostName, config, optURL.Values, optUser, optPassword, optForce), opt.Name())
+		if err == nil {
+			stlog.Info("command remote %q succeeded", opt.Name())
+		}
+		return err
 	case "run":
-		return fmtErr(run.Main(opt.Args(), optPort, optHostIP, optAllowedCIDRs.Values, optOTP, efiUUID, efiConfigName, efiKeyName, efiHostName), opt.Name())
+		err = fmtErr(run.Main(opt.Args(), optPort, optHostIP, optAllowedCIDRs.Values, optOTP, efiUUID, efiConfigName, efiKeyName, efiHostName), opt.Name())
+		if err == nil {
+			stlog.Info("command remote %q succeeded", opt.Name())
+		}
+		return err
 	default:
 		return fmt.Errorf("invalid command %q, try \"help\"", opt.Name())
 	}
