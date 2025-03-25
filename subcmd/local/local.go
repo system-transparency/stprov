@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"system-transparency.org/stboot/stlog"
 	"system-transparency.org/stprov/internal/options"
 	"system-transparency.org/stprov/subcmd/local/run"
 )
@@ -52,6 +53,9 @@ func Main(args []string) error {
 		opt.Usage()
 	case "run":
 		err = run.Main(opt.Args(), optPort, optIP, optOTP)
+		if err == nil {
+			stlog.Info("command local %q succeeded", opt.Name())
+		}
 	default:
 		err = fmt.Errorf("invalid command %q, try \"help\"", opt.Name())
 	}
