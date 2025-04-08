@@ -41,9 +41,9 @@ func TestNewClient(t *testing.T) {
 	//
 	// Run tests
 	//
-	t.Run("invalid: file does not exist", func(t *testing.T) {
-		if _, err := NewClient("stprov.client_test.go.pem"); err == nil {
-			t.Errorf("non-existing file accepted")
+	t.Run("valid: file does not exist", func(t *testing.T) {
+		if _, err := NewClient("stprov.client_test.go.pem"); err != nil {
+			t.Errorf("non-existing file rejected; should be optional")
 		}
 	})
 	t.Run("invalid: no certificate in file", func(t *testing.T) {
