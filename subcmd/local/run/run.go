@@ -7,9 +7,11 @@ import (
 
 	"system-transparency.org/stprov/internal/api"
 	"system-transparency.org/stprov/internal/hexify"
+	"system-transparency.org/stprov/internal/sb"
 )
 
-func Main(args []string, optPort int, optIP, optOTP string) error {
+func Main(args []string, optPort int, optIP, optOTP, optPKFile, optKEKFile, optDBFile, optDBXFile string) error {
+	// Parse options relating to secure connection
 	if len(args) != 0 {
 		return fmt.Errorf("trailing arguments: %v", args)
 	}
@@ -29,10 +31,33 @@ func Main(args []string, optPort int, optIP, optOTP string) error {
 	}
 	otp := optOTP
 
+	// Parse options relating to Secure Boot
+	pk, err := sb.ReadOptionalESLFile(optPKFile)
+	if err != nil {
+		return fmt.Errorf("invalid pk: %w", err)
+	}
+	kek, err := sb.ReadOptionalESLFile(optKEKFile)
+	if err != nil {
+		return fmt.Errorf("invalid kek: %w", err)
+	}
+	db, err := sb.ReadOptionalESLFile(optDBFile)
+	if err != nil {
+		return fmt.Errorf("invalid db: %w", err)
+	}
+	dbx, err := sb.ReadOptionalESLFile(optDBXFile)
+	if err != nil {
+		return fmt.Errorf("invalid dbx: %w", err)
+	}
+
+	// Perform local-remote ping pongs
 	cli, err := api.NewClient(&api.ClientConfig{
 		Secret:     otp,
 		RemoteIP:   ip,
 		RemotePort: port,
+		PK:         pk,
+		KEK:        kek,
+		DB:         db,
+		DBX:        dbx,
 	})
 	if err != nil {
 		return fmt.Errorf("new client: %w", err)
@@ -40,6 +65,10 @@ func Main(args []string, optPort int, optIP, optOTP string) error {
 	data, err := cli.AddData()
 	if err != nil {
 		return fmt.Errorf("add data: %w", err)
+	}
+	err = cli.AddSecureBootKeys()
+	if err != nil {
+		return fmt.Errorf("add Secure Boot keys: %w", err)
 	}
 	cr, err := cli.Commit()
 	if err != nil {

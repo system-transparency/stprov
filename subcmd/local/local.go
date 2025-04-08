@@ -27,20 +27,29 @@ const usage = `Usage:
     -o, --otp   One-time password to establish a secure connection
     -i, --ip    Remote stprov address (e.g., 10.0.2.10)
     -p, --port  Remote stprov port (Default: 2009)
+
+    TODO: document Secure Boot options.
 `
 
 var (
-	optPort       int
-	optIP, optOTP string
+	optPort                                      int
+	optIP, optOTP                                string
+	optPKFile, optKEKFile, optDBFile, optDBXFile string
 )
 
 func setOptions(fs *flag.FlagSet) {
 	switch cmd := fs.Name(); cmd {
 	case "help":
 	case "run":
+		// Connection options
 		options.AddInt(fs, &optPort, "p", "port", 2009)
 		options.AddString(fs, &optIP, "i", "ip", "")
 		options.AddString(fs, &optOTP, "o", "otp", "")
+		// Secure Boot options
+		options.AddString(fs, &optPKFile, "a", "pk", "")
+		options.AddString(fs, &optKEKFile, "b", "kek", "")
+		options.AddString(fs, &optDBFile, "c", "db", "")
+		options.AddString(fs, &optDBXFile, "d", "dbx", "")
 	}
 }
 
@@ -48,11 +57,12 @@ func Main(args []string) error {
 	var err error
 
 	opt := options.New(args, func() { fmt.Fprintf(os.Stderr, usage) }, setOptions)
+
 	switch opt.Name() {
 	case "help", "":
 		opt.Usage()
 	case "run":
-		err = run.Main(opt.Args(), optPort, optIP, optOTP)
+		err = run.Main(opt.Args(), optPort, optIP, optOTP, optPKFile, optKEKFile, optDBFile, optDBXFile)
 		if err == nil {
 			stlog.Info("command local %q succeeded", opt.Name())
 		}
