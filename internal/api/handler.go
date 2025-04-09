@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"time"
 
+	"system-transparency.org/stprov/internal/sb"
 	"system-transparency.org/stprov/internal/secrets"
 )
 
@@ -115,6 +116,20 @@ func handleAddData(ctx context.Context, s *Server, w http.ResponseWriter, r *htt
 
 	s.Timestamp = data.Timestamp
 	copy(s.Entropy[:], data.Entropy)
+	return http.StatusOK, nil
+}
+
+func handleAddSecureBoot(ctx context.Context, s *Server, w http.ResponseWriter, r *http.Request) (int, error) {
+	var data AddSecureBootRequest
+	if err := unpackPost(r, &data); err != nil {
+		log.Printf("invalid add-secure-boot request from %s: %v", r.RemoteAddr, err)
+		return http.StatusBadRequest, err
+	}
+	// TODO: assert setup mode
+	if err := sb.ProvisionKeys(data.PK, data.KEK, data.DB, data.DBX); err != nil {
+		log.Printf("failed to provision secure boot request from %s: %v", r.RemoteAddr, err)
+		return http.StatusBadRequest, err
+	}
 	return http.StatusOK, nil
 }
 

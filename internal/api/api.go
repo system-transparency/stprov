@@ -3,18 +3,21 @@
 package api
 
 import (
+	"bytes"
 	"encoding/hex"
 	"fmt"
 	"time"
 
+	"github.com/foxboron/go-uefi/efi/signature"
 	"system-transparency.org/stprov/internal/secrets"
 )
 
 const (
 	Protocol = "stprov/v0.0.1"
 
-	EndpointAddData = "add-data"
-	EndpointCommit  = "commit"
+	EndpointAddData       = "add-data"
+	EndpointAddSecureBoot = "add-secure-boot"
+	EndpointCommit        = "commit"
 
 	BasicAuthUser = "example-user"
 )
@@ -32,6 +35,13 @@ type AddDataRequest struct {
 	Timestamp int64 `json:"timestamp"`
 }
 
+type AddSecureBootRequest struct {
+	PK  []byte `json:"pk"`
+	KEK []byte `json:"kek"`
+	DB  []byte `json:"db"`
+	DBX []byte `json:"dbx"`
+}
+
 // CommitResponse is the output of a commit request
 type CommitResponse struct {
 	Fingerprint    string `json:"fingerprint"`
@@ -47,6 +57,31 @@ func NewAddDataRequest() (*AddDataRequest, error) {
 		return nil, fmt.Errorf("api: %w", err)
 	}
 	return &AddDataRequest{entropy[:], time.Now().Unix()}, nil
+}
+
+func NewAddSecureBootRequest(pk, kek, db, dbx *signature.SignatureDatabase) (*AddSecureBootRequest, error) {
+	var req AddSecureBootRequest
+	if pk != nil {
+		var buf bytes.Buffer
+		pk.Marshal(&buf)
+		req.PK = buf.Bytes()
+	}
+	if kek != nil {
+		var buf bytes.Buffer
+		kek.Marshal(&buf)
+		req.KEK = buf.Bytes()
+	}
+	if db != nil {
+		var buf bytes.Buffer
+		db.Marshal(&buf)
+		req.DB = buf.Bytes()
+	}
+	if dbx != nil {
+		var buf bytes.Buffer
+		dbx.Marshal(&buf)
+		req.DBX = buf.Bytes()
+	}
+	return &req, nil
 }
 
 func NewCommitResponse(uds *secrets.UniqueDeviceSecret, hostname string) (*CommitResponse, error) {
