@@ -3,6 +3,7 @@ package sb
 import (
 	"bytes"
 	"crypto"
+	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
@@ -13,7 +14,6 @@ import (
 	"github.com/foxboron/go-uefi/efi"
 	"github.com/foxboron/go-uefi/efi/signature"
 	"github.com/foxboron/go-uefi/efivar"
-	"system-transparency.org/stprov/internal/secrets"
 )
 
 func IsSetupMode() bool {
@@ -117,9 +117,10 @@ func provision(name string, v efivar.Efivar, sd *signature.SignatureDatabase) er
 }
 
 func fixedKeyPair() (crypto.Signer, *x509.Certificate, error) {
-	seed := []byte("fixed seed -- not a secret")
-	label := "secure boot provisioning"
-	priv, err := rsa.GenerateKey(secrets.Reader(seed, label, 0), 2048)
+	//seed := []byte("fixed seed -- not a secret")
+	//label := "secure boot provisioning"
+	//priv, err := rsa.GenerateKey(secrets.Reader(seed, label, 0), 2048)
+	priv, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		return priv, nil, fmt.Errorf("generate key: %w", err)
 	}
@@ -133,7 +134,8 @@ func fixedKeyPair() (crypto.Signer, *x509.Certificate, error) {
 		NotBefore:          time.Now().Add(-24 * time.Hour),
 		NotAfter:           time.Now().Add(24 * time.Hour),
 	}
-	crtDER, err := x509.CreateCertificate(secrets.Reader(seed, label, 1), tmpl, tmpl, &priv.PublicKey, priv)
+	//crtDER, err := x509.CreateCertificate(secrets.Reader(seed, label, 1), tmpl, tmpl, &priv.PublicKey, priv)
+	crtDER, err := x509.CreateCertificate(rand.Reader, tmpl, tmpl, &priv.PublicKey, priv)
 	if err != nil {
 		return priv, nil, fmt.Errorf("create certificate: %w", err)
 	}

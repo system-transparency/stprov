@@ -5,10 +5,10 @@ trap clean_up EXIT
 
 function clean_up() {
 	echo "clean up" >/dev/null
-	rm -f  pk{,.pem,.esl}
-	rm -f kek{,.pem,.esl}
-	rm -f  db{,.pem,.esl}
-	rm -f dbx{,.pem,.esl}
+	#rm -f  pk{,.pem,.esl}
+	#rm -f kek{,.pem,.esl}
+	#rm -f  db{,.pem,.esl}
+	#rm -f dbx{,.pem,.esl}
 }
 
 function info() {
