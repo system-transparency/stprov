@@ -81,7 +81,7 @@ func (c *Client) AddSecureBootKeys() error {
 	if err != nil {
 		return fmt.Errorf("create secure boot request: %w", err)
 	}
-	if _, err := c.doPost(c.serverURL+EndpointAddData, req); err != nil {
+	if _, err := c.doPost(c.serverURL+EndpointAddSecureBoot, req); err != nil {
 		return fmt.Errorf("post secure boot keys: %w", err)
 	}
 	return nil
