@@ -3,6 +3,7 @@ package sb
 import (
 	"bytes"
 	"crypto"
+	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
@@ -15,7 +16,6 @@ import (
 	"github.com/foxboron/go-uefi/efivar"
 	"github.com/google/uuid"
 	"github.com/u-root/u-root/pkg/efivarfs"
-	"system-transparency.org/stprov/internal/secrets"
 )
 
 // ReadOptionalESLFile reads an EFI signature list if filename is provided
@@ -38,7 +38,7 @@ func IsSetupMode() (bool, error) {
 	varUUID, _ := uuid.Parse("8be4df61-93ca-11d2-aa0d-00e098032b8c")
 	b, err := readEFI(&varUUID, "SetupMode")
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("readEFI: %w", err)
 	}
 	if len(b) != 1 {
 		return false, fmt.Errorf("unexpected length: %w", err)
@@ -87,9 +87,7 @@ func provision(v efivar.Efivar, sd *signature.SignatureDatabase) error {
 }
 
 func dummyKeyPair() (crypto.Signer, *x509.Certificate, error) {
-	seed := []byte("fixed seed -- not a secret")
-	label := "secure boot provisioning"
-	priv, err := rsa.GenerateKey(secrets.Reader(seed, label, 0), 2048)
+	priv, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		return priv, nil, fmt.Errorf("generate key: %w", err)
 	}
@@ -103,7 +101,7 @@ func dummyKeyPair() (crypto.Signer, *x509.Certificate, error) {
 		NotBefore:          time.Now().Add(-24 * time.Hour),
 		NotAfter:           time.Now().Add(24 * time.Hour),
 	}
-	crtDER, err := x509.CreateCertificate(secrets.Reader(seed, label, 1), tmpl, tmpl, &priv.PublicKey, priv)
+	crtDER, err := x509.CreateCertificate(rand.Reader, tmpl, tmpl, &priv.PublicKey, priv)
 	if err != nil {
 		return priv, nil, fmt.Errorf("create certificate: %w", err)
 	}
