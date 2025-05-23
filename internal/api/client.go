@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 
+	"github.com/foxboron/go-uefi/efi/signature"
 	"system-transparency.org/stprov/internal/secrets"
 )
 
@@ -17,6 +18,12 @@ type ClientConfig struct {
 	Secret     string // shared secret between stprov local and stprov remote
 	RemoteIP   net.IP // IP address used by stprov remote
 	RemotePort int    // port used by stprov remote
+
+	// Optional Secure Boot policy objects
+	PK  *signature.SignatureDatabase
+	KEK *signature.SignatureDatabase
+	DB  *signature.SignatureDatabase
+	DBX *signature.SignatureDatabase
 }
 
 type Client struct {
@@ -67,6 +74,17 @@ func (c *Client) AddData() (*AddDataRequest, error) {
 		return nil, fmt.Errorf("post data: %w", err)
 	}
 	return data, nil
+}
+
+func (c *Client) AddSecureBootKeys() error {
+	req, err := NewAddSecureBootRequest(c.PK, c.KEK, c.DB, c.DBX)
+	if err != nil {
+		return fmt.Errorf("create secure boot request: %w", err)
+	}
+	if _, err := c.doPost(c.serverURL+EndpointAddData, req); err != nil {
+		return fmt.Errorf("post secure boot keys: %w", err)
+	}
+	return nil
 }
 
 func (c *Client) Commit() (*CommitResponse, error) {
