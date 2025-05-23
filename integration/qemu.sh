@@ -230,7 +230,7 @@ unzip -p "cache/$ospkg" "*${ospkg%.zip}.cpio.gz" | gzip -d |\
 ovmf_locations=(
 	# https://packages.debian.org/bookworm/all/ovmf/filelist
 	# https://packages.debian.org/trixie/all/ovmf/filelist
-	"/usr/share/OVMF/OVMF_CODE_4M.fd /usr/share/OVMF/OVMF_VARS_4M.fd"
+	"/usr/share/OVMF/OVMF_CODE_4M.secboot.fd /usr/share/OVMF/OVMF_VARS_4M.fd"
 	# https://archlinux.org/packages/extra/any/edk2-ovmf/files/
 	"/usr/share/OVMF/x64/OVMF_CODE.4m.fd /usr/share/OVMF/x64/OVMF_VARS.4m.fd"
 )
@@ -254,10 +254,20 @@ done
 openssl genpkey -algorithm ED25519 -out build/tls_key.pem
 openssl req -x509 -key build/tls_key.pem -days 1 -out build/tls_roots.pem -subj "/C=US/ST=Test/L=Test/O=Test/OU=Test Unit/CN=example.com"
 
+# Secure Boot keys
+for key in pk kek db dbx; do
+	guid=$(uuidgen)
+	openssl req -newkey rsa:4096 -nodes -keyout "saved/$key" -x509 -days 1 -out "saved/$key.pem" -subj "/O=$key/CN=$key/" 2>/dev/null
+	cert-to-efi-sig-list -g "$(uuidgen)" "saved/$key.pem" "saved/$key.esl"
+	info "created $guid <-- $key"
+done
+cat saved/dbx >> saved/db  # pretend 1/2 certificates are not revoked
+sb_opts="--pk saved/pk.esl --kek saved/kek.esl --db saved/db.esl --dbx saved/dbx.esl"
+
 ###
 # Run tests
 ###
-local_run="./cache/bin/stprov local run --ip 127.0.0.1 -p $PORT --otp $PASSWORD"
+local_run="./cache/bin/stprov local run --ip 127.0.0.1 -p $PORT --otp $PASSWORD $sb_opts"
 remote_run="stprov remote run -p $PORT --otp=$PASSWORD" # use compiled-in default set via Makefile
 remote_configs=(
 	# Static network configuration
@@ -312,15 +322,15 @@ for i in "${!remote_configs[@]}"; do
 	nic_opts="$nic_opts,guestfwd=tcp:$OSPKG_SRV:80-cmd:./cache/bin/serve-http -d saved"
 
 	qemu_opts=(
-		-nographic -no-reboot -m 512M -M q35
+		-nographic -no-reboot -m 512M -M q35,smm=on
 		-rtc base=localtime -pidfile qemu.pid
 		-object "rng-random,filename=/dev/urandom,id=rng0"
 		-device "virtio-rng-pci,rng=rng0"
 		-nic "$nic_opts"
 		# Additional, slow, network. Should be ignored by autodetect.
 		-nic type=user,model=rtl8139,net="$IP/$MASK",host="$GATEWAY"
-		-drive "if=pflash,format=raw,readonly=on,file=$ovmf_code"
-		-drive "if=pflash,format=raw,file=saved/OVMF_VARS.fd"
+		-drive "if=pflash,format=raw,unit=0,readonly=on,file=$ovmf_code"
+		-drive "if=pflash,format=raw,unit=1,file=saved/OVMF_VARS.fd"
 		-kernel "build/kernel.vmlinuz"
 		-initrd "build/stprov.cpio"
 		-append "console=ttyS0 -- -v"
