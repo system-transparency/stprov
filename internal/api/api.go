@@ -13,8 +13,9 @@ import (
 const (
 	Protocol = "stprov/v0.0.1"
 
-	EndpointAddData = "add-data"
-	EndpointCommit  = "commit"
+	EndpointAddData       = "add-data"
+	EndpointAddSecureBoot = "add-secure-boot"
+	EndpointCommit        = "commit"
 
 	BasicAuthUser = "example-user"
 )
@@ -32,6 +33,16 @@ type AddDataRequest struct {
 	Timestamp int64 `json:"timestamp"`
 }
 
+// AddSecureBootRequest is a request to provision Secure Boot keys.  The
+// serialized blobs are expected to be valid authentication_v2 descriptors such
+// that PK is self signed, KEK is signed by PK, and db/dbx are signed by KEK.
+type AddSecureBootRequest struct {
+	PK  []byte `json:"pk"`
+	KEK []byte `json:"kek"`
+	Db  []byte `json:"db"`
+	Dbx []byte `json:"dbx"`
+}
+
 // CommitResponse is the output of a commit request
 type CommitResponse struct {
 	Fingerprint    string `json:"fingerprint"`
@@ -47,6 +58,12 @@ func NewAddDataRequest() (*AddDataRequest, error) {
 		return nil, fmt.Errorf("api: %w", err)
 	}
 	return &AddDataRequest{entropy[:], time.Now().Unix()}, nil
+}
+
+// NewAddSecureBootRequest creates a new request to provision Secure Boot keys
+func NewAddSecureBootRequest(pk, kek, db, dbx []byte) (*AddSecureBootRequest, error) {
+	req := AddSecureBootRequest{PK: pk, KEK: kek, Db: db, Dbx: dbx}
+	return &req, req.Check()
 }
 
 func NewCommitResponse(uds *secrets.UniqueDeviceSecret, hostname string) (*CommitResponse, error) {
@@ -67,4 +84,18 @@ func NewCommitResponse(uds *secrets.UniqueDeviceSecret, hostname string) (*Commi
 		return nil, fmt.Errorf("authentication: %w", err)
 	}
 	return &CommitResponse{fpr, hostname, hex.EncodeToString(auth[:]), hex.EncodeToString(id[:])}, nil
+}
+
+// Check checks that the request has a PK, KEK, and db (dbx is optional)
+func (r AddSecureBootRequest) Check() error {
+	if len(r.PK) == 0 {
+		return fmt.Errorf("invalid request: PK is required")
+	}
+	if len(r.KEK) == 0 {
+		return fmt.Errorf("invalid request: KEK is required")
+	}
+	if len(r.Db) == 0 {
+		return fmt.Errorf("invalid request: db is required")
+	}
+	return nil
 }

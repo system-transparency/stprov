@@ -25,8 +25,9 @@ func TestHTTPMethod(t *testing.T) {
 
 func TestHandlers(t *testing.T) {
 	endpoints := map[string]bool{
-		EndpointAddData: false,
-		EndpointCommit:  false,
+		EndpointAddData:       false,
+		EndpointAddSecureBoot: false,
+		EndpointCommit:        false,
 	}
 	srv := Server{}
 	for _, handler := range srv.handlers() {
