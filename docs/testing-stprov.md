@@ -20,8 +20,8 @@ hardware using an stprov ISO.
 ## QEMU tests
 
 The `integration/` subdirectory contains a script for running stprov with
-different invocations in QEMU.  The core/system-transparency repository contains
-a QEMU test that checks if provision mode works with stprov as an OS package.
+different invocations in QEMU.  The core/stboot repository contains a QEMU test
+that checks if provision mode works with stprov as an OS package.
 
 ### integration/qemu.sh
 
