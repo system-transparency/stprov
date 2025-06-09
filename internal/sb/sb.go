@@ -2,6 +2,7 @@
 package sb
 
 import (
+	"encoding/binary"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -13,6 +14,9 @@ var (
 	efiGlobalVariableSetupMode = "SetupMode"
 	efiGlobalVariablePK        = "PK"
 	efiGlobalVariableKEK       = "KEK"
+
+	efiGlobalVariableOSIndications   = "OsIndications"
+	efiOsInditationsBootToFirmwareUI = uint64(1)
 
 	efiImageSecurityDatabaseGUID = "d719b2cb-3d3a-4596-a3bc-dad00e67656f"
 	efiImageSecurityDatabaseDb   = "db"
@@ -58,6 +62,30 @@ func Provision(pk, kek, db, dbx []byte) error {
 	return nil
 }
 
+// RequestRebootIntoUEFIMenu asks the firmware to go straight into the UEFI menu
+// on next boot
+func RequestRebootIntoUEFIMenu() error {
+	b, err := efiRead(efiGlobalVariableOSIndications, efiGlobalVariableGUID)
+	if err != nil {
+		b = make([]byte, 8)
+	}
+	if len(b) != 8 {
+		return fmt.Errorf("%s: unexpected data length %d", efiGlobalVariableOSIndications, len(b))
+	}
+	osIndications := binary.LittleEndian.Uint64(b)
+	if osIndications&efiOsInditationsBootToFirmwareUI != 0 {
+		return nil // already requested
+	}
+
+	osIndications |= efiOsInditationsBootToFirmwareUI
+	data := make([]byte, 8)
+	binary.LittleEndian.PutUint64(data, osIndications)
+	if err := efiWrite(efiGlobalVariableOSIndications, efiGlobalVariableGUID, data); err != nil {
+		return fmt.Errorf("%s: %w", efiGlobalVariableOSIndications, err)
+	}
+	return nil
+}
+
 func efiRead(name, guid string) ([]byte, error) {
 	id, err := uuid.Parse(guid)
 	if err != nil {
@@ -73,6 +101,22 @@ func efiRead(name, guid string) ([]byte, error) {
 		return nil, fmt.Errorf("read efivarfs: %w", err)
 	}
 	return b, err
+}
+
+func efiWrite(name, guid string, data []byte) error {
+	fs, err := efivarfs.New()
+	if err != nil {
+		return fmt.Errorf("new efivarfs: %w", err)
+	}
+	id, err := uuid.Parse(guid)
+	if err != nil {
+		return fmt.Errorf("parse guid %s: %w", guid, err)
+	}
+	desc := efivarfs.VariableDescriptor{Name: name, GUID: id}
+	attrs := efivarfs.AttributeNonVolatile
+	attrs |= efivarfs.AttributeBootserviceAccess
+	attrs |= efivarfs.AttributeRuntimeAccess
+	return efivarfs.WriteVariable(fs, desc, attrs, data)
 }
 
 func efiAuthenticatedWrite(name, guid string, authData []byte) error {

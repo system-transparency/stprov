@@ -37,10 +37,11 @@ type AddDataRequest struct {
 // serialized blobs are expected to be valid authentication_v2 descriptors such
 // that PK is self signed, KEK is signed by PK, and db/dbx are signed by KEK.
 type AddSecureBootRequest struct {
-	PK  []byte `json:"pk"`
-	KEK []byte `json:"kek"`
-	Db  []byte `json:"db"`
-	Dbx []byte `json:"dbx"`
+	PK                 []byte `json:"pk"`
+	KEK                []byte `json:"kek"`
+	Db                 []byte `json:"db"`
+	Dbx                []byte `json:"dbx"`
+	RebootIntoUEFIMenu bool   `json:"reboot_into_uefi_menu"`
 }
 
 // CommitResponse is the output of a commit request
@@ -61,8 +62,8 @@ func NewAddDataRequest() (*AddDataRequest, error) {
 }
 
 // NewAddSecureBootRequest creates a new request to provision Secure Boot keys
-func NewAddSecureBootRequest(pk, kek, db, dbx []byte) (*AddSecureBootRequest, error) {
-	req := AddSecureBootRequest{PK: pk, KEK: kek, Db: db, Dbx: dbx}
+func NewAddSecureBootRequest(pk, kek, db, dbx []byte, rebootIntoUEFIMenu bool) (*AddSecureBootRequest, error) {
+	req := AddSecureBootRequest{PK: pk, KEK: kek, Db: db, Dbx: dbx, RebootIntoUEFIMenu: rebootIntoUEFIMenu}
 	return &req, req.Check()
 }
 

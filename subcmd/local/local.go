@@ -13,7 +13,7 @@ import (
 const usage = `Usage:
 
   stprov local run -o OTP -i IP_ADDR [-p PORT]
-        [--pk FILENAME --kek FILENAME --db FILENAME [--dbx FILENAME]]
+        [--pk FILENAME --kek FILENAME --db FILENAME [--dbx FILENAME] [-n]]
 
     Contributes entropy to stprov remote, which is listening on a given IP
     address (-i) and port (-p).  A one-time password (-o) is used to bootstrap
@@ -34,12 +34,15 @@ const usage = `Usage:
         --kek   Filename to read Secure Boot KEK from (.auth format), must be signed by PK
         --db    Filename to read Secure Boot db from (.auth format), must be signed by KEK
         --dbx   Filename to read Secure Boot dbx from (.auth format), must be signed by KEK
+    -n, --no-uefi-menu-reboot
+                Don't request the firmware to reboot into UEFI menu
 `
 
 var (
 	optPort                                      int
 	optIP, optOTP                                string
 	optPKFile, optKEKFile, optDBFile, optDBXFile string
+	optNoUefiMenuReboot                          bool
 )
 
 func setOptions(fs *flag.FlagSet) {
@@ -51,6 +54,7 @@ func setOptions(fs *flag.FlagSet) {
 		options.AddString(fs, &optIP, "i", "ip", "")
 		options.AddString(fs, &optOTP, "o", "otp", "")
 		// Secure Boot options
+		options.AddBool(fs, &optNoUefiMenuReboot, "n", "no-uefi-menu-reboot", false)
 		fs.StringVar(&optPKFile, "pk", "", "")
 		fs.StringVar(&optKEKFile, "kek", "", "")
 		fs.StringVar(&optDBFile, "db", "", "")
@@ -67,7 +71,7 @@ func Main(args []string) error {
 	case "help", "":
 		opt.Usage()
 	case "run":
-		err = run.Main(opt.Args(), optPort, optIP, optOTP, optPKFile, optKEKFile, optDBFile, optDBXFile)
+		err = run.Main(opt.Args(), optPort, optIP, optOTP, optPKFile, optKEKFile, optDBFile, optDBXFile, optNoUefiMenuReboot)
 		if err == nil {
 			stlog.Info("command local %q succeeded", opt.Name())
 		}

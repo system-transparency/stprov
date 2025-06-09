@@ -118,7 +118,7 @@ function reach_stage() {
 			die "test $test_num: reach $token"
 		fi
 
-		if grep -q "^$token" saved/qemu.log; then
+		if grep -q "$token" saved/qemu.log; then
 			break
 		fi
 
@@ -451,6 +451,15 @@ go run system-transparency.org/stmgr uki create -format iso \
     -initramfs build/stprov.cpio.gz                         \
     -cmdline 'console=ttyS0 -- -v'                          \
     -out build/stprov.iso
+
+info "Ensuring firmware menu is entered"
+qemu-system-x86_64                                                   \
+    -pidfile qemu.pid -nographic -no-reboot -m 512M -M q35           \
+    -cdrom build/stprov.iso                                          \
+    -drive if=pflash,format=raw,unit=0,file="$ovmf_code",readonly=on \
+    -drive if=pflash,format=raw,unit=1,file=saved/OVMF_VARS.fd >saved/qemu.log &
+reach_stage "end" 20 "Boot Maintenance Manager"
+kill $(cat qemu.pid) 2>/dev/null && sleep 1
 
 info "Enabling secure boot"
 virt-fw-vars --secure-boot --inplace saved/OVMF_VARS.fd

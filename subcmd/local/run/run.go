@@ -10,7 +10,7 @@ import (
 	"system-transparency.org/stprov/internal/hexify"
 )
 
-func Main(args []string, optPort int, optIP, optOTP, optPKFile, optKEKFile, optDBFile, optDBXFile string) error {
+func Main(args []string, optPort int, optIP, optOTP, optPKFile, optKEKFile, optDBFile, optDBXFile string, optNoUEFIMenuReboot bool) error {
 	// Parse options relating to secure connection
 	if len(args) != 0 {
 		return fmt.Errorf("trailing arguments: %v", args)
@@ -56,13 +56,14 @@ func Main(args []string, optPort int, optIP, optOTP, optPKFile, optKEKFile, optD
 
 	// Perform local-remote ping pongs
 	cli, err := api.NewClient(&api.ClientConfig{
-		Secret:     otp,
-		RemoteIP:   ip,
-		RemotePort: port,
-		PK:         pk,
-		KEK:        kek,
-		DB:         db,
-		DBX:        dbx,
+		Secret:             otp,
+		RemoteIP:           ip,
+		RemotePort:         port,
+		PK:                 pk,
+		KEK:                kek,
+		DB:                 db,
+		DBX:                dbx,
+		RebootIntoUEFIMenu: !optNoUEFIMenuReboot,
 	})
 	if err != nil {
 		return fmt.Errorf("new client: %w", err)

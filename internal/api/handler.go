@@ -120,6 +120,18 @@ func handleAddData(ctx context.Context, s *Server, w http.ResponseWriter, r *htt
 }
 
 func handleAddSecureBoot(ctx context.Context, s *Server, w http.ResponseWriter, r *http.Request) (int, error) {
+	var rebootIntoUEFIMenu bool
+	defer func() {
+		if !rebootIntoUEFIMenu {
+			return
+		}
+		if err := sb.RequestRebootIntoUEFIMenu(); err != nil {
+			log.Printf("failed to request reboot into UEFI menu: %v", err)
+			return
+		}
+		log.Printf("requested to reboot into UEFI menu on next boot")
+	}()
+
 	ok, err := sb.IsSetupMode()
 	if err != nil {
 		log.Printf("add-secure boot request from %s: failed to read SetupMode EFI variable, trying to proceed anyway", r.RemoteAddr)
@@ -137,6 +149,7 @@ func handleAddSecureBoot(ctx context.Context, s *Server, w http.ResponseWriter, 
 	if err := data.Check(); err != nil {
 		return http.StatusBadRequest, err
 	}
+	rebootIntoUEFIMenu = data.RebootIntoUEFIMenu
 	if err := sb.Provision(data.PK, data.KEK, data.Db, data.Dbx); err != nil {
 		log.Printf("failed to provision secure boot request from %s: %v", r.RemoteAddr, err)
 		return http.StatusBadRequest, err

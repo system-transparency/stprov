@@ -19,7 +19,8 @@ type ClientConfig struct {
 	RemotePort int    // port used by stprov remote
 
 	// Optional Secure Boot keys in authentication_v2 descriptor format
-	PK, KEK, DB, DBX []byte
+	PK, KEK, DB, DBX   []byte
+	RebootIntoUEFIMenu bool
 }
 
 type Client struct {
@@ -73,7 +74,7 @@ func (c *Client) AddData() (*AddDataRequest, error) {
 }
 
 func (c *Client) AddSecureBootKeys() error {
-	req, err := NewAddSecureBootRequest(c.PK, c.KEK, c.DB, c.DBX)
+	req, err := NewAddSecureBootRequest(c.PK, c.KEK, c.DB, c.DBX, c.RebootIntoUEFIMenu)
 	if err != nil {
 		return fmt.Errorf("create secure boot request: %w", err)
 	}
