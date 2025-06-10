@@ -39,3 +39,7 @@ rules:
     - - sentence-case
       - start-case
       - upper-case
+  body-max-line-length:
+    - 2
+    - always
+    - 256  # permit, e.g., long URLs
