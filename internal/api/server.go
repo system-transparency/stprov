@@ -100,6 +100,7 @@ func (srv *Server) checkHTTPMethod(m string) bool {
 func (srv *Server) handlers() []Handler {
 	return []Handler{
 		{srv, EndpointAddData, http.MethodPost, handleAddData},
+		{srv, EndpointAddSecureBoot, http.MethodPost, handleAddSecureBoot},
 		{srv, EndpointCommit, http.MethodGet, handleCommit},
 	}
 }

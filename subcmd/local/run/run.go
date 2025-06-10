@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 
 	"system-transparency.org/stprov/internal/api"
 	"system-transparency.org/stprov/internal/hexify"
 )
 
-func Main(args []string, optPort int, optIP, optOTP string) error {
+func Main(args []string, optPort int, optIP, optOTP, optPKFile, optKEKFile, optDBFile, optDBXFile string, optNoUEFIMenuReboot bool) error {
+	// Parse options relating to secure connection
 	if len(args) != 0 {
 		return fmt.Errorf("trailing arguments: %v", args)
 	}
@@ -29,10 +31,39 @@ func Main(args []string, optPort int, optIP, optOTP string) error {
 	}
 	otp := optOTP
 
+	// Parse options relating to Secure Boot
+	pk, err := readOptionalFile(optPKFile)
+	if err != nil {
+		return fmt.Errorf("invalid Secure Boot PK: %w", err)
+	}
+	kek, err := readOptionalFile(optKEKFile)
+	if err != nil {
+		return fmt.Errorf("invalid Secure Boot KEK: %w", err)
+	}
+	db, err := readOptionalFile(optDBFile)
+	if err != nil {
+		return fmt.Errorf("invalid Secure Boot db: %w", err)
+	}
+	dbx, err := readOptionalFile(optDBXFile)
+	if err != nil {
+		return fmt.Errorf("invalid Secure Boot dbx: %w", err)
+	}
+	haveSBOpts := pk != nil || kek != nil || db != nil || dbx != nil
+	okSBOpts := pk != nil && kek != nil && db != nil
+	if haveSBOpts && !okSBOpts {
+		return fmt.Errorf("invalid Secure Boot options: PK, KEK, and db are required")
+	}
+
+	// Perform local-remote ping pongs
 	cli, err := api.NewClient(&api.ClientConfig{
-		Secret:     otp,
-		RemoteIP:   ip,
-		RemotePort: port,
+		Secret:             otp,
+		RemoteIP:           ip,
+		RemotePort:         port,
+		PK:                 pk,
+		KEK:                kek,
+		DB:                 db,
+		DBX:                dbx,
+		RebootIntoUEFIMenu: !optNoUEFIMenuReboot,
 	})
 	if err != nil {
 		return fmt.Errorf("new client: %w", err)
@@ -40,6 +71,12 @@ func Main(args []string, optPort int, optIP, optOTP string) error {
 	data, err := cli.AddData()
 	if err != nil {
 		return fmt.Errorf("add data: %w", err)
+	}
+	if haveSBOpts {
+		err = cli.AddSecureBootKeys()
+		if err != nil {
+			return fmt.Errorf("add Secure Boot keys: %w", err)
+		}
 	}
 	cr, err := cli.Commit()
 	if err != nil {
@@ -51,4 +88,15 @@ func Main(args []string, optPort int, optIP, optOTP string) error {
 	fmt.Printf("hostname=%s\n", cr.HostName)
 	fmt.Printf("ip=%s\n", optIP)
 	return nil
+}
+
+func readOptionalFile(filename string) ([]byte, error) {
+	b, err := os.ReadFile(filename)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return b, nil
 }

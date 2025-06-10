@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"time"
 
+	"system-transparency.org/stprov/internal/sb"
 	"system-transparency.org/stprov/internal/secrets"
 )
 
@@ -115,6 +116,46 @@ func handleAddData(ctx context.Context, s *Server, w http.ResponseWriter, r *htt
 
 	s.Timestamp = data.Timestamp
 	copy(s.Entropy[:], data.Entropy)
+	return http.StatusOK, nil
+}
+
+func handleAddSecureBoot(ctx context.Context, s *Server, w http.ResponseWriter, r *http.Request) (int, error) {
+	var rebootIntoUEFIMenu bool
+	defer func() {
+		if !rebootIntoUEFIMenu {
+			return
+		}
+		if err := sb.RequestRebootIntoUEFIMenu(); err != nil {
+			log.Printf("failed to request reboot into UEFI menu: %v", err)
+			return
+		}
+		log.Printf("requested to reboot into UEFI menu on next boot")
+	}()
+
+	ok, err := sb.IsSetupMode()
+	if err != nil {
+		log.Printf("add-secure boot request from %s: failed to read SetupMode EFI variable, trying to proceed anyway", r.RemoteAddr)
+	} else if !ok {
+		err = fmt.Errorf("not in setup mode")
+		log.Printf("add-secure boot request from %s: %v, aborting", r.RemoteAddr, err)
+		return http.StatusForbidden, err
+	}
+
+	var data AddSecureBootRequest
+	if err := unpackPost(r, &data); err != nil {
+		log.Printf("invalid add-secure-boot request from %s: %v", r.RemoteAddr, err)
+		return http.StatusBadRequest, err
+	}
+	if err := data.Check(); err != nil {
+		return http.StatusBadRequest, err
+	}
+	rebootIntoUEFIMenu = data.RebootIntoUEFIMenu
+	if err := sb.Provision(data.PK, data.KEK, data.Db, data.Dbx); err != nil {
+		log.Printf("failed to provision secure boot request from %s: %v", r.RemoteAddr, err)
+		return http.StatusBadRequest, err
+	}
+
+	log.Printf("provisioned received Secure Boot keys")
 	return http.StatusOK, nil
 }
 

@@ -46,9 +46,11 @@ echo "mount -t efivarfs none /sys/firmware/efi/efivars" >> build/uinitcmd.sh
 rm -f build/stprov.iso
 gzip -f build/stprov.cpio
 go run system-transparency.org/stmgr uki create -format iso\
+    -signcert saved/db.pem\
+    -signkey saved/db.priv\
     -kernel build/kernel.vmlinuz\
     -initramfs build/stprov.cpio.gz\
     -cmdline '-- -v'\
     -out build/stprov.iso
 
-echo "INFO: created build/stprov.iso" >&2
+echo "INFO: created signed build/stprov.iso" >&2

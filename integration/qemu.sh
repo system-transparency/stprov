@@ -64,6 +64,14 @@ function assert_hostcfg_regexp() {
 	[[ "$got" =~ $want ]] || die "test $test_num: host config: wrong $key: got $got, want $want"
 }
 
+function assert_secure_boot_key() {
+	local test_num=$1; shift
+	local efivar_file=$1; shift
+	local want_esl_file=$1; shift
+
+	diff -q "$efivar_file" "$want_esl_file" || die "test $test_num: $efivar_file and $want_esl_file differs"
+}
+
 function assert_headreq() {
 	local test_num=$1; shift
 	local token
@@ -110,7 +118,7 @@ function reach_stage() {
 			die "test $test_num: reach $token"
 		fi
 
-		if grep -q "^$token" saved/qemu.log; then
+		if grep -q "$token" saved/qemu.log; then
 			break
 		fi
 
@@ -221,18 +229,19 @@ unzip -p "cache/$ospkg" "*${ospkg%.zip}.cpio.gz" | gzip -d |\
 # Our tests use OVMF to emulate EFI NVRAM.  For an overview of OVMF, see:
 # https://github.com/tianocore/tianocore.github.io/wiki/OVMF
 #
-# QEMU needs the following files:
+# QEMU needs the following:
 #
-#   OVMF_DATA.fd  Precompiled EFI that runs inside the VM
+#   OVMF_CODE.fd  Precompiled EFI firmware that runs inside the VM
 #   OVMF_VARS.fd  EFI variables as they would be serialized to the system flash
 #
-# Valid formatting of these files are shipped with the system's OVMF package.
+# Valid formatting of the above are shipped with the system's OVMF package.
+# Below we select the OVMF_CODE firmware that supports secure boot (secboot).
 ovmf_locations=(
 	# https://packages.debian.org/bookworm/all/ovmf/filelist
 	# https://packages.debian.org/trixie/all/ovmf/filelist
-	"/usr/share/OVMF/OVMF_CODE_4M.fd /usr/share/OVMF/OVMF_VARS_4M.fd"
+	"/usr/share/OVMF/OVMF_CODE_4M.secboot.fd /usr/share/OVMF/OVMF_VARS_4M.fd"
 	# https://archlinux.org/packages/extra/any/edk2-ovmf/files/
-	"/usr/share/OVMF/x64/OVMF_CODE.4m.fd /usr/share/OVMF/x64/OVMF_VARS.4m.fd"
+	"/usr/share/edk2/x64/OVMF_CODE.secboot.4m.fd /usr/share/OVMF/x64/OVMF_VARS.4m.fd"
 )
 
 ovmf_code=""
@@ -243,21 +252,38 @@ for files in "${ovmf_locations[@]}"; do
 	[[ -f "$ovmf_code" ]] || continue
 	[[ -f "$ovmf_vars" ]] || continue
 
-	cp "$ovmf_vars" saved/OVMF_VARS.fd
 	break
 done
 
-[[ -n "$ovmf_code" ]] || die "unable to locate OVMF_CODE.fd"
+[[ -n "$ovmf_code" ]] || die "unable to locate OVMF firmware"
 
 # Our integration test doesn't make use of this certificate (in favor of
 # guestfwd), but stprov needs something valid to read for correct setup.
 openssl genpkey -algorithm ED25519 -out build/tls_key.pem
 openssl req -x509 -key build/tls_key.pem -days 1 -out build/tls_roots.pem -subj "/C=US/ST=Test/L=Test/O=Test/OU=Test Unit/CN=example.com"
 
+# Generate Secure Boot keys with ESL formatting
+guid=$(uuidgen)
+info "created owner guid $guid for secure boot keys"
+for key in PK KEK db dbx; do
+	openssl req -newkey rsa:4096 -nodes -x509 -days 1 -subj "/O=$key/CN=$key/" \
+		-keyout "saved/$key.priv" -out "saved/$key.pem" 2>/dev/null
+	cert-to-efi-sig-list -g "$guid" "saved/$key.pem" "saved/$key.esl"
+done
+cat saved/dbx.esl >> saved/db.esl  # pretend 1/2 certificates are not revoked
+
+# Sign Secure Boot keys with authentication_v2 descriptors
+(cd saved/ &&
+	info "Signing db"  && sign-efi-sig-list -g "$guid" -c KEK.pem -k KEK.priv db  db.esl  db.auth  &&
+	info "Signing dbx" && sign-efi-sig-list -g "$guid" -c KEK.pem -k KEK.priv dbx dbx.esl dbx.auth &&
+	info "Signing KEK" && sign-efi-sig-list -g "$guid" -c  PK.pem -k PK.priv  KEK KEK.esl KEK.auth &&
+	info "Signing PK"  && sign-efi-sig-list -g "$guid" -c  PK.pem -k PK.priv  PK  PK.esl  PK.auth)
+sb_opts="--pk saved/PK.auth --kek saved/KEK.auth --db saved/db.auth --dbx saved/dbx.auth"
+
 ###
 # Run tests
 ###
-local_run="./cache/bin/stprov local run --ip 127.0.0.1 -p $PORT --otp $PASSWORD"
+local_run="./cache/bin/stprov local run --ip 127.0.0.1 -p $PORT --otp $PASSWORD $sb_opts"
 remote_run="stprov remote run -p $PORT --otp=$PASSWORD" # use compiled-in default set via Makefile
 remote_configs=(
 	# Static network configuration
@@ -311,6 +337,7 @@ for i in "${!remote_configs[@]}"; do
 	nic_opts="$nic_opts,hostfwd=tcp:127.0.0.1:$PORT-$IP:$PORT"
 	nic_opts="$nic_opts,guestfwd=tcp:$OSPKG_SRV:80-cmd:./cache/bin/serve-http -d saved"
 
+	cp "$ovmf_vars" saved/OVMF_VARS.fd
 	qemu_opts=(
 		-nographic -no-reboot -m 512M -M q35
 		-rtc base=localtime -pidfile qemu.pid
@@ -319,8 +346,8 @@ for i in "${!remote_configs[@]}"; do
 		-nic "$nic_opts"
 		# Additional, slow, network. Should be ignored by autodetect.
 		-nic type=user,model=rtl8139,net="$IP/$MASK",host="$GATEWAY"
-		-drive "if=pflash,format=raw,readonly=on,file=$ovmf_code"
-		-drive "if=pflash,format=raw,file=saved/OVMF_VARS.fd"
+		-drive "if=pflash,format=raw,unit=0,file=$ovmf_code,readonly=on"
+		-drive "if=pflash,format=raw,unit=1,file=saved/OVMF_VARS.fd"
 		-kernel "build/kernel.vmlinuz"
 		-initrd "build/stprov.cpio"
 		-append "console=ttyS0 -- -v"
@@ -345,6 +372,10 @@ for i in "${!remote_configs[@]}"; do
 	jq -r '.variables[] | select(.name == "STHostConfig") | .data' saved/efivars.json | tr a-f A-F | basenc --base16 -d | jq > saved/hostcfg.json
 	jq -r '.variables[] | select(.name == "STHostKey")    | .data' saved/efivars.json | tr a-f A-F | basenc --base16 -d > saved/hostkey
 	jq -r '.variables[] | select(.name == "STHostName")   | .data' saved/efivars.json | tr a-f A-F | basenc --base16 -d > saved/hostname
+	jq -r '.variables[] | select(.name == "PK")           | .data' saved/efivars.json | tr a-f A-F | basenc --base16 -d > saved/PK.efi
+	jq -r '.variables[] | select(.name == "KEK")          | .data' saved/efivars.json | tr a-f A-F | basenc --base16 -d > saved/KEK.efi
+	jq -r '.variables[] | select(.name == "db")           | .data' saved/efivars.json | tr a-f A-F | basenc --base16 -d > saved/db.efi
+	jq -r '.variables[] | select(.name == "dbx")          | .data' saved/efivars.json | tr a-f A-F | basenc --base16 -d > saved/dbx.efi
 
 	#
 	# Check echo:ed IP address
@@ -399,4 +430,66 @@ for i in "${!remote_configs[@]}"; do
 	assert_hostcfg "$i" ".bonding_name"                         null # only tested manually
 	assert_hostcfg_regexp "$i" ".description" \
 		'^"stprov version v[^ ]*; timestamp 2[0-9]{3}-[01][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-6][0-9]Z"$'
+
+	cp saved/qemu.log "saved/qemu-$i.log"
 done
+
+#
+# Check secure boot provisioning.  We only do this once because neither the
+# secure boot keys nor the command-line option are differents in the above loop.
+#
+assert_secure_boot_key "$i" saved/PK.efi  saved/PK.esl
+assert_secure_boot_key "$i" saved/KEK.efi saved/KEK.esl
+assert_secure_boot_key "$i" saved/db.efi  saved/db.esl
+assert_secure_boot_key "$i" saved/dbx.efi saved/dbx.esl
+
+info "Building unsigned stprov iso"
+rm -f build/stprov.iso
+gzip -f build/stprov.cpio
+go run system-transparency.org/stmgr uki create -format iso \
+    -kernel build/kernel.vmlinuz                            \
+    -initramfs build/stprov.cpio.gz                         \
+    -cmdline 'console=ttyS0 -- -v'                          \
+    -out build/stprov.iso
+
+info "Ensuring firmware menu is entered"
+qemu-system-x86_64                                                   \
+    -pidfile qemu.pid -nographic -no-reboot -m 512M -M q35           \
+    -cdrom build/stprov.iso                                          \
+    -drive if=pflash,format=raw,unit=0,file="$ovmf_code",readonly=on \
+    -drive if=pflash,format=raw,unit=1,file=saved/OVMF_VARS.fd >saved/qemu.log &
+reach_stage "end" 20 "Boot Maintenance Manager"
+kill $(cat qemu.pid) 2>/dev/null && sleep 1
+
+info "Enabling secure boot"
+virt-fw-vars --secure-boot --inplace saved/OVMF_VARS.fd
+
+info "Ensuring Secure Boot validation fails without signature"
+qemu-system-x86_64                                                   \
+    -pidfile qemu.pid -nographic -no-reboot -m 512M -M q35           \
+    -cdrom build/stprov.iso                                          \
+    -drive if=pflash,format=raw,unit=0,file="$ovmf_code",readonly=on \
+    -drive if=pflash,format=raw,unit=1,file=saved/OVMF_VARS.fd >saved/qemu.log &
+reach_stage "end" 20 "BdsDxe: failed to load Boot0001"
+kill $(cat qemu.pid) 2>/dev/null && sleep 1
+
+info "Building signed stprov iso"
+rm -f build/stprov.iso
+go run system-transparency.org/stmgr uki create -format iso \
+    -signcert saved/db.pem                                  \
+    -signkey saved/db.priv                                  \
+    -kernel build/kernel.vmlinuz                            \
+    -initramfs build/stprov.cpio.gz                         \
+    -cmdline 'console=ttyS0 -- -v'                          \
+    -out build/stprov.iso
+
+info "Ensuring Secure Boot validation passes with signature"
+qemu-system-x86_64                                                   \
+    -pidfile qemu.pid -nographic -no-reboot -m 512M -M q35           \
+    -cdrom build/stprov.iso                                          \
+    -drive if=pflash,format=raw,unit=0,file="$ovmf_code",readonly=on \
+    -drive if=pflash,format=raw,unit=1,file=saved/OVMF_VARS.fd >saved/qemu.log &
+reach_stage "end" 20 "stage:boot"
+kill $(cat qemu.pid) 2>/dev/null && sleep 1
+
+info "All tests passed"

@@ -25,7 +25,7 @@ qemu_test:
     # Backporting QEMU version 8.1.1 makes the guestfwd option work though.  We
     # did not hunt down what the bug is, just the (non-)working versions.
     - apt install -qqy -t bookworm-backports qemu-system-x86 qemu-system-common qemu-system-data golang-1.22
-    - apt install -qqy git python3 curl jq openssh-client make openssl unzip cpio gzip
+    - apt install -qqy git python3 curl jq openssh-client make openssl unzip cpio gzip efitools uuid-runtime
     - apt install -qqy --no-install-recommends python3-pip
     - pip install --break-system-packages --user virt-firmware
     - export GOPATH=$PWD/.go
@@ -59,7 +59,7 @@ qemu_head_stboot_test:
   before_script:
     - apt update
     - apt install -qqy -t bookworm-backports qemu-system-x86 qemu-system-common qemu-system-data golang-1.22
-    - apt install -qqy git python3 curl jq openssh-client make openssl unzip cpio
+    - apt install -qqy git python3 curl jq openssh-client make openssl unzip cpio gzip efitools uuid-runtime
     - apt install -qqy --no-install-recommends python3-pip
     - pip install --break-system-packages --user virt-firmware
     - export PATH=/usr/lib/go-1.22/bin:$PATH
