@@ -35,6 +35,13 @@ Use of the local command is optional.  The operator may use the remote
 subcommand "run" to await further configuration from the local subcommand "run".
 In short, the local command provides the remote command with entropy.  The
 remote command mixes that into key derivations when provisioning an SSH hostkey.
+The local command can also transfer Secure Boot keys that the remote command
+provisions.  Such provisioning only works if the platform is in Setup Mode.
+
+Note: The operator needs to manually enable Secure Boot after provisioning in
+the UEFI menu.  If there is a setting for *deployed mode*, also enabled that.
+By default, stprov will request the firmware to go straight into the UEFI menu
+on next boot if any Secure Boot provisioning was attempted (successful or not).
 
 ## COMMANDS
 
@@ -159,9 +166,13 @@ subset of these options are supported by "dhcp", see COMMANDS.
 stprov reads TLS roots from the [trust policy][] directory "/etc/trust_policy".
 These TLS roots are required and used to HEAD-request all OS package URLs.
 
-stprov writes a [host configuration][], a hostname, and an SSH hostkey to EFI
-NVRAM, see the [EFI variables reference][].  The SSH hostkey is only written if
-the "run" subcommand is used for client-server exchanges.
+stprov writes a host configuration, a hostname, an SSH hostkey, and the Secure
+Boot variables PK, KEK, db, and dbx to EFI NVRAM, see the [EFI variables
+reference][].
+
+The SSH hostkey is only written if the "run" subcommand is used for
+client-server exchanges.  Secure Boot keys are further only written if stprov
+local provides them to stprov remote in these client-server exchanges.
 
 [trust policy]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.4.1/content/docs/reference/trust_policy.md
 [EFI variables reference]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.4.1/content/docs/reference/efi-variables.md
@@ -206,7 +217,7 @@ Wait for commands from "stprov local", which connects from 192.168.0.1/26.
 
 Provide commands to "stprov remote", which listens on 192.168.1.24.
 
-    stprov local run -o sikritpassword -i 192.168.1.24
+    stprov local run -o sikritpassword -i 192.168.1.24 --pk PK.auth --kek KEK.auth --db db.auth
 
 ## SECURITY CONSIDERATIONS
 
@@ -235,4 +246,7 @@ https://lists.system-transparency.org/mailman3/postorius/lists/st-discuss.lists.
 The [stprov system documentation][] describes stprov from a
 design and intended usage perspective without being a dense reference manual.
 
+See also the [HOW-TO guides][] on Secure Boot key management and signing.
+
 [stprov system documentation]: ./stprov-system.md
+[HOW-TO guides]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.5.0/content/docs/how-to/secure-boot
