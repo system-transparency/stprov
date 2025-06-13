@@ -30,7 +30,8 @@ const usage_string = `Usage:
     a mutually authenticated HTTPS connection.  Connections are only accepted
     from the allowed hosts (-a), a repeated option that uses CIDR notation.
 
-    An SSH hostkey is written to EFI NVRAM on success.
+    An SSH hostkey is written to EFI NVRAM on success.  Secure Boot objects PK,
+    KEK, db, and dbx are also written to EFI NVRAM if provided by stprov local.
 
   Options:
 

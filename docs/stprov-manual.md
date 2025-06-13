@@ -15,7 +15,7 @@ The local and remote commands accept the subcommand "help".
 
 ## VERSION
 
-This manual describes stprov v0.4.2.
+This manual describes stprov v0.5.X.
 
 ## DESCRIPTION
 
@@ -33,8 +33,7 @@ platform's network configuration using the subcommands "static" or "dhcp".
 
 Use of the local command is optional.  The operator may use the remote
 subcommand "run" to await further configuration from the local subcommand "run".
-In short, the local command provides the remote command with entropy.  The
-remote command mixes that into key derivations when provisioning an SSH hostkey.
+Such further configuration includes receiving entropy and Secure Boot keys.
 
 ## COMMANDS
 
@@ -59,10 +58,13 @@ There are multiple ways to specify the same option.  For example, `-A val` and
 
 
     stprov local run -o OTP -i IP_ADDR [-p PORT]
+          [--pk FILENAME --kek FILENAME --db FILENAME [--dbx FILENAME] [-n]]
 
       Contributes entropy to stprov remote, which is listening on a given IP
       address (-i) and port (-p).  A one-time password (-o) is used to bootstrap
-      HTTPS.  Outputs the following key-value pairs on success:
+      HTTPS.  Secure Boot keys can optionally be provisioned in Setup Mode.
+
+      Outputs the following key-value pairs on success:
 
       fingerprint=<the platform's SSH hostkey fingerprint>
       hostname=<the platform's hostname>
@@ -76,7 +78,8 @@ There are multiple ways to specify the same option.  For example, `-A val` and
       a mutually authenticated HTTPS connection.  Connections are only accepted
       from the allowed hosts (-a), a repeated option that uses CIDR notation.
 
-      An SSH hostkey is written to EFI NVRAM on success.
+      An SSH hostkey is written to EFI NVRAM on success.  Secure Boot objects PK,
+      KEK, db, and dbx are also written to EFI NVRAM if provided by stprov local.
 
 
     stprov remote dhcp -h HOSTNAME | -H FULL_HOSTNAME
@@ -88,7 +91,6 @@ There are multiple ways to specify the same option.  For example, `-A val` and
       interface is guessed.
 
       A host configuration and a hostname is written to EFI NVRAM on success.
-
 
     stprov remote static -i HOST_ADDR
                          -r OSPKG_URL [-r OSPKG_URL ...] [-u USER] [-p PASSWORD]
@@ -111,6 +113,12 @@ The options of "stprov local run" are listed below.
     -o, --otp   One-time password to establish a secure connection
     -i, --ip    Remote stprov address (e.g., 10.0.2.10)
     -p, --port  Remote stprov port (Default: 2009)
+        --pk    Filename to read Secure Boot PK from (.auth format), must be self-signed
+        --kek   Filename to read Secure Boot KEK from (.auth format), must be signed by PK
+        --db    Filename to read Secure Boot db from (.auth format), must be signed by KEK
+        --dbx   Filename to read Secure Boot dbx from (.auth format), must be signed by KEK
+    -n, --no-uefi-menu-reboot
+                Don't request the firmware to reboot into UEFI menu
 
 The options of "stprov remote run" are listed below.
 
@@ -159,13 +167,21 @@ subset of these options are supported by "dhcp", see COMMANDS.
 stprov reads TLS roots from the [trust policy][] directory "/etc/trust_policy".
 These TLS roots are required and used to HEAD-request all OS package URLs.
 
-stprov writes a [host configuration][], a hostname, and an SSH hostkey to EFI
-NVRAM, see the [EFI variables reference][].  The SSH hostkey is only written if
-the "run" subcommand is used for client-server exchanges.
+stprov writes a host configuration, a hostname, an SSH hostkey, and the Secure
+Boot variables PK, KEK, db, and dbx to EFI NVRAM, see the [EFI variables
+reference][].  The input Secure Boot variables need to be valid [EFI signature
+lists][] with [authentication_v2 descriptors][] *and* be signed according to the
+Secure Boot key hierarchy (PK -> KEK -> db/dbx) for the writes to succeed.
+
+The SSH hostkey is only written if the "run" subcommand is used for
+client-server exchanges.  Secure Boot keys are further only written if stprov
+local provides them to stprov remote in these client-server exchanges.
 
 [trust policy]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.4.1/content/docs/reference/trust_policy.md
 [EFI variables reference]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.4.1/content/docs/reference/efi-variables.md
 [host configuration]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.4.1/content/docs/reference/host_configuration.md
+[EFI signature lists]: https://uefi.org/specs/UEFI/2.11/32_Secure_Boot_and_Driver_Signing.html#efi-signature-data
+[authentication_v2 descriptors]: https://uefi.org/specs/UEFI/2.11/08_Services_Runtime_Services.html#using-the-efi-variable-authentication-2-descriptor
 
 ## VARIABLES
 
@@ -206,7 +222,7 @@ Wait for commands from "stprov local", which connects from 192.168.0.1/26.
 
 Provide commands to "stprov remote", which listens on 192.168.1.24.
 
-    stprov local run -o sikritpassword -i 192.168.1.24
+    stprov local run -o sikritpassword -i 192.168.1.24 --pk PK.auth --kek KEK.auth --db db.auth
 
 ## SECURITY CONSIDERATIONS
 
@@ -235,4 +251,7 @@ https://lists.system-transparency.org/mailman3/postorius/lists/st-discuss.lists.
 The [stprov system documentation][] describes stprov from a
 design and intended usage perspective without being a dense reference manual.
 
+See also the [HOW-TO guides][] on Secure Boot key management and signing.
+
 [stprov system documentation]: ./stprov-system.md
+[HOW-TO guides]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.5.0/content/docs/how-to/secure-boot
