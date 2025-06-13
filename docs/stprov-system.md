@@ -170,7 +170,7 @@ participant platform
 operator->>operator: (3) stprov local [Options]
 operator->>platform: (3.1) Add 128-bits of entropy
 operator->>platform: (3.2) Add Secure Boot keys
-platform->>platform: (2.2) Provision Secure Boot keys
+platform->>platform: (2.2) Provision PK, KEK, db, dbx
 platform->>platform: (2.3) Request reboot into UEFI menu
 operator->>platform: (3.3) Commit
 
