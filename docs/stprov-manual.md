@@ -169,7 +169,9 @@ These TLS roots are required and used to HEAD-request all OS package URLs.
 
 stprov writes a host configuration, a hostname, an SSH hostkey, and the Secure
 Boot variables PK, KEK, db, and dbx to EFI NVRAM, see the [EFI variables
-reference][].
+reference][].  The input Secure Boot variables need to be valid [EFI signature
+lists][] with [authentication_v2 descriptors][] *and* be signed according to the
+Secure Boot key hierarchy (PK -> KEK -> db/dbx) for the writes to succeed.
 
 The SSH hostkey is only written if the "run" subcommand is used for
 client-server exchanges.  Secure Boot keys are further only written if stprov
@@ -178,6 +180,8 @@ local provides them to stprov remote in these client-server exchanges.
 [trust policy]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.4.1/content/docs/reference/trust_policy.md
 [EFI variables reference]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.4.1/content/docs/reference/efi-variables.md
 [host configuration]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.4.1/content/docs/reference/host_configuration.md
+[EFI signature lists]: https://uefi.org/specs/UEFI/2.11/32_Secure_Boot_and_Driver_Signing.html#efi-signature-data
+[authentication_v2 descriptors]: https://uefi.org/specs/UEFI/2.11/08_Services_Runtime_Services.html#using-the-efi-variable-authentication-2-descriptor
 
 ## VARIABLES
 
