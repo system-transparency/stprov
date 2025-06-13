@@ -33,15 +33,7 @@ platform's network configuration using the subcommands "static" or "dhcp".
 
 Use of the local command is optional.  The operator may use the remote
 subcommand "run" to await further configuration from the local subcommand "run".
-In short, the local command provides the remote command with entropy.  The
-remote command mixes that into key derivations when provisioning an SSH hostkey.
-The local command can also transfer Secure Boot keys that the remote command
-provisions.  Such provisioning only works if the platform is in Setup Mode.
-
-Note: The operator needs to manually enable Secure Boot after provisioning in
-the UEFI menu.  If there is a setting for *deployed mode*, also enabled that.
-By default, stprov will request the firmware to go straight into the UEFI menu
-on next boot if any Secure Boot provisioning was attempted (successful or not).
+Such further configuration includes receiving entropy and Secure Boot keys.
 
 ## COMMANDS
 
