@@ -3,7 +3,7 @@ module system-transparency.org/stprov
 go 1.22
 
 require (
-	github.com/go-ping/ping v1.1.0
+	github.com/go-ping/ping v1.2.0
 	github.com/google/uuid v1.6.0
 	github.com/u-root/u-root v0.14.0
 	github.com/vishvananda/netlink v1.3.0
