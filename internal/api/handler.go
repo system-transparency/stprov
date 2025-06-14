@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"time"
 
+	"system-transparency.org/stboot/stlog"
 	"system-transparency.org/stprov/internal/sb"
 	"system-transparency.org/stprov/internal/secrets"
 )
@@ -129,7 +130,7 @@ func handleAddSecureBoot(ctx context.Context, s *Server, w http.ResponseWriter, 
 			log.Printf("failed to request reboot into UEFI menu: %v", err)
 			return
 		}
-		log.Printf("requested to reboot into UEFI menu on next boot")
+		stlog.Info("requested the firmware to reboot into the UEFI menu on next boot")
 	}()
 
 	ok, err := sb.IsSetupMode()
@@ -155,7 +156,7 @@ func handleAddSecureBoot(ctx context.Context, s *Server, w http.ResponseWriter, 
 		return http.StatusBadRequest, err
 	}
 
-	log.Printf("provisioned received Secure Boot keys")
+	stlog.Info("efivarfs: Secure Boot keys provisioned")
 	return http.StatusOK, nil
 }
 

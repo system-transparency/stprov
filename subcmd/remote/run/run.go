@@ -12,6 +12,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"system-transparency.org/stboot/stlog"
 	"system-transparency.org/stprov/internal/api"
 	"system-transparency.org/stprov/internal/hexify"
 	"system-transparency.org/stprov/internal/secrets"
@@ -50,6 +51,7 @@ func Main(args []string, optPort int, optIP string, optAllowHosts []string, optO
 	if err := writeHostKey(uds, efiUUID, efiKeyName); err != nil {
 		return fmt.Errorf("persist host key: %w", err)
 	}
+	stlog.Info("efivar: ssh host key persisted")
 
 	return nil
 }

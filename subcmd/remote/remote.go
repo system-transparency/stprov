@@ -350,8 +350,10 @@ func commitConfig(optHostName string, config *host.Config, optURL []string, optU
 	if err := hostName.WriteEFI(efiGuid, efiHostName); err != nil {
 		return fmt.Errorf("persist host name: %w", err)
 	}
+	stlog.Info("efivarfs: hostname persisted")
 	if err := st.WriteHostConfigEFI(config); err != nil {
 		return fmt.Errorf("persist host config: %w", err)
 	}
+	stlog.Info("efivarfs: host configuration persisted")
 	return nil
 }
