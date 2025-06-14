@@ -1,6 +1,6 @@
 module testonly
 
-go 1.22
+go 1.23
 
 require system-transparency.org/stmgr v0.5.1
 

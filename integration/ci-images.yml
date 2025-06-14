@@ -8,10 +8,10 @@ build_stimage:
   image: debian:bookworm-backports
   before_script:
     - apt-get update
-    - apt-get install -qqy golang-1.22
+    - apt-get install -qqy golang-1.23
     - apt-get install -qqy git pigz
     - export GOPATH=$PWD/.go
-    - export PATH=$PATH:/usr/lib/go-1.22/bin:$GOPATH/bin
+    - export PATH=$PATH:/usr/lib/go-1.23/bin:$GOPATH/bin
     - (cd integration && go install system-transparency.org/stmgr)
   script:
     - apt install -qqy sudo make mmdebstrap cpio
@@ -33,10 +33,10 @@ build_bootimages:
     BUILD: integration/build
   before_script:
     - apt-get update
-    - apt-get install -qqy golang-1.22
+    - apt-get install -qqy golang-1.23
     - apt-get install -qqy git
     - export GOPATH=$PWD/.go
-    - export PATH=$PATH:/usr/lib/go-1.22/bin:$GOPATH/bin
+    - export PATH=$PATH:/usr/lib/go-1.23/bin:$GOPATH/bin
     - (cd integration && go install system-transparency.org/stmgr)
   script:
     - stmgr uki create -format iso -kernel $BUILD/kernel.vmlinuz -initramfs $BUILD/stprov.cpio.gz -out $BUILD/stprov.iso
