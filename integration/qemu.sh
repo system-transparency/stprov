@@ -473,15 +473,17 @@ qemu-system-x86_64                                                   \
 reach_stage "end" 20 "BdsDxe: failed to load Boot0001"
 kill $(cat qemu.pid) 2>/dev/null && sleep 1
 
+# We create uki and sign separetly here just to test stmgr uki to-iso.
+# We're testing that built-in stmgr soft key signing in supermicro script.
 info "Building signed stprov iso"
 rm -f build/stprov.iso
-go run system-transparency.org/stmgr uki create -format iso \
-    -signcert saved/db.pem                                  \
-    -signkey saved/db.priv                                  \
+go run system-transparency.org/stmgr uki create -format uki \
     -kernel build/kernel.vmlinuz                            \
     -initramfs build/stprov.cpio.gz                         \
     -cmdline 'console=ttyS0 -- -v'                          \
-    -out build/stprov.iso
+    -out build/stprov.uki
+sbsign --key saved/db.priv --cert saved/db.pem --output build/stprov.uki.signed build/stprov.uki
+go run system-transparency.org/stmgr uki to-iso -in build/stprov.uki.signed -out build/stprov.iso
 
 info "Ensuring Secure Boot validation passes with signature"
 qemu-system-x86_64                                                   \
