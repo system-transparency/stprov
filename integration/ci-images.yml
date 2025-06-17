@@ -24,25 +24,3 @@ build_stimage:
     name: "images-$CI_PROJECT_NAME-$CI_COMMIT_REF_SLUG"
     paths:
       - stimages/build/stimage.*
-
-# Build an ISO on u-root userland with stprov installed
-build_bootimages:
-  stage: images
-  image: debian:bookworm-backports
-  variables:
-    BUILD: integration/build
-  before_script:
-    - apt-get update
-    - apt-get install -qqy golang-1.23
-    - apt-get install -qqy git
-    - export GOPATH=$PWD/.go
-    - export PATH=$PATH:/usr/lib/go-1.23/bin:$GOPATH/bin
-    - (cd integration && go install system-transparency.org/stmgr)
-  script:
-    - stmgr uki create -format iso -kernel $BUILD/kernel.vmlinuz -initramfs $BUILD/stprov.cpio.gz -out $BUILD/stprov.iso
-    - stmgr uki create -format iso -kernel $BUILD/kernel.vmlinuz -initramfs $BUILD/stprov.cpio.gz -out $BUILD/stprov.ttyS0.iso -cmdline console=ttyS0,115200
-  artifacts:
-    name: "images-$CI_PROJECT_NAME-$CI_COMMIT_REF_SLUG"
-    paths:
-      - $BUILD/stprov.iso
-      - $BUILD/stprov.ttyS0.iso
