@@ -45,7 +45,7 @@ times.  Repeated values may be specified with comma-separation: `-A val,val`.
 The syntax `{}` denotes a block of commands, only used if needed for clarity.
 
 There are multiple ways to specify the same option.  For example, `-A val` and
-`-A=val` are equivalent.  All options have short and long names, see OPTIONS.
+`-A=val` are equivalent.  Most options have short and long names, see OPTIONS.
 
     stprov help
 
