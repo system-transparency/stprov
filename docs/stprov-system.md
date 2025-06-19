@@ -62,7 +62,7 @@ graph LR
     operator -- "stprov-local connects"--o router3
 ```
 
-[stboot]: https://git.glasklar.is/system-transparency/core/stboot/-/blob/v0.5.2/docs/stboot-system.md
+[stboot]: https://git.glasklar.is/system-transparency/core/stboot/-/blob/v0.6.2/docs/stboot-system.md
 
 ## How to make stprov run
 
@@ -100,9 +100,9 @@ the Secure Boot key hierarchy, and that provisioning only works in Setup Mode.
 
 All configuration is written to EFI NVRAM, see the [EFI variables reference][].
 
-[Host configuration]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.4.1/content/docs/reference/host_configuration.md
-[HOW-TO guides]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.5.0/content/docs/how-to/secure-boot
-[EFI variables reference]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.4.1/content/docs/reference/efi-variables.md
+[Host configuration]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.5.2/content/docs/reference/host_configuration.md
+[HOW-TO guides]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.5.2/content/docs/how-to/secure-boot
+[EFI variables reference]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.5.2/content/docs/reference/efi-variables.md
 
 ## Provisioning flow
 
@@ -214,7 +214,7 @@ JSON key-value pairs.  Output is also encoded as JSON key-value pairs (if any).
 
 Interested readers can find more details in the [stprov API package][].
 
-[stprov API package]: https://git.glasklar.is/system-transparency/core/stprov/-/blob/main/internal/api/api.go?ref_type=heads
+[stprov API package]: https://git.glasklar.is/system-transparency/core/stprov/-/blob/main/internal/api/api.go
 
 ## Security considerations
 

@@ -15,7 +15,7 @@ The local and remote commands accept the subcommand "help".
 
 ## VERSION
 
-This manual describes stprov v0.5.X.
+This manual describes stprov v0.5.4.
 
 ## DESCRIPTION
 
@@ -45,7 +45,7 @@ times.  Repeated values may be specified with comma-separation: `-A val,val`.
 The syntax `{}` denotes a block of commands, only used if needed for clarity.
 
 There are multiple ways to specify the same option.  For example, `-A val` and
-`-A=val` are equivalent.  All options have short and long names, see OPTIONS.
+`-A=val` are equivalent.  Most options have short and long names, see OPTIONS.
 
     stprov help
 
@@ -91,6 +91,7 @@ There are multiple ways to specify the same option.  For example, `-A val` and
       interface is guessed.
 
       A host configuration and a hostname is written to EFI NVRAM on success.
+
 
     stprov remote static -i HOST_ADDR
                          -r OSPKG_URL [-r OSPKG_URL ...] [-u USER] [-p PASSWORD]
@@ -177,9 +178,9 @@ The SSH hostkey is only written if the "run" subcommand is used for
 client-server exchanges.  Secure Boot keys are further only written if stprov
 local provides them to stprov remote in these client-server exchanges.
 
-[trust policy]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.4.1/content/docs/reference/trust_policy.md
-[EFI variables reference]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.4.1/content/docs/reference/efi-variables.md
-[host configuration]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.4.1/content/docs/reference/host_configuration.md
+[trust policy]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.5.2/content/docs/reference/trust_policy.md
+[EFI variables reference]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.5.2/content/docs/reference/efi-variables.md
+[host configuration]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.5.2/content/docs/reference/host_configuration.md
 [EFI signature lists]: https://uefi.org/specs/UEFI/2.11/32_Secure_Boot_and_Driver_Signing.html#efi-signature-data
 [authentication_v2 descriptors]: https://uefi.org/specs/UEFI/2.11/08_Services_Runtime_Services.html#using-the-efi-variable-authentication-2-descriptor
 
@@ -254,4 +255,4 @@ design and intended usage perspective without being a dense reference manual.
 See also the [HOW-TO guides][] on Secure Boot key management and signing.
 
 [stprov system documentation]: ./stprov-system.md
-[HOW-TO guides]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.5.0/content/docs/how-to/secure-boot
+[HOW-TO guides]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.5.2/content/docs/how-to/secure-boot
