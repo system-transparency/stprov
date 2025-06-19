@@ -68,8 +68,8 @@ stprov CI, or build the ISO locally as follows:
 
     $ SINGLE_TEST=0 ./integration/qemu.sh && ./integration/supermicro-x11scl.sh
 
-`integration/supermicro-x11scl.sh` uses the `stmgr` tool.  Select the same
-version as the stboot smoke test, or ensure the stprov CI uses that version.
+`integration/supermicro-x11scl.sh` uses the `stmgr` tool.  Ensure the same
+version as the stboot smoke test is used, see `integration/go.mod`.
 
 The instructions for three manual tests will now be outlined.
 
