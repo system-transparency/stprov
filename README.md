@@ -28,10 +28,11 @@ a provisioning environment where the `stprov remote` program is available.
 Another way to achieve the same thing is to have a separate image just for
 provisioning, e.g., built as an ISO that can be mounted on the platform.
 
-The [stprov CI](./integration/ci-images.yml) contains examples of how to build
-provisioning OS packages and separate ISOs that use u-root's shell environment.
+The stprov CI contains examples of how to build [provisioning OS
+packages](./integration/ci-images.yml) and [separate
+ISOs](./integration/supermicro-x11scl.sh) that use u-root's shell environment.
 
-[provisioning mode]: https://git.glasklar.is/system-transparency/core/stboot/-/blob/v0.5.2/docs/stboot-system.md?ref_type=tags#host-configuration
+[provisioning mode]: https://git.glasklar.is/system-transparency/core/stboot/-/blob/v0.6.2/docs/stboot-system.md?ref_type=tags#host-configuration
 
 ## Development
 
@@ -51,9 +52,9 @@ your name to the list of authors at the bottom in a separate commit.
 
 ### Testing
 
-Our [CI configuration](./gitlab-ci) builds the `stprov` program, runs (most)
-unit tests, and performs a QEMU integration test.  The QEMU integration test
-contains a working example of `stprov remote` and `stprov local`.  See the
+Our [CI configuration](./.gitlab-ci.yml) builds the `stprov` program, runs
+(most) unit tests, and performs a QEMU integration test.  The QEMU integration
+test contains a working example of `stprov remote` and `stprov local`.  See the
 [testing stprov](./docs/testing-stprov.md) document for further details.
 
 Please make sure that all CI tests pass before requesting review.
