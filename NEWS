@@ -1,3 +1,36 @@
+NEWS for stprov v0.5.X
+
+    This release most notably helps operators provision Secure Boot keys.
+
+    New features:
+
+    * Secure Boot policy objects PK, KEK, db, and dbx can be provisioned.  See
+      stprov-manual and stprov-system, which also links to a few HOW-TO guides.
+    * It is optional to provide a file with with X.509 certificate roots for
+      HTTPS.  If omitted, HEAD requests on HTTPS URLs will definiltely fail.
+
+    Miscellaneous:
+
+    * Add INFO prints that clarify if the stprov commands succeeded or not.
+    * Add INFO prints that clarify what is being provisioned in EFI NVRAM.
+
+    Incompatible changes:
+
+    * This version requires go version 1.23 or later when building.
+
+    This release has been tested to work with:
+
+    * stboot's provision mode, pre-release tag v0.6.2:
+      https://git.glasklar.is/system-transparency/core/stboot/-/tree/v0.6.2
+    * ISO building using stmgr, pre-release tag v0.6.4:
+      https://git.glasklar.is/system-transparency/core/stmgr/-/tree/v0.6.4
+
+    This release implements the specifications at:
+
+    * https://git.glasklar.is/system-transparency/core/stprov/-/blob/v0.5.2/docs/stprov-system.md
+    * https://git.glasklar.is/system-transparency/core/stprov/-/blob/v0.5.2/docs/stprov-manual.md#files-and-directories
+    * https://git.glasklar.is/system-transparency/project/docs/-/tree/v0.5.1/content/docs/reference
+
 NEWS for stprov v0.4.2
 
     Bug fixes:
