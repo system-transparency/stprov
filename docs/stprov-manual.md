@@ -15,7 +15,7 @@ The local and remote commands accept the subcommand "help".
 
 ## VERSION
 
-This manual describes stprov v0.5.X.
+This manual describes stprov v0.5.4.
 
 ## DESCRIPTION
 
@@ -91,6 +91,7 @@ There are multiple ways to specify the same option.  For example, `-A val` and
       interface is guessed.
 
       A host configuration and a hostname is written to EFI NVRAM on success.
+
 
     stprov remote static -i HOST_ADDR
                          -r OSPKG_URL [-r OSPKG_URL ...] [-u USER] [-p PASSWORD]
