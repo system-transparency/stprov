@@ -1,4 +1,4 @@
-NEWS for stprov v0.5.X
+NEWS for stprov v0.5.4
 
     This release most notably helps operators provision Secure Boot keys.
 
@@ -20,9 +20,9 @@ NEWS for stprov v0.5.X
 
     This release has been tested to work with:
 
-    * stboot's provision mode, pre-release tag v0.6.2:
+    * stboot's provision mode, pre-release tag v0.6.2.
       https://git.glasklar.is/system-transparency/core/stboot/-/tree/v0.6.2
-    * ISO building using stmgr, pre-release tag v0.6.4:
+    * ISO building using stmgr, pre-release tag v0.6.4.
       https://git.glasklar.is/system-transparency/core/stmgr/-/tree/v0.6.4
 
     This release implements the specifications at:
