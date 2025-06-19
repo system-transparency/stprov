@@ -178,9 +178,9 @@ The SSH hostkey is only written if the "run" subcommand is used for
 client-server exchanges.  Secure Boot keys are further only written if stprov
 local provides them to stprov remote in these client-server exchanges.
 
-[trust policy]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.4.1/content/docs/reference/trust_policy.md
-[EFI variables reference]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.4.1/content/docs/reference/efi-variables.md
-[host configuration]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.4.1/content/docs/reference/host_configuration.md
+[trust policy]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.5.2/content/docs/reference/trust_policy.md
+[EFI variables reference]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.5.2/content/docs/reference/efi-variables.md
+[host configuration]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.5.2/content/docs/reference/host_configuration.md
 [EFI signature lists]: https://uefi.org/specs/UEFI/2.11/32_Secure_Boot_and_Driver_Signing.html#efi-signature-data
 [authentication_v2 descriptors]: https://uefi.org/specs/UEFI/2.11/08_Services_Runtime_Services.html#using-the-efi-variable-authentication-2-descriptor
 
@@ -255,4 +255,4 @@ design and intended usage perspective without being a dense reference manual.
 See also the [HOW-TO guides][] on Secure Boot key management and signing.
 
 [stprov system documentation]: ./stprov-system.md
-[HOW-TO guides]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.5.0/content/docs/how-to/secure-boot
+[HOW-TO guides]: https://git.glasklar.is/system-transparency/project/docs/-/blob/v0.5.2/content/docs/how-to/secure-boot
