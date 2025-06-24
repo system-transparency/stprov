@@ -7,7 +7,7 @@ NEWS for stprov v0.5.4
     * Secure Boot policy objects PK, KEK, db, and dbx can be provisioned.  See
       stprov-manual and stprov-system, which also links to a few HOW-TO guides.
     * It is optional to provide a file with with X.509 certificate roots for
-      HTTPS.  If omitted, HEAD requests on HTTPS URLs will definiltely fail.
+      HTTPS.  If omitted, HEAD requests on HTTPS URLs will definitely fail.
 
     Miscellaneous:
 
