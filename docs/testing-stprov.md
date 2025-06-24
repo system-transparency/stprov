@@ -106,6 +106,10 @@ If the interface name is `eth1`, run:
 
     # stprov remote dhcp -h qa1 -I eth1
 
+**Troubleshooting:** not getting an IP address? Check `systemctl status udhcpd`
+on tee, might need a *restart*.  This is a temporary fix for
+[bootlab#5](https://git.glasklar.is/glasklar/services/bootlab/-/issues/5).
+
 Expect to see that the HEAD request on the OS package succeeds.
 
 Determine the configured IP address:
