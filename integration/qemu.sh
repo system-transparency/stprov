@@ -459,7 +459,7 @@ qemu-system-x86_64                                                   \
     -drive if=pflash,format=raw,unit=0,file="$ovmf_code",readonly=on \
     -drive if=pflash,format=raw,unit=1,file=saved/OVMF_VARS.fd >saved/qemu.log &
 reach_stage "end" 20 "Boot Maintenance Manager"
-kill $(cat qemu.pid) 2>/dev/null && sleep 1
+kill $(cat qemu.pid) 2>/dev/null && wait
 
 info "Enabling secure boot"
 virt-fw-vars --secure-boot --inplace saved/OVMF_VARS.fd
@@ -471,7 +471,7 @@ qemu-system-x86_64                                                   \
     -drive if=pflash,format=raw,unit=0,file="$ovmf_code",readonly=on \
     -drive if=pflash,format=raw,unit=1,file=saved/OVMF_VARS.fd >saved/qemu.log &
 reach_stage "end" 20 "BdsDxe: failed to load Boot0001"
-kill $(cat qemu.pid) 2>/dev/null && sleep 1
+kill $(cat qemu.pid) 2>/dev/null && wait
 
 # We create uki and sign separetly here just to test stmgr uki to-iso.
 # We're testing that built-in stmgr soft key signing in supermicro script.
@@ -492,6 +492,6 @@ qemu-system-x86_64                                                   \
     -drive if=pflash,format=raw,unit=0,file="$ovmf_code",readonly=on \
     -drive if=pflash,format=raw,unit=1,file=saved/OVMF_VARS.fd >saved/qemu.log &
 reach_stage "end" 20 "stage:boot"
-kill $(cat qemu.pid) 2>/dev/null && sleep 1
+kill $(cat qemu.pid) 2>/dev/null && wait
 
 info "All tests passed"
