@@ -471,8 +471,32 @@ qemu-system-x86_64                                                   \
     -drive if=pflash,format=raw,unit=0,file="$ovmf_code",readonly=on \
     -drive if=pflash,format=raw,unit=1,file=saved/OVMF_VARS.fd >saved/qemu.log &
 reach_stage "end" 20 "BdsDxe: failed to load Boot0001"
+
+echo Checking for qemu pid using ps, before kill command
+ps -A | grep $(cat qemu.pid)
+
 kill $(cat qemu.pid) 2>/dev/null && sleep 1
-rm -f qemu.pid
+
+echo Checking for qemu pid using ps, after kill command
+ps -A | grep $(cat qemu.pid)
+
+echo Doing sleep 10
+sleep 10
+
+echo Checking for qemu pid using ps, after kill command, again
+ps -A | grep $(cat qemu.pid)
+
+echo Doing sleep 10
+sleep 10
+
+echo Checking for qemu pid using ps, after kill command, again
+ps -A | grep $(cat qemu.pid)
+
+echo Doing sleep 10
+sleep 10
+
+echo Checking for qemu pid using ps, after kill command, again
+ps -A | grep $(cat qemu.pid)
 
 # We create uki and sign separetly here just to test stmgr uki to-iso.
 # We're testing that built-in stmgr soft key signing in supermicro script.
