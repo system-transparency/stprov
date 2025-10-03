@@ -498,6 +498,69 @@ sleep 10
 echo Checking for qemu pid using ps, after kill command, again
 ps -A | grep $(cat qemu.pid)
 
+echo Doing kill command again
+kill $(cat qemu.pid) 2>/dev/null && sleep 1
+
+echo Checking for qemu pid using ps, after kill command, again
+ps -A | grep $(cat qemu.pid)
+
+echo Doing sleep 10
+sleep 10
+
+echo Checking for qemu pid using ps, after kill command, again
+ps -A | grep $(cat qemu.pid)
+
+echo Doing sleep 10
+sleep 10
+
+echo Checking for qemu pid using ps, after kill command, again
+ps -A | grep $(cat qemu.pid)
+
+echo Doing sleep 10
+sleep 10
+
+echo Checking for qemu pid using ps, after kill command, again
+ps -A | grep $(cat qemu.pid)
+
+echo Doing sleep 10
+sleep 10
+
+echo Checking for qemu pid using ps, after kill command, again
+ps -A | grep $(cat qemu.pid)
+
+echo Doing sleep 10
+sleep 10
+
+echo Checking for qemu pid using ps, after kill command, again
+ps -A | grep $(cat qemu.pid)
+
+echo Doing kill command again
+kill $(cat qemu.pid) 2>/dev/null && sleep 1
+
+echo Checking for qemu pid using ps, after kill command, again
+ps -A | grep $(cat qemu.pid)
+
+echo Doing sleep 10
+sleep 10
+
+echo Checking for qemu pid using ps, after kill command, again
+ps -A | grep $(cat qemu.pid)
+
+echo Doing sleep 10
+sleep 10
+
+echo Checking for qemu pid using ps, after kill command, again
+ps -A | grep $(cat qemu.pid)
+
+echo Doing sleep 10
+sleep 10
+
+echo Checking for qemu pid using ps, after kill command, again
+ps -A | grep $(cat qemu.pid)
+
+echo Doing cat qemu.pid
+cat qemu.pid
+
 # We create uki and sign separetly here just to test stmgr uki to-iso.
 # We're testing that built-in stmgr soft key signing in supermicro script.
 info "Building signed stprov iso"
@@ -510,7 +573,7 @@ go run system-transparency.org/stmgr uki create -format uki \
 sbsign --key saved/db.priv --cert saved/db.pem --output build/stprov.uki.signed build/stprov.uki
 go run system-transparency.org/stmgr uki to-iso -in build/stprov.uki.signed -out build/stprov.iso
 
-info "Ensuring Secure Boot validation passes with signature -- the qemu.pid file was removed earler so hopefully this should work now"
+info "Ensuring Secure Boot validation passes with signature -- if the qemu.pid file was not removed this may not work"
 qemu-system-x86_64                                                   \
     -pidfile qemu.pid -nographic -no-reboot -m 512M -M q35           \
     -cdrom build/stprov.iso                                          \
