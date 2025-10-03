@@ -358,7 +358,7 @@ for i in "${!remote_configs[@]}"; do
 		exit 0
 	fi
 
-	qemu-system-x86_64 "${qemu_opts[@]}" >saved/qemu.log &
+	qemu-system-x86_64 </dev/null "${qemu_opts[@]}" >saved/qemu.log &
 
 	reach_stage "$i" 20 "stage:boot"
 	reach_stage "$i" 60 "stage:network"
@@ -453,7 +453,7 @@ go run system-transparency.org/stmgr uki create -format iso \
     -out build/stprov.iso
 
 info "Ensuring firmware menu is entered"
-qemu-system-x86_64                                                   \
+qemu-system-x86_64 </dev/null                                        \
     -pidfile qemu.pid -nographic -no-reboot -m 512M -M q35           \
     -cdrom build/stprov.iso                                          \
     -drive if=pflash,format=raw,unit=0,file="$ovmf_code",readonly=on \
@@ -465,7 +465,7 @@ info "Enabling secure boot"
 virt-fw-vars --secure-boot --inplace saved/OVMF_VARS.fd
 
 info "Ensuring Secure Boot validation fails without signature"
-qemu-system-x86_64                                                   \
+qemu-system-x86_64 </dev/null                                        \
     -pidfile qemu.pid -nographic -no-reboot -m 512M -M q35           \
     -cdrom build/stprov.iso                                          \
     -drive if=pflash,format=raw,unit=0,file="$ovmf_code",readonly=on \
@@ -486,7 +486,7 @@ sbsign --key saved/db.priv --cert saved/db.pem --output build/stprov.uki.signed 
 go run system-transparency.org/stmgr uki to-iso -in build/stprov.uki.signed -out build/stprov.iso
 
 info "Ensuring Secure Boot validation passes with signature"
-qemu-system-x86_64                                                   \
+qemu-system-x86_64 </dev/null                                        \
     -pidfile qemu.pid -nographic -no-reboot -m 512M -M q35           \
     -cdrom build/stprov.iso                                          \
     -drive if=pflash,format=raw,unit=0,file="$ovmf_code",readonly=on \
