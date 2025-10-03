@@ -485,7 +485,8 @@ go run system-transparency.org/stmgr uki create -format uki \
 sbsign --key saved/db.priv --cert saved/db.pem --output build/stprov.uki.signed build/stprov.uki
 go run system-transparency.org/stmgr uki to-iso -in build/stprov.uki.signed -out build/stprov.iso
 
-info "Ensuring Secure Boot validation passes with signature"
+info "Ensuring Secure Boot validation passes with signature, but doing sleep 5 first"
+sleep 5
 qemu-system-x86_64                                                   \
     -pidfile qemu.pid -nographic -no-reboot -m 512M -M q35           \
     -cdrom build/stprov.iso                                          \
