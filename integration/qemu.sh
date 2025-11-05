@@ -471,6 +471,9 @@ qemu-system-x86_64                                                   \
     -drive if=pflash,format=raw,unit=0,file="$ovmf_code",readonly=on \
     -drive if=pflash,format=raw,unit=1,file=saved/OVMF_VARS.fd >saved/qemu.log &
 reach_stage "end" 20 "BdsDxe: failed to load Boot0001"
+# Doing kill directly here sometimes leads to the qemu process getting
+# stuck. Do sleep 1 before kill to avoid that problem.
+sleep 1
 kill $(cat qemu.pid) 2>/dev/null && wait
 
 # We create uki and sign separetly here just to test stmgr uki to-iso.
