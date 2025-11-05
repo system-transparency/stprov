@@ -475,6 +475,10 @@ reach_stage "end" 20 "BdsDxe: failed to load Boot0001"
 echo Checking for qemu pid using ps, before kill command
 ps -A | grep $(cat qemu.pid)
 
+echo Doing sleep 30 before kill command
+sleep 30
+echo After sleep 30 before kill command
+
 kill $(cat qemu.pid) 2>/dev/null && sleep 1
 
 echo Checking for qemu pid using ps, after kill command
