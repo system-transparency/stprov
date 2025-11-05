@@ -471,99 +471,7 @@ qemu-system-x86_64                                                   \
     -drive if=pflash,format=raw,unit=0,file="$ovmf_code",readonly=on \
     -drive if=pflash,format=raw,unit=1,file=saved/OVMF_VARS.fd >saved/qemu.log &
 reach_stage "end" 20 "BdsDxe: failed to load Boot0001"
-
-echo Checking for qemu pid using ps, before kill command
-ps -A | grep $(cat qemu.pid)
-
-echo Doing sleep 30 before kill command
-sleep 30
-echo After sleep 30 before kill command
-
 kill $(cat qemu.pid) 2>/dev/null && sleep 1
-
-echo Checking for qemu pid using ps, after kill command
-ps -A | grep $(cat qemu.pid)
-
-echo Doing sleep 10
-sleep 10
-
-echo Checking for qemu pid using ps, after kill command, again
-ps -A | grep $(cat qemu.pid)
-
-echo Doing sleep 10
-sleep 10
-
-echo Checking for qemu pid using ps, after kill command, again
-ps -A | grep $(cat qemu.pid)
-
-echo Doing sleep 10
-sleep 10
-
-echo Checking for qemu pid using ps, after kill command, again
-ps -A | grep $(cat qemu.pid)
-
-echo Doing kill command again
-kill $(cat qemu.pid) 2>/dev/null && sleep 1
-
-echo Checking for qemu pid using ps, after kill command, again
-ps -A | grep $(cat qemu.pid)
-
-echo Doing sleep 10
-sleep 10
-
-echo Checking for qemu pid using ps, after kill command, again
-ps -A | grep $(cat qemu.pid)
-
-echo Doing sleep 10
-sleep 10
-
-echo Checking for qemu pid using ps, after kill command, again
-ps -A | grep $(cat qemu.pid)
-
-echo Doing sleep 10
-sleep 10
-
-echo Checking for qemu pid using ps, after kill command, again
-ps -A | grep $(cat qemu.pid)
-
-echo Doing sleep 10
-sleep 10
-
-echo Checking for qemu pid using ps, after kill command, again
-ps -A | grep $(cat qemu.pid)
-
-echo Doing sleep 10
-sleep 10
-
-echo Checking for qemu pid using ps, after kill command, again
-ps -A | grep $(cat qemu.pid)
-
-echo Doing kill command again
-kill $(cat qemu.pid) 2>/dev/null && sleep 1
-
-echo Checking for qemu pid using ps, after kill command, again
-ps -A | grep $(cat qemu.pid)
-
-echo Doing sleep 10
-sleep 10
-
-echo Checking for qemu pid using ps, after kill command, again
-ps -A | grep $(cat qemu.pid)
-
-echo Doing sleep 10
-sleep 10
-
-echo Checking for qemu pid using ps, after kill command, again
-ps -A | grep $(cat qemu.pid)
-
-echo Doing sleep 10
-sleep 10
-
-echo Checking for qemu pid using ps, after kill command, again
-ps -A | grep $(cat qemu.pid)
-
-echo Doing cat qemu.pid
-cat qemu.pid
 
 # We create uki and sign separetly here just to test stmgr uki to-iso.
 # We're testing that built-in stmgr soft key signing in supermicro script.
@@ -577,7 +485,7 @@ go run system-transparency.org/stmgr uki create -format uki \
 sbsign --key saved/db.priv --cert saved/db.pem --output build/stprov.uki.signed build/stprov.uki
 go run system-transparency.org/stmgr uki to-iso -in build/stprov.uki.signed -out build/stprov.iso
 
-info "Ensuring Secure Boot validation passes with signature -- if the qemu.pid file was not removed this may not work"
+info "Ensuring Secure Boot validation passes with signature"
 qemu-system-x86_64                                                   \
     -pidfile qemu.pid -nographic -no-reboot -m 512M -M q35           \
     -cdrom build/stprov.iso                                          \
