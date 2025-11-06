@@ -5,13 +5,12 @@ variables:
 # Build an ST image on a Debian system with stprov installed
 build_stimage:
   stage: images
-  image: debian:bookworm-backports
+  image: debian:trixie
   before_script:
     - apt-get update
-    - apt-get install -qqy golang-1.23
-    - apt-get install -qqy git pigz
+    - apt-get install -qqy golang-1.24 git pigz
     - export GOPATH=$PWD/.go
-    - export PATH=$PATH:/usr/lib/go-1.23/bin:$GOPATH/bin
+    - export PATH=$PATH:/usr/lib/go-1.24/bin:$GOPATH/bin
     - (cd integration && go install system-transparency.org/stmgr)
   script:
     - apt install -qqy sudo make mmdebstrap cpio

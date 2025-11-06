@@ -18,18 +18,13 @@ qemu_test:
   stage: integration
   tags:
     - longrunning
-  image: debian:bookworm-backports
+  image: debian:trixie
   before_script:
     - apt update
-    # The guestfwd option is broken on Debian bookworm with QEMU version 7.2.7.
-    # Backporting QEMU version 8.1.1 makes the guestfwd option work though.  We
-    # did not hunt down what the bug is, just the (non-)working versions.
-    - apt install -qqy -t bookworm-backports qemu-system-x86 qemu-system-common qemu-system-data golang-1.23
-    - apt install -qqy git python3 curl jq openssh-client make openssl unzip cpio gzip efitools uuid-runtime sbsigntool
-    - apt install -qqy --no-install-recommends python3-pip
-    - pip install --break-system-packages --user virt-firmware
+    - apt install -qqy qemu-system-x86 qemu-system-common qemu-system-data golang-1.24
+    - apt install -qqy git python3 curl jq openssh-client make openssl unzip cpio gzip efitools uuid-runtime sbsigntool python3-virt-firmware
     - export GOPATH=$PWD/.go
-    - export PATH=$PATH:/usr/lib/go-1.23/bin:$GOPATH/bin
+    - export PATH=$PATH:/usr/lib/go-1.24/bin:$GOPATH/bin
     - export PATH=$PATH:$HOME/.local/bin/
   script:
     - ./integration/qemu.sh
@@ -48,22 +43,17 @@ qemu_test:
 # commands. Instead, we create a go.work.local file, and point to it
 # via the GOWORK environment variable; that way, it can be enabled
 # only when building stprov, and disabled for u-root.
-#
-# Same comment here as for the above qemu_test job: the the guestfwd
-# feature appears broken in the bookworm version of QEMU.
 qemu_head_stboot_test:
   stage: integration
   tags:
     - longrunning
-  image: debian:bookworm-backports
+  image: debian:trixie
   allow_failure: true
   before_script:
     - apt update
-    - apt install -qqy -t bookworm-backports qemu-system-x86 qemu-system-common qemu-system-data golang-1.23
-    - apt install -qqy git python3 curl jq openssh-client make openssl unzip cpio gzip efitools uuid-runtime sbsigntool
-    - apt install -qqy --no-install-recommends python3-pip
-    - pip install --break-system-packages --user virt-firmware
-    - export PATH=/usr/lib/go-1.23/bin:$PATH
+    - apt install -qqy qemu-system-x86 qemu-system-common qemu-system-data golang-1.24
+    - apt install -qqy git python3 curl jq openssh-client make openssl unzip cpio gzip efitools uuid-runtime sbsigntool python3-virt-firmware
+    - export PATH=/usr/lib/go-1.24/bin:$PATH
     - export PATH=$PATH:$HOME/.local/bin/
     - git clone https://git.glasklar.is/system-transparency/core/stboot.git
     - go work init && go work use . ./stboot && mv go.work go.work.local
