@@ -190,6 +190,12 @@ func countTrue(b ...bool) int {
 	return n
 }
 
+// decodeSafeCIDR decodes CIDR where '/' has been encoded as 'm' (short for
+// mask) to avoid scrambled input.
+func decodeSafeCIDR(cidr string) string {
+	return strings.Replace(cidr, "m", "/", 1)
+}
+
 func Main(args []string) error {
 	var err error
 	var interfaceWait time.Duration
@@ -232,6 +238,13 @@ func Main(args []string) error {
 	efiConfigName, efiUUID, err := st.HostConfigEFIVariableName()
 	if err != nil {
 		return fmtErr(err, opt.Name())
+	}
+
+	// Decode CIDR strings encoded to avoid scrambled input.
+	optHostIP = decodeSafeCIDR(optHostIP)
+	optGateway = decodeSafeCIDR(optGateway)
+	for i, allowedCIDR := range optAllowedCIDRs.Values {
+		optAllowedCIDRs.Values[i] = decodeSafeCIDR(allowedCIDR)
 	}
 
 	description := formatDescription(version.Version, time.Now())
