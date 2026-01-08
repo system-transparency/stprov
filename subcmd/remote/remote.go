@@ -44,6 +44,10 @@ const usage_string = `Usage:
     If the subnet mask is omitted with the -a option, it defaults to "/32"
     (IPv4) or "/128" (IPv6).  E.g., 10.0.0.1 and 10.0.0.1/32 are equivalent.
 
+    If your input interface scrambles the '/' (slash) when typing, it is
+    possible to type 'm' as a replacement for the '/' in CIDR notation
+    addresses.  This is possible for the arguments to the flags -i and -a.
+
 
   stprov remote dhcp -h HOSTNAME | -H FULL_HOSTNAME
                      -r OSPKG_URL [-r OSPKG_URL ...] [-u USER] [-p PASSWORD]
@@ -99,6 +103,10 @@ const usage_string = `Usage:
 
     Bonding mode (-M) is one of: balance-rr, active-backup, balance-xor,
     broadcast, 802.3ad, balance-tlb, balance-alb.
+
+    If your input interface scrambles the '/' (slash) when typing, it is
+    possible to type 'm' as a replacement for the '/' in CIDR notation
+    addresses.  This is possible for the arguments to the flags -i and -g.
 `
 
 const (
@@ -232,6 +240,13 @@ func Main(args []string) error {
 	efiConfigName, efiUUID, err := st.HostConfigEFIVariableName()
 	if err != nil {
 		return fmtErr(err, opt.Name())
+	}
+
+	// Decode CIDR strings encoded to avoid scrambled input.
+	optHostIP = options.DecodeSafeCIDR(optHostIP)
+	optGateway = options.DecodeSafeCIDR(optGateway)
+	for i, allowedCIDR := range optAllowedCIDRs.Values {
+		optAllowedCIDRs.Values[i] = options.DecodeSafeCIDR(allowedCIDR)
 	}
 
 	description := formatDescription(version.Version, time.Now())
