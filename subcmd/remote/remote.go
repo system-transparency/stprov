@@ -192,8 +192,22 @@ func countTrue(b ...bool) int {
 
 // decodeSafeCIDR decodes CIDR where '/' has been encoded as 'm' (short for
 // mask) to avoid scrambled input.
+// If the string already contains '/', the original string is returned.
 func decodeSafeCIDR(cidr string) string {
-	return strings.Replace(cidr, "m", "/", 1)
+	if strings.Contains(cidr, "/") {
+		return cidr
+	}
+
+	runes := []rune(cidr)
+
+	for i := len(runes) - 1; i >= 0; i-- {
+		if runes[i] == 'm' {
+			runes[i] = '/'
+			return string(runes)
+		}
+	}
+
+	return cidr
 }
 
 func Main(args []string) error {
