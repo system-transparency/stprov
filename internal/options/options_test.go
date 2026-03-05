@@ -117,3 +117,29 @@ func TestMaxHost(t *testing.T) {
 		}
 	}
 }
+
+func TestDecodeSafeCIDR(t *testing.T) {
+	for _, table := range []struct {
+		in   string
+		want string
+	}{
+		{"", ""},
+		{"x", "x"},
+		{"/", "/"},
+		{"m", "/"},
+		{"m/", "m/"},
+		{"mm", "m/"},
+		{"mm2", "m/2"},
+		{"192.0.2.1/25", "192.0.2.1/25"},
+		{"192.0.2.1m25", "192.0.2.1/25"},
+		{"2001:db8::1/25", "2001:db8::1/25"},
+		{"2001:db8::1m25", "2001:db8::1/25"},
+	} {
+		got := DecodeSafeCIDR(table.in)
+
+		if got != table.want {
+			t.Errorf("Unexpected decoded string for input %s: got %s, want %s",
+				table.in, got, table.want)
+		}
+	}
+}

@@ -233,6 +233,26 @@ func ValidateHostAndGateway(optHostIP, optGateway string, optForce, optTryLastIP
 	return optGateway, nil
 }
 
+// DecodeSafeCIDR decodes CIDR where '/' has been encoded as 'm' (short for
+// mask) to avoid scrambled input.
+// If the string already contains '/', the original string is returned.
+func DecodeSafeCIDR(cidr string) string {
+	if strings.Contains(cidr, "/") {
+		return cidr
+	}
+
+	runes := []rune(cidr)
+
+	for i := len(runes) - 1; i >= 0; i-- {
+		if runes[i] == 'm' {
+			runes[i] = '/'
+			return string(runes)
+		}
+	}
+
+	return cidr
+}
+
 func appendPrefixLength(addr string) string {
 	if strings.Contains(addr, ":") {
 		if strings.HasSuffix(addr, "/128") {
