@@ -8,7 +8,7 @@ require (
 	github.com/u-root/u-root v0.14.0
 	github.com/vishvananda/netlink v1.3.1
 	golang.org/x/crypto v0.48.0
-	system-transparency.org/stboot v0.6.2
+	system-transparency.org/stboot v0.6.4
 )
 
 require (
@@ -21,7 +21,7 @@ require (
 	github.com/u-root/uio v0.0.0-20240224005618-d2acac8f3701 // indirect
 	github.com/vishvananda/netns v0.0.5 // indirect
 	golang.org/x/net v0.49.0 // indirect
-	golang.org/x/sync v0.11.0 // indirect
+	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.41.0 // indirect
 	sigsum.org/sigsum-go v0.11.2 // indirect
 )
