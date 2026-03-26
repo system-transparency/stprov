@@ -109,7 +109,7 @@ func (c *Client) doGet(endpointURL string) ([]byte, error) {
 	}
 	defer rsp.Body.Close()
 	if rsp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(http.StatusText(rsp.StatusCode))
+		return nil, fmt.Errorf("%s", http.StatusText(rsp.StatusCode))
 	}
 	return io.ReadAll(rsp.Body)
 }
@@ -131,7 +131,7 @@ func (c *Client) doPost(endpointURL string, i interface{}) ([]byte, error) {
 	}
 	defer rsp.Body.Close()
 	if rsp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(http.StatusText(rsp.StatusCode))
+		return nil, fmt.Errorf("%s", http.StatusText(rsp.StatusCode))
 	}
 	return io.ReadAll(rsp.Body)
 }
