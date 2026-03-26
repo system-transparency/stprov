@@ -6,6 +6,10 @@ NEWS for stprov v0.6.x
       possible for the arguments to the flags -i and -a of "stprov remote run",
       and -i and -g of "stprov remote static".
 
+    Incompatible changes:
+
+    * This version requires go version 1.24 or later when building.
+
 NEWS for stprov v0.5.4
 
     This release most notably helps operators provision Secure Boot keys.
