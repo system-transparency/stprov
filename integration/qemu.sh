@@ -175,7 +175,7 @@ version=$(go list -m -f '{{.Version}}' github.com/u-root/u-root)
 	git clone --depth 1 -b "$version" https://github.com/u-root/u-root cache/u-root &&
 	(cd cache/u-root && go install)
 
-url=https://st.glasklar.is/st/qa/qa-debian-bookworm-amd64.zip
+url=https://st.glasklar.is/st/qa/qa-debian-trixie-amd64.zip
 ospkg=$(basename "$url")
 [[ -f cache/$ospkg ]] || curl -L "$url" -o "cache/$ospkg"
 
@@ -202,28 +202,28 @@ EOF
 info "copying kernel modules and their dependencies from qa-images initramfs"
 unzip -p "cache/$ospkg" "*${ospkg%.zip}.cpio.gz" | gzip -d |\
     cpio -i -D build/modules/ -d --no-absolute-filenames\
-        'usr/lib/modules/*/kernel/drivers/net/*/e1000.ko'\
-        'usr/lib/modules/*/kernel/drivers/net/*/igb.ko'\
-        'usr/lib/modules/*/kernel/drivers/net/*/igc.ko'\
-        'usr/lib/modules/*/kernel/drivers/dca/dca.ko'\
-        'usr/lib/modules/*/kernel/drivers/i2c/*/i2c-algo-bit.ko'\
-        'usr/lib/modules/*/kernel/drivers/net/*/tg3.ko'\
-        'usr/lib/modules/*/kernel/drivers/net/*/libphy.ko'\
-        'usr/lib/modules/*/kernel/drivers/net/*/bonding.ko'\
-        'usr/lib/modules/*/kernel/drivers/net/mii.ko'\
-        'usr/lib/modules/*/kernel/drivers/net/*/8139cp.ko'\
-        'usr/lib/modules/*/kernel/net/*/tls.ko'\
-        'usr/lib/modules/*/kernel/drivers/virtio/virtio.ko'\
-        'usr/lib/modules/*/kernel/drivers/virtio/virtio_ring.ko'\
-        'usr/lib/modules/*/kernel/drivers/char/*/virtio-rng.ko'\
-        'usr/lib/modules/*/kernel/fs/efivarfs/efivarfs.ko'\
-        'usr/lib/modules/*/kernel/drivers/hid/usbhid/usbhid.ko'\
-        'usr/lib/modules/*/kernel/drivers/hid/hid-generic.ko'\
-        'usr/lib/modules/*/kernel/drivers/hid/hid.ko'\
-        'usr/lib/modules/*/kernel/drivers/usb/host/xhci-hcd.ko'\
-        'usr/lib/modules/*/kernel/drivers/usb/host/xhci-pci.ko'\
-        'usr/lib/modules/*/kernel/drivers/usb/core/usbcore.ko'\
-        'usr/lib/modules/*/kernel/drivers/usb/common/usb-common.ko'\
+        'usr/lib/modules/*/kernel/drivers/net/*/e1000.ko*'\
+        'usr/lib/modules/*/kernel/drivers/net/*/igb.ko*'\
+        'usr/lib/modules/*/kernel/drivers/net/*/igc.ko*'\
+        'usr/lib/modules/*/kernel/drivers/dca/dca.ko*'\
+        'usr/lib/modules/*/kernel/drivers/i2c/*/i2c-algo-bit.ko*'\
+        'usr/lib/modules/*/kernel/drivers/net/*/tg3.ko*'\
+        'usr/lib/modules/*/kernel/drivers/net/*/libphy.ko*'\
+        'usr/lib/modules/*/kernel/drivers/net/*/bonding.ko*'\
+        'usr/lib/modules/*/kernel/drivers/net/mii.ko*'\
+        'usr/lib/modules/*/kernel/drivers/net/*/8139cp.ko*'\
+        'usr/lib/modules/*/kernel/net/*/tls.ko*'\
+        'usr/lib/modules/*/kernel/drivers/virtio/virtio.ko*'\
+        'usr/lib/modules/*/kernel/drivers/virtio/virtio_ring.ko*'\
+        'usr/lib/modules/*/kernel/drivers/char/*/virtio-rng.ko*'\
+        'usr/lib/modules/*/kernel/fs/efivarfs/efivarfs.ko*'\
+        'usr/lib/modules/*/kernel/drivers/hid/usbhid/usbhid.ko*'\
+        'usr/lib/modules/*/kernel/drivers/hid/hid-generic.ko*'\
+        'usr/lib/modules/*/kernel/drivers/hid/hid.ko*'\
+        'usr/lib/modules/*/kernel/drivers/usb/host/xhci-hcd.ko*'\
+        'usr/lib/modules/*/kernel/drivers/usb/host/xhci-pci.ko*'\
+        'usr/lib/modules/*/kernel/drivers/usb/core/usbcore.ko*'\
+        'usr/lib/modules/*/kernel/drivers/usb/common/usb-common.ko*'\
         'usr/lib/modules/*/modules.dep'
 
 # Our tests use OVMF to emulate EFI NVRAM.  For an overview of OVMF, see:
