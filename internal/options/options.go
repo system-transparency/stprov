@@ -202,7 +202,7 @@ func ValidateHostAndGateway(optHostIP, optGateway string, optForce, optTryLastIP
 		if !hostIPPrefix.Contains(gwIPAddr) {
 			msg := fmt.Sprintf("%s: gateway not within host IP network (%s)", gwIPAddr.String(), hostIPPrefix.String())
 			if !optForce {
-				return "", fmt.Errorf(msg)
+				return "", fmt.Errorf("%s", msg)
 			}
 			log.Printf("force flag: ignoring: %s", msg)
 		}
@@ -225,7 +225,7 @@ func ValidateHostAndGateway(optHostIP, optGateway string, optForce, optTryLastIP
 	if hostIPAddr.Equal(gwIPAddr) {
 		msg := fmt.Sprintf("%v: host address must be distinct from gateway address", hostIPAddr)
 		if !optForce {
-			return "", fmt.Errorf(msg)
+			return "", fmt.Errorf("%s", msg)
 		}
 		log.Printf("force flag: ignoring: %s", msg)
 	}
