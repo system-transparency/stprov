@@ -2,12 +2,12 @@ module testonly
 
 go 1.24.0
 
-require system-transparency.org/stmgr v0.6.7-0.20260330094601-88acc2307afb
+require system-transparency.org/stmgr v0.6.7-0.20260330095555-06ffc73eb19b
 
 require (
 	filippo.io/age v1.2.1 // indirect
 	github.com/dchest/safefile v0.0.0-20151022103144-855e8d98f185 // indirect
-	github.com/diskfs/go-diskfs v1.4.2 // indirect
+	github.com/diskfs/go-diskfs v1.4.1 // indirect
 	github.com/djherbis/times v1.6.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/elliotwutingfeng/asciiset v0.0.0-20230602022725-51bbb787efab // indirect
