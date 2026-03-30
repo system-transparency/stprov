@@ -8,7 +8,7 @@ stages:
 
 go_test:
   stage: unit_test
-  image: golang:1.23
+  image: golang:1.24
   script:
     - go build ./...
     - go test -v -race ./...
