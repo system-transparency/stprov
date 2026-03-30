@@ -2,13 +2,12 @@ module testonly
 
 go 1.24.0
 
-require system-transparency.org/stmgr v0.6.7-0.20260330095555-06ffc73eb19b
+require system-transparency.org/stmgr v0.6.7-0.20260330101319-aa905800dd99
 
 require (
 	filippo.io/age v1.2.1 // indirect
 	github.com/dchest/safefile v0.0.0-20151022103144-855e8d98f185 // indirect
-	github.com/diskfs/go-diskfs v1.4.1 // indirect
-	github.com/djherbis/times v1.6.0 // indirect
+	github.com/diskfs/go-diskfs v1.4.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/elliotwutingfeng/asciiset v0.0.0-20230602022725-51bbb787efab // indirect
 	github.com/foxboron/go-uefi v0.0.0-20251010190908-d29549a44f29 // indirect
@@ -30,6 +29,7 @@ require (
 	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/sys v0.39.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
+	gopkg.in/djherbis/times.v1 v1.3.0 // indirect
 	sigsum.org/sigsum-go v0.11.2 // indirect
 	system-transparency.org/stboot v0.6.4 // indirect
 )
