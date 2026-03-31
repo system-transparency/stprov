@@ -445,12 +445,18 @@ assert_secure_boot_key "$i" saved/dbx.efi saved/dbx.esl
 
 info "Building unsigned stprov iso"
 rm -f build/stprov.iso
+rm -f build/stprov-141.iso
 gzip -f build/stprov.cpio
-go run system-transparency.org/stmgr uki create -format iso \
+./stmgr-140 uki create -format iso \
     -kernel build/kernel.vmlinuz                            \
     -initramfs build/stprov.cpio.gz                         \
     -cmdline 'console=ttyS0 -- -v'                          \
     -out build/stprov.iso
+./stmgr-141 uki create -format iso \
+    -kernel build/kernel.vmlinuz                            \
+    -initramfs build/stprov.cpio.gz                         \
+    -cmdline 'console=ttyS0 -- -v'                          \
+    -out build/stprov-141.iso
 
 info "Ensuring firmware menu is entered"
 qemu-system-x86_64                                                   \
@@ -480,13 +486,21 @@ kill $(cat qemu.pid) 2>/dev/null && wait
 # We're testing that built-in stmgr soft key signing in supermicro script.
 info "Building signed stprov iso"
 rm -f build/stprov.iso
-go run system-transparency.org/stmgr uki create -format uki \
+rm -f build/stprov-141.iso
+./stmgr-140 uki create -format uki \
     -kernel build/kernel.vmlinuz                            \
     -initramfs build/stprov.cpio.gz                         \
     -cmdline 'console=ttyS0 -- -v'                          \
     -out build/stprov.uki
 sbsign --key saved/db.priv --cert saved/db.pem --output build/stprov.uki.signed build/stprov.uki
-go run system-transparency.org/stmgr uki to-iso -in build/stprov.uki.signed -out build/stprov.iso
+./stmgr-140 uki to-iso -in build/stprov.uki.signed -out build/stprov.iso
+./stmgr-141 uki create -format uki \
+    -kernel build/kernel.vmlinuz                            \
+    -initramfs build/stprov.cpio.gz                         \
+    -cmdline 'console=ttyS0 -- -v'                          \
+    -out build/stprov-141.uki
+sbsign --key saved/db.priv --cert saved/db.pem --output build/stprov-141.uki.signed build/stprov-141.uki
+./stmgr-141 uki to-iso -in build/stprov-141.uki.signed -out build/stprov-141.iso
 
 info "Ensuring Secure Boot validation passes with signature"
 qemu-system-x86_64                                                   \

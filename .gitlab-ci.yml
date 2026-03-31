@@ -36,6 +36,11 @@ qemu_test:
     - ./integration/build/stprov.cpio.gz # for stage 'images'
     - ./integration/build/kernel.vmlinuz # for stage 'images'
     - ./integration/build/stprov.iso # for stime releng testing
+    - ./integration/build/stprov-141.iso
+    - ./integration/build/stprov.uki
+    - ./integration/build/stprov-141.uki
+    - ./integration/build/stprov.uki.signed
+    - ./integration/build/stprov-141.uki.signed
 
 # Run tests with HEAD stboot, to detect any breaking changes. One
 # complication is that existence of a go.work file interacts badly
