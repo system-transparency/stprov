@@ -188,7 +188,7 @@ provisions.  On Secure Boot provisioning (successful or not), the default
 behavior is to request that the next reboot goes straight into the UEFI menu.
 
 At the end, platform information is sent from stprov remote to stprov local.
-This notably includes the SSH hostkey fingerprint.
+This notably includes the fingerprint and public key of the SSH hostkey.
 
 ---
 

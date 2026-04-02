@@ -10,6 +10,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/u-root/u-root/pkg/efivarfs"
@@ -48,11 +49,29 @@ func NewHostKey(rand io.Reader, comment string) (*HostKey, error) {
 
 // Fingerprint outputs a host key's SHA256 fingerprint
 func (hk *HostKey) Fingerprint() (string, error) {
-	pub, err := ssh.NewPublicKey(hk.Private.Public().(ed25519.PublicKey))
+	pub, err := hk.publicKey()
 	if err != nil {
-		return "", fmt.Errorf("derive public key: %w", err)
+		return "", err
 	}
 	return ssh.FingerprintSHA256(pub), nil
+}
+
+// PublicKey outputs a host key's public key as a string without trailing newline
+func (hk *HostKey) PublicKey() (string, error) {
+	pub, err := hk.publicKey()
+	if err != nil {
+		return "", err
+	}
+	authKeyBytes := ssh.MarshalAuthorizedKey(pub)
+	return strings.TrimRight(string(authKeyBytes), "\n"), nil
+}
+
+func (hk *HostKey) publicKey() (ssh.PublicKey, error) {
+	pub, err := ssh.NewPublicKey(hk.Private.Public().(ed25519.PublicKey))
+	if err != nil {
+		return nil, fmt.Errorf("derive public key: %w", err)
+	}
+	return pub, nil
 }
 
 // WriteEFI writes a host key to EFI-NVRAM in PEM format

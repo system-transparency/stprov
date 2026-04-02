@@ -46,6 +46,7 @@ type AddSecureBootRequest struct {
 
 // CommitResponse is the output of a commit request
 type CommitResponse struct {
+	PublicKey      string `json:"publickey"`
 	Fingerprint    string `json:"fingerprint"`
 	HostName       string `json:"hostname"`
 	Authentication string `json:"authentication"`
@@ -76,6 +77,12 @@ func NewCommitResponse(uds *secrets.UniqueDeviceSecret, hostname string) (*Commi
 	if err != nil {
 		return nil, fmt.Errorf("ssh: %w", err)
 	}
+
+	pk, err := hk.PublicKey()
+	if err != nil {
+		return nil, fmt.Errorf("ssh: %w", err)
+	}
+
 	id, err := uds.Identity()
 	if err != nil {
 		return nil, fmt.Errorf("identity: %w", err)
@@ -84,7 +91,13 @@ func NewCommitResponse(uds *secrets.UniqueDeviceSecret, hostname string) (*Commi
 	if err != nil {
 		return nil, fmt.Errorf("authentication: %w", err)
 	}
-	return &CommitResponse{fpr, hostname, hex.EncodeToString(auth[:]), hex.EncodeToString(id[:])}, nil
+	return &CommitResponse{
+		PublicKey:      pk,
+		Fingerprint:    fpr,
+		HostName:       hostname,
+		Authentication: hex.EncodeToString(auth[:]),
+		Identity:       hex.EncodeToString(id[:]),
+	}, nil
 }
 
 // Check checks that the request has a PK, KEK, and db (dbx is optional)

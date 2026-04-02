@@ -6,6 +6,9 @@ NEWS for stprov v0.6.x
       possible for the arguments to the flags -i and -a of "stprov remote run",
       and -i and -g of "stprov remote static".
 
+    * Add "publickey" key-value pair to the output of "stprov local" holding
+      the public key of the platform's SSH hostkey.
+
     Incompatible changes:
 
     * This version requires go version 1.25 or later when building.

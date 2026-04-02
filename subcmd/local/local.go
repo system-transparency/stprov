@@ -21,7 +21,8 @@ const usage = `Usage:
 
     Outputs the following key-value pairs on success:
 
-    fingerprint=<the platform's SSH hostkey fingerprint>
+    publickey=<the public key of the platform's SSH hostkey>
+    fingerprint=<the fingerprint of the platform's SSH hostkey>
     hostname=<the platform's hostname>
     ip=<the platform's IP address>
 
