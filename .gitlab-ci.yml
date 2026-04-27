@@ -8,7 +8,7 @@ stages:
 
 go_test:
   stage: unit_test
-  image: golang:1.24
+  image: golang:1.25
   script:
     - go build ./...
     - go test -v -race ./...
@@ -19,12 +19,13 @@ qemu_test:
   tags:
     - longrunning
   image: debian:trixie
+  # Debian trixie has go 1.24, we rely on go itself downloading and installing 1.25
   before_script:
     - apt update
-    - apt install -qqy qemu-system-x86 qemu-system-common qemu-system-data golang-1.24
+    - apt install -qqy qemu-system-x86 qemu-system-common qemu-system-data golang
     - apt install -qqy git python3 curl jq openssh-client make openssl unzip cpio gzip efitools uuid-runtime sbsigntool python3-virt-firmware
     - export GOPATH=$PWD/.go
-    - export PATH=$PATH:/usr/lib/go-1.24/bin:$GOPATH/bin
+    - export PATH=$PATH:$GOPATH/bin
     - export PATH=$PATH:$HOME/.local/bin/
   script:
     - ./integration/qemu.sh
@@ -49,11 +50,11 @@ qemu_head_stboot_test:
     - longrunning
   image: debian:trixie
   allow_failure: true
+  # Debian trixie has go 1.24, we rely on go itself downloading and installing 1.25
   before_script:
     - apt update
-    - apt install -qqy qemu-system-x86 qemu-system-common qemu-system-data golang-1.24
+    - apt install -qqy qemu-system-x86 qemu-system-common qemu-system-data golang
     - apt install -qqy git python3 curl jq openssh-client make openssl unzip cpio gzip efitools uuid-runtime sbsigntool python3-virt-firmware
-    - export PATH=/usr/lib/go-1.24/bin:$PATH
     - export PATH=$PATH:$HOME/.local/bin/
     - git clone https://git.glasklar.is/system-transparency/core/stboot.git
     - go work init && go work use . ./stboot && mv go.work go.work.local
