@@ -336,6 +336,9 @@ func commitConfig(optHostName string, config *host.Config, optURL []string, optU
 	}
 	hostName := st.HostName(optHostName)
 
+	stlog.Info("sleep 3")
+	time.Sleep(3 * time.Second)
+
 	client, err := network.NewClient(trustPolicyRootFile)
 	if err != nil {
 		return fmt.Errorf("configure tls client: %w", err)
