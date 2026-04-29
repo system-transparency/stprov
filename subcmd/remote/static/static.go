@@ -64,6 +64,7 @@ func Config(args []string, dnsServers []*net.IP, optInterface, optHostIP, optGat
 		if err != nil {
 			return nil, fmt.Errorf("no suitable network interface available")
 		}
+		log.Printf("defaultMACs: %q  (first will be picked)", defaultMACs)
 		optInterface = defaultMACs[0].String()
 	}
 	mac, err := net.ParseMAC(optInterface)

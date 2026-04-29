@@ -312,10 +312,20 @@ func checkURL(client http.Client, url string) error {
 	if err != nil {
 		return err
 	}
-	resp, err := client.Do(req)
-	if err != nil {
-		return fmt.Errorf("HEAD request on %q failed: %w", url, err)
+	var resp *http.Response
+	var errCount = 0
+	for {
+		resp, err = client.Do(req)
+		if err != nil {
+			errCount++
+			if errCount < 2 {
+				continue
+			}
+			return fmt.Errorf("HEAD request on %q failed: %w", url, err)
+		}
+		break
 	}
+
 	// Ignore any response body
 	resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
