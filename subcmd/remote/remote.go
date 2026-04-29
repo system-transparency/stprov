@@ -303,6 +303,21 @@ func parseIPs(ips []string) ([]*net.IP, error) {
 // checkURL checks url for validity, logging success or returning
 // error
 func checkURL(client http.Client, url string) error {
+	stlog.Info("sleep 25 before checkurl")
+	time.Sleep(25 * time.Second)
+
+	// These take quite for each interface?!
+	// links, err := netlink.LinkList()
+	// if err != nil {
+	// 	fmt.Printf("linklist err: %s\n", err)
+	// } else {
+	// 	for _, link := range links {
+	// 		attrs := link.Attrs()
+	// 		isUp := (attrs.Flags & net.FlagUp) != 0
+	// 		fmt.Printf("* %s up:%t operstate:%s\n", attrs.Name, isUp, attrs.OperState)
+	// 		time.Sleep(5 * time.Second)
+	// 	}
+	// }
 	if strings.Contains(url, options.DefUser+":"+options.DefPassword) {
 		stlog.Warn("Using default username and password")
 	}
@@ -319,6 +334,8 @@ func checkURL(client http.Client, url string) error {
 		if err != nil {
 			errCount++
 			if errCount < 2 {
+				fmt.Printf("** RETRYING AFTER 5 SEC\n")
+
 				continue
 			}
 			return fmt.Errorf("HEAD request on %q failed: %w", url, err)
@@ -345,9 +362,6 @@ func commitConfig(optHostName string, config *host.Config, optURL []string, optU
 		return fmt.Errorf("host name is a required option")
 	}
 	hostName := st.HostName(optHostName)
-
-	stlog.Info("sleep 3")
-	time.Sleep(3 * time.Second)
 
 	client, err := network.NewClient(trustPolicyRootFile)
 	if err != nil {
