@@ -25,6 +25,8 @@ func TestHTTPMethod(t *testing.T) {
 
 func TestHandlers(t *testing.T) {
 	endpoints := map[string]bool{
+		EndpointTPMKeys:       false,
+		EndpointTPMQuote:      false,
 		EndpointAddData:       false,
 		EndpointAddSecureBoot: false,
 		EndpointCommit:        false,

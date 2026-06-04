@@ -1,7 +1,10 @@
 package api
 
 import (
+	"bytes"
 	"context"
+	"crypto/rand"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,6 +13,7 @@ import (
 	"net/http"
 	"time"
 
+	"git.glasklar.is/nisse/tpm-lib/pkg/tpm"
 	"system-transparency.org/stboot/stlog"
 	"system-transparency.org/stprov/internal/sb"
 	"system-transparency.org/stprov/internal/secrets"
@@ -98,6 +102,135 @@ func (h Handler) authenticateUser(w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 	return true
+}
+
+func handleTPMKeys(ctx context.Context, s *Server, w http.ResponseWriter, r *http.Request) (int, error) {
+	akPub, err := s.AKPub.Pack()
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+	keysResp := TPMKeysResponse{
+		EKCert: s.EKCert,
+		AKPub:  akPub,
+	}
+	b, err := json.Marshal(keysResp)
+	if err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("marshal tpm-keys response: %w", err)
+	}
+	if _, err := w.Write(b); err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("write tpm-keys response: %w", err)
+	}
+
+	return http.StatusOK, nil
+}
+
+// NOTE Below func is based st-complete-poc's server
+
+func handleTPMQuote(ctx context.Context, s *Server, w http.ResponseWriter, r *http.Request) (int, error) {
+	var quoteReq TPMQuoteRequest
+	if err := unpackPost(r, &quoteReq); err != nil {
+		log.Printf("invalid tpm-quote request from %s: %v", r.RemoteAddr, err)
+		return http.StatusBadRequest, err
+	}
+
+	tlsNonce, err := getTLSConnectionNonce(r.TLS)
+	if err != nil {
+		log.Printf("failed getTLSConnectionNonce: %v", err)
+		return http.StatusMisdirectedRequest, err
+	}
+
+	id, err := tpm.UnpackIdObject(quoteReq.ID)
+	if err != nil {
+		return http.StatusBadRequest, err
+	}
+	encrypted := quoteReq.Encrypted
+
+	// Create a TPM session
+	sess, err := tpm.StartAuthSession(ctx, s.TPMDevice, tpm.TPM_ALG_SHA256, rand.Reader)
+	if err != nil {
+		log.Printf("StartAuthSession failed: %v", err)
+		return http.StatusInternalServerError, err
+	}
+	defer func() { tpm.FlushContext(ctx, s.TPMDevice, sess) }()
+
+	_, _, err = tpm.PolicySecret(ctx, s.TPMDevice, tpm.TPM_RH_ENDORSEMENT, sess, tpm.Password(""), nil, nil, nil, 0)
+	if err != nil {
+		log.Printf("PolicySecret failed: %v", err)
+		return http.StatusInternalServerError, err
+	}
+
+	decrypted, err := tpm.ActivateCredential(ctx, s.TPMDevice, s.AKHandle, s.EKHandle, tpm.Password(""), tpm.Policy(sess), *id, tpm.Buffer(encrypted))
+	if err != nil {
+		log.Printf("ActivateCredential failed: %v", err)
+		return http.StatusForbidden, err
+	}
+	if len(decrypted) != 16 {
+		log.Printf("unexpected nonce size")
+		return http.StatusForbidden, err
+	}
+
+	attest, sig, err := quotePCRs(ctx, s.TPMDevice, s.AKHandle, s.AKPub, []int{4}, bytes.Join([][]byte{tlsNonce, decrypted}, nil))
+	if err != nil {
+		log.Printf("failed quotePCRs: %v", err)
+		return http.StatusInternalServerError, err
+	}
+	attestBuf, err := attest.Pack()
+	if err != nil {
+		log.Printf("failed attest.Pack: %v", err)
+		return http.StatusInternalServerError, err
+	}
+	sigBuf, err := sig.Pack()
+	if err != nil {
+		log.Printf("failed sig.Pack: %v", err)
+		return http.StatusInternalServerError, err
+	}
+
+	quoteResp := TPMQuoteResponse{
+		Attest:    attestBuf,
+		Signature: sigBuf,
+	}
+	b, err := json.Marshal(quoteResp)
+	if err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("marshal tpm-quote response: %w", err)
+	}
+	if _, err := w.Write(b); err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("write tpm-quote response: %w", err)
+	}
+
+	return http.StatusOK, nil
+}
+
+func getTLSConnectionNonce(cs *tls.ConnectionState) ([]byte, error) {
+	if cs == nil {
+		return nil, fmt.Errorf("no TLS connection")
+	}
+	return cs.ExportKeyingMaterial("EXPERIMENTAL ST RA", nil, 16)
+}
+
+func quotePCRs(ctx context.Context, dev tpm.Device, akHandle tpm.U32, akPub tpm.Public, pcr []int, nonce []byte) (tpm.Attest, tpm.Signature, error) {
+	keyQName, err := akPub.QName(tpm.TPM_RH_OWNER)
+	if err != nil {
+		return tpm.Attest{}, tpm.Signature{}, err
+	}
+	attest, sig, err := tpm.Quote(ctx, dev, akHandle, tpm.Password(""),
+		tpm.Scheme{Scheme: tpm.TPM_ALG_NULL}, nonce,
+		tpm.PcrSelection{tpm.PcrSelect{Hash: tpm.TPM_ALG_SHA256, Pcr: pcr}})
+	if err != nil {
+		return tpm.Attest{}, tpm.Signature{}, err
+	}
+	if got, want := attest.Magic, tpm.TPM_GENERATED_VALUE; got != want {
+		return tpm.Attest{}, tpm.Signature{}, fmt.Errorf("bad attest magic value, got %x, want %x", got, want)
+	}
+	if got, want := attest.Type, tpm.TPM_ST_ATTEST_QUOTE; got != want {
+		return tpm.Attest{}, tpm.Signature{}, fmt.Errorf("bad attest type, got %x, want %x", got, want)
+	}
+	if got, want := attest.Signer, keyQName; !bytes.Equal(got, want) {
+		return tpm.Attest{}, tpm.Signature{}, fmt.Errorf("unexpected attestation signer: got %x, want %x", got, want)
+	}
+	if got, want := attest.Extra, nonce; !bytes.Equal(got, want) {
+		return tpm.Attest{}, tpm.Signature{}, fmt.Errorf("extra data differs from nonce, got %x, want %x", got, want)
+	}
+	return attest, sig, nil
 }
 
 func handleAddData(ctx context.Context, s *Server, w http.ResponseWriter, r *http.Request) (int, error) {

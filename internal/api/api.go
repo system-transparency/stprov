@@ -13,12 +13,29 @@ import (
 const (
 	Protocol = "stprov/v0.0.1"
 
+	EndpointTPMKeys       = "tpm-keys"
+	EndpointTPMQuote      = "tpm-quote"
 	EndpointAddData       = "add-data"
 	EndpointAddSecureBoot = "add-secure-boot"
 	EndpointCommit        = "commit"
 
 	BasicAuthUser = "example-user"
 )
+
+type TPMKeysResponse struct {
+	EKCert []byte `json:"ekcert"`
+	AKPub  []byte `json:"akpub"`
+}
+
+type TPMQuoteRequest struct {
+	ID        []byte `json:"id"`
+	Encrypted []byte `json:"encrypted"`
+}
+
+type TPMQuoteResponse struct {
+	Attest    []byte `json:"attest"`
+	Signature []byte `json:"signature"`
+}
 
 // AddDataRequest is the input of an add-data request
 type AddDataRequest struct {

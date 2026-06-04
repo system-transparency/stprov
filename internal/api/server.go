@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"git.glasklar.is/nisse/tpm-lib/pkg/tpm"
 	"system-transparency.org/stprov/internal/secrets"
 )
 
@@ -31,6 +32,12 @@ type ServerConfig struct {
 	RemotePort int         // stprov-remote port
 	LocalCIDR  []net.IPNet // where stprov-local may connect from
 	HostName   string      // host name to give back to stprov local
+	TPMDevice  tpm.Device
+	EKCert     []byte // Endorsement Key certificate (DER) extracted from server's TPM
+	EKHandle   tpm.U32
+	EKPub      tpm.Public
+	AKHandle   tpm.U32
+	AKPub      tpm.Public
 
 	Deadline time.Duration // maximum time to serve an HTTP request
 	Timeout  time.Duration // maximum time to wait on a graceful shutdown
@@ -99,6 +106,8 @@ func (srv *Server) checkHTTPMethod(m string) bool {
 
 func (srv *Server) handlers() []Handler {
 	return []Handler{
+		{srv, EndpointTPMKeys, http.MethodGet, handleTPMKeys},
+		{srv, EndpointTPMQuote, http.MethodPost, handleTPMQuote},
 		{srv, EndpointAddData, http.MethodPost, handleAddData},
 		{srv, EndpointAddSecureBoot, http.MethodPost, handleAddSecureBoot},
 		{srv, EndpointCommit, http.MethodGet, handleCommit},

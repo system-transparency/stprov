@@ -30,6 +30,7 @@ qemu_test:
     when: always
     paths:
     - ./integration/saved/
+    - ./integration/tmp.tpm/
     - ./integration/build/stprov.cpio.gz # for stage 'images'
     - ./integration/build/kernel.vmlinuz # for stage 'images'
     - ./integration/build/stprov.iso # for stime releng testing
@@ -56,6 +57,7 @@ qemu_head_stboot_test:
     when: always
     paths:
     - ./integration/saved/
+    - ./integration/tmp.tpm/
 
 commitlint:
   stage: commit

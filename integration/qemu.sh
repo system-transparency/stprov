@@ -283,6 +283,12 @@ cat saved/dbx.esl >> saved/db.esl  # pretend 1/2 certificates are not revoked
 	info "Signing PK"  && sign-efi-sig-list -g "$guid" -c  PK.pem -k PK.priv  PK  PK.esl  PK.auth)
 sb_opts="--pk saved/PK.auth --kek saved/KEK.auth --db saved/db.auth --dbx saved/dbx.auth"
 
+# We avoid start our own swtpm if somebody is running one for us
+ownswtpm=
+if [[ -z "${TPM_SOCKET:-}" ]]; then
+	ownswtpm=ownswtpm
+fi
+
 ###
 # Run tests
 ###
@@ -326,6 +332,30 @@ for i in "${!remote_configs[@]}"; do
 		-files ../../build/tls_roots.pem:etc/trust_policy/tls_roots.pem\
 		./cmds/core/{init,gosh,shutdown,cat,cp,dd,echo,grep,hexdump,ls,mkdir,mv,ping,pwd,rm,wget,wc,ip,mount,more}
 	)
+
+	if [[ -n "$ownswtpm" ]]; then
+		rm -rf tmp.tpm
+		mkdir -p tmp.tpm/state tmp.tpm/config
+		tpmd=$(pwd)/tmp.tpm
+		XDG_CONFIG_HOME=$tpmd/config swtpm_setup --create-config-files=root > $tpmd/swtpm_setup.log
+		XDG_CONFIG_HOME=$tpmd/config swtpm_setup --tpm2 --tpmstate $tpmd/state \
+			       --create-ek-cert --create-platform-cert --lock-nvram >> $tpmd/swtpm_setup.log
+		swtpm socket --tpmstate "dir=$tpmd/state" --tpm2 --pid "file=$tpmd/swtpm.pid" \
+		      --ctrl "type=unixio,path=$tpmd/swtpm.socket" --log file=$tpmd/swtpm.log,level=10,truncate &
+		TPM_SOCKET=$tpmd/swtpm.socket
+		# Noting that when QEMU tears itself down, it sends a
+		# shutdown cmd to TPM, and swtpm process exits when
+		# receiving that (or, possibly, it is exiting because
+		# QEMU disconnects from its ctrl socket)
+	fi
+
+	tpm_args=()
+	if [[ "${TPM_SOCKET:-}" ]] ; then
+		# Note: It seems one needs a --ctrl socket, not a --server socket.
+		# Example command line:
+		#  swtpm socket --tpmstate "dir=..." --tpm2 --pid "file=..." --ctrl "type=unixio,path=..."
+		tpm_args=(-chardev "socket,id=chrtpm,path=${TPM_SOCKET}" -tpmdev "emulator,id=tpm0,chardev=chrtpm" -device "tpm-tis,tpmdev=tpm0" -d guest_errors)
+	fi
 	# Documentation to understand qemu user networking and these options:
 	# - https://wiki.qemu.org/Documentation/Networking#User_Networking_(SLIRP)
 	# - https://www.qemu.org/docs/master/system/invocation.html#hxtool-5
@@ -347,6 +377,7 @@ for i in "${!remote_configs[@]}"; do
 	qemu_opts=(
 		-nographic -no-reboot -m 512M -M q35
 		-rtc base=localtime -pidfile qemu.pid
+		"${tpm_args[@]}"
 		-object "rng-random,filename=/dev/urandom,id=rng0"
 		-device "virtio-rng-pci,rng=rng0"
 		-nic "$nic_opts"

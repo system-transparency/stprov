@@ -2,7 +2,9 @@ package run
 
 import (
 	"bufio"
+	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -10,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"git.glasklar.is/nisse/tpm-lib/pkg/tpm"
 	"github.com/google/uuid"
 
 	"system-transparency.org/stboot/stlog"
@@ -88,6 +91,28 @@ func listen(otp string, allowNets []net.IPNet, ip net.IP, port int, hostname st.
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	tpmDevice, err := openTPM(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed openTPM: %w", err)
+	}
+	defer func() {
+		_ = tpmDevice.Close()
+	}()
+
+	ekCert, err := getEkCertRsa(ctx, tpmDevice)
+	if err != nil {
+		return nil, fmt.Errorf("failed getEkCertRsa: %w", err)
+	}
+
+	ek, ak, flush, err := getKeys(ctx, tpmDevice)
+	if err != nil {
+		log.Printf("failed to create keys for attestation: %v", err)
+		return
+	}
+	defer func() {
+		flush()
+	}()
+
 	srv, err := api.NewServer(&api.ServerConfig{
 		Secret:     otp,
 		RemoteIP:   ip,
@@ -96,6 +121,12 @@ func listen(otp string, allowNets []net.IPNet, ip net.IP, port int, hostname st.
 		Deadline:   15 * time.Second,
 		Timeout:    60 * time.Second,
 		HostName:   string(hostname),
+		TPMDevice:  tpmDevice,
+		EKCert:     ekCert,
+		EKHandle:   ek.handle,
+		EKPub:      ek.pub,
+		AKHandle:   ak.handle,
+		AKPub:      ak.pub,
 	})
 	if err != nil {
 		return uds, fmt.Errorf("new server: %w", err)
@@ -126,4 +157,128 @@ func writeHostKey(uds *secrets.UniqueDeviceSecret, varUUID *uuid.UUID, name stri
 		return err
 	}
 	return hk.WriteEFI(varUUID, name)
+}
+
+// NOTE All below is copypasted from st-complete-poc
+
+// Returns ek and ak keys.
+func getKeys(ctx context.Context, dev tpm.Device) (*TpmKey, *TpmKey, func(), error) {
+	ek, f1, err := NewEndorsementKey(ctx, dev)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	ak, f2, err := NewAttestationKey(ctx, dev)
+	if err != nil {
+		f1()
+		return nil, nil, nil, err
+	}
+	return ek, ak, func() { f1(); f2() }, nil
+}
+
+func openTPM(ctx context.Context) (tpm.Device, error) {
+	tpmName := os.Getenv("TEST_TPM")
+	if tpmName == "" {
+		// Requires root privs.
+		tpmName = "/dev/tpm0"
+	}
+
+	dev, err := tpm.OpenTPM(tpmName)
+	if err != nil {
+		return nil, err
+	}
+	// Needed in case of swtpm.
+	if err := tpm.Startup(ctx, dev, tpm.TPM_SU_CLEAR); err != nil && err != tpm.ErrRcInitialize {
+		return nil, err
+	}
+	return dev, nil
+}
+
+func getEkCertRsa(ctx context.Context, dev tpm.Device) ([]byte, error) {
+	idx := uint32(tpm.EkTemplateIndexL1)
+	template, _, err := tpm.NvReadPublic(ctx, dev, idx)
+	if err == nil {
+		return nil, fmt.Errorf("endorsement key with non-default template: %x", template)
+	} else if !errors.Is(err, tpm.ErrRcHandle) {
+		return nil, fmt.Errorf("failed NvReadPublic idx==0x%x: %w", idx, err)
+	}
+	_, der, err := readNvIndex(ctx, dev, tpm.EkCertificateIndexL1, "")
+	return der, err
+}
+
+type TpmKey struct {
+	handle tpm.U32
+	pub    tpm.Public
+}
+
+func newKey(ctx context.Context, dev tpm.Device, hierarchy tpm.U32, template tpm.Template, label []byte) (*TpmKey, func(), error) {
+	handle, pub, _, _, _, _, err := tpm.CreatePrimary(ctx, dev, tpm.Password(""), hierarchy, "", template, label, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+	return &TpmKey{handle: handle, pub: pub},
+		func() { _ = tpm.FlushContext(context.Background(), dev, handle) }, nil
+}
+
+func NewAttestationKey(ctx context.Context, dev tpm.Device) (*TpmKey, func(), error) {
+	akLabel := []byte("ST-POC-ECC-AK-LABEL")
+	akTemplate := tpm.Template{
+		Public: tpm.Public{
+			Type:             tpm.TPM_ALG_ECC,
+			NameAlg:          tpm.TPM_ALG_SHA256,
+			ObjectAttributes: tpm.TPMA_OBJECT_RESTRICTED_SIGN, // TODO should also TPMA_OBJECT_STCLEAR? see trammels safeboot
+			AuthPolicy:       make([]byte, 32),
+			EccParameters: &tpm.EccParms{
+				Symmetric: tpm.SymDefObject{
+					Algorithm: tpm.TPM_ALG_NULL,
+				},
+				Scheme: tpm.Scheme{
+					Scheme:  tpm.TPM_ALG_ECDSA,
+					HashAlg: tpm.TPM_ALG_SHA256,
+				},
+				CurveID: tpm.TPM_ECC_NIST_P256,
+				KDF: tpm.Scheme{
+					Scheme: tpm.TPM_ALG_NULL,
+				},
+				Unique: tpm.EccPoint{},
+			},
+		},
+	}
+	return newKey(ctx, dev, tpm.TPM_RH_OWNER, akTemplate, akLabel)
+}
+
+func NewEndorsementKey(ctx context.Context, dev tpm.Device) (*TpmKey, func(), error) {
+	return newKey(ctx, dev, tpm.TPM_RH_ENDORSEMENT, tpm.EkTemplateL1, nil)
+}
+
+func readNvIndex(ctx context.Context, dev tpm.Device, idx uint32, pw string) (tpm.NvPublic, []byte, error) {
+	nvpub, _, err := tpm.NvReadPublic(ctx, dev, idx)
+	if err != nil {
+		return tpm.NvPublic{}, nil, fmt.Errorf("failed NvReadPublic idx==0x%x: %w", idx, err)
+	}
+
+	// Get hold of TPM's nvBufMax property, which is the largest size
+	// that the TPM can handle for NvRead, NvWrite, etc
+	capData, _, err := tpm.GetCapability(ctx, dev, uint32(tpm.TPM_CAP_TPM_PROPERTIES), uint32(tpm.TPM_PT_NV_BUFFER_MAX), 1)
+	if err != nil {
+		return tpm.NvPublic{}, nil, fmt.Errorf("failed GetCapability: %w", err)
+	}
+	nvBufMax, ok := capData.TpmProperties[tpm.TPM_PT_NV_BUFFER_MAX]
+	if !ok {
+		return tpm.NvPublic{}, nil, fmt.Errorf("missing nvBufMax property")
+	}
+
+	var data bytes.Buffer
+	offset := uint16(0)
+	for data.Len() < int(nvpub.DataSize) {
+		remaining := int(nvpub.DataSize) - data.Len()
+		readSize := uint16(min(int(nvBufMax), remaining))
+		block, err := tpm.NvRead(ctx, dev, idx, tpm.Password(pw), idx, readSize, offset)
+		if err != nil {
+			return tpm.NvPublic{}, nil, fmt.Errorf("failed NvRead idx==0x%x readSize==%d offset==%d DataSize==%d data.Len()==%d: %w", idx, readSize, offset, nvpub.DataSize, data.Len(), err)
+		}
+		data.Write(block)
+		offset += readSize
+	}
+
+	return nvpub, data.Bytes(), nil
 }

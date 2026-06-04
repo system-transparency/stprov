@@ -3,6 +3,7 @@ module system-transparency.org/stprov
 go 1.25.0
 
 require (
+	git.glasklar.is/nisse/tpm-lib v0.0.5
 	github.com/go-ping/ping v1.2.0
 	github.com/google/uuid v1.6.0
 	github.com/u-root/u-root v0.16.0
