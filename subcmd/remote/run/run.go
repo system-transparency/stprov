@@ -2,7 +2,11 @@ package run
 
 import (
 	"bufio"
+	"bytes"
 	"context"
+	"crypto/sha256"
+	"crypto/x509"
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -10,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"git.glasklar.is/nisse/tpm-lib/pkg/tpm"
 	"github.com/google/uuid"
 
 	"system-transparency.org/stboot/stlog"
@@ -40,6 +45,8 @@ func Main(args []string, optPort int, optIP string, optAllowHosts []string, optO
 	}
 	otp := optOTP
 
+	ra()
+
 	var hostname st.HostName
 	if err := hostname.ReadEFI(efiUUID, efiHostName); err != nil {
 		return fmt.Errorf("ReadEFI: %s: %w", efiHostName, err)
@@ -54,6 +61,37 @@ func Main(args []string, optPort int, optIP string, optAllowHosts []string, optO
 	stlog.Info("efivar: ssh host key persisted")
 
 	return nil
+}
+
+func ra() {
+	ctx := context.Background()
+	tpmDevice, err := openTPM(ctx)
+	if err != nil {
+		log.Printf("failed to open TPM device: %v", err)
+		return
+	}
+
+	ekCertDER, err := getEkCertRsa(ctx, tpmDevice)
+	if err != nil {
+		log.Printf("failed getEkCertRsa: %s", err)
+		return
+	}
+
+	ekCert, err := x509.ParseCertificate(ekCertDER)
+	if err != nil {
+		log.Printf("failed ParseCertificate: %s", err)
+		return
+	}
+
+	log.Printf("ekCert fingerprint sha256: %0x", sha256.Sum256(ekCert.Raw))
+
+	ekPub, err := x509.MarshalPKIXPublicKey(ekCert.PublicKey)
+	if err != nil {
+		log.Printf("failed MarshallPKIXPublicKey: %s", err)
+		return
+	}
+
+	log.Printf("ekCert pubkey sha256: %0x", sha256.Sum256(ekPub))
 }
 
 // parseAllowedNets parses a list of addresses in CIDR format.  If an address
@@ -126,4 +164,86 @@ func writeHostKey(uds *secrets.UniqueDeviceSecret, varUUID *uuid.UUID, name stri
 		return err
 	}
 	return hk.WriteEFI(varUUID, name)
+}
+
+// // Returns ek and ak keys.
+// func getKeys(ctx context.Context, dev tpm.Device) (*TpmKey, *TpmKey, func(), error) {
+// 	ek, f1, err := NewEndorsementKey(ctx, dev)
+// 	if err != nil {
+// 		return nil, nil, nil, err
+// 	}
+// 	ak, f2, err := NewAttestationKey(ctx, dev)
+// 	if err != nil {
+// 		f1()
+// 		return nil, nil, nil, err
+// 	}
+// 	return ek, ak, func() { f1(); f2() }, nil
+// }
+
+func openTPM(ctx context.Context) (tpm.Device, error) {
+	tpmName := os.Getenv("TEST_TPM")
+	if tpmName == "" {
+		// Requires root privs.
+		tpmName = "/dev/tpm0"
+	}
+
+	dev, err := tpm.OpenTPM(tpmName)
+	if err != nil {
+		return nil, err
+	}
+	// Needed in case of swtpm.
+	if err := tpm.Startup(ctx, dev, tpm.TPM_SU_CLEAR); err != nil && err != tpm.ErrRcInitialize {
+		return nil, err
+	}
+	return dev, nil
+}
+
+func getEkCertRsa(ctx context.Context, dev tpm.Device) ([]byte, error) {
+	idx := uint32(tpm.EkTemplateIndexL1)
+	template, _, err := tpm.NvReadPublic(ctx, dev, idx)
+	if err == nil {
+		return nil, fmt.Errorf("endorsement key with non-default template: %x", template)
+	} else if !errors.Is(err, tpm.ErrRcHandle) {
+		return nil, fmt.Errorf("failed NvReadPublic idx==0x%x: %w", idx, err)
+	}
+	_, der, err := readNvIndex(ctx, dev, tpm.EkCertificateIndexL1, "")
+	return der, err
+}
+
+type TpmKey struct {
+	handle tpm.U32
+	pub    tpm.Public
+}
+
+func readNvIndex(ctx context.Context, dev tpm.Device, idx uint32, pw string) (tpm.NvPublic, []byte, error) {
+	nvpub, _, err := tpm.NvReadPublic(ctx, dev, idx)
+	if err != nil {
+		return tpm.NvPublic{}, nil, fmt.Errorf("failed NvReadPublic idx==0x%x: %w", idx, err)
+	}
+
+	// Get hold of TPM's nvBufMax property, which is the largest size
+	// that the TPM can handle for NvRead, NvWrite, etc
+	capData, _, err := tpm.GetCapability(ctx, dev, uint32(tpm.TPM_CAP_TPM_PROPERTIES), uint32(tpm.TPM_PT_NV_BUFFER_MAX), 1)
+	if err != nil {
+		return tpm.NvPublic{}, nil, fmt.Errorf("failed GetCapability: %w", err)
+	}
+	nvBufMax, ok := capData.TpmProperties[tpm.TPM_PT_NV_BUFFER_MAX]
+	if !ok {
+		return tpm.NvPublic{}, nil, fmt.Errorf("missing nvBufMax property")
+	}
+
+	var data bytes.Buffer
+	offset := uint16(0)
+	for data.Len() < int(nvpub.DataSize) {
+		remaining := int(nvpub.DataSize) - data.Len()
+		readSize := uint16(min(int(nvBufMax), remaining))
+		block, err := tpm.NvRead(ctx, dev, idx, tpm.Password(pw), idx, readSize, offset)
+		if err != nil {
+			return tpm.NvPublic{}, nil, fmt.Errorf("failed NvRead idx==0x%x readSize==%d offset==%d DataSize==%d data.Len()==%d: %w", idx, readSize, offset, nvpub.DataSize, data.Len(), err)
+		}
+		data.Write(block)
+		offset += readSize
+	}
+
+	return nvpub, data.Bytes(), nil
 }

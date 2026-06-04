@@ -13,6 +13,7 @@ require (
 
 require (
 	filippo.io/age v1.2.1 // indirect
+	git.glasklar.is/nisse/tpm-lib v0.0.5 // indirect
 	github.com/insomniacslk/dhcp v0.0.0-20231206064809-8c70d406f6d2 // indirect
 	github.com/josharian/native v1.1.0 // indirect
 	github.com/mdlayher/packet v1.1.2 // indirect
