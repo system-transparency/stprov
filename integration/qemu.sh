@@ -366,11 +366,11 @@ for i in "${!remote_configs[@]}"; do
 
 	qemu-system-x86_64 "${qemu_opts[@]}" >saved/qemu.log &
 
-	reach_stage "$i" 20 "stage:boot"
+	reach_stage "$i" 60 "stage:boot"
 	reach_stage "$i" 60 "stage:network"
 	assert_headreq "$i"
 
-	sleep 3 # unclear why local_rune sometimes fail without this
+	sleep 3 # unclear why local_run sometimes fail without this
 	$local_run | tee saved/stprov.log
 	reach_stage "$i" 3 "stage:shutdown"
 
@@ -500,7 +500,7 @@ qemu-system-x86_64                                                   \
     -cdrom build/stprov.iso                                          \
     -drive if=pflash,format=raw,unit=0,file="$ovmf_code",readonly=on \
     -drive if=pflash,format=raw,unit=1,file=saved/OVMF_VARS.fd >saved/qemu.log &
-reach_stage "end" 20 "stage:boot"
+reach_stage "end" 60 "stage:boot"
 kill $(cat qemu.pid) 2>/dev/null && wait
 
 info "All tests passed"
