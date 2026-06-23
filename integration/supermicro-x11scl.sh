@@ -27,20 +27,28 @@ mv ../stprov cache/bin/
 
 # It appears that u-root's init doesn't mount EFI variables correctly when using
 # modules.  So, we will need to mount it on our own after u-root's init exited.
-echo "#!/bin/elvish" > build/uinitcmd.sh
-echo "mount -t efivarfs none /sys/firmware/efi/efivars" >> build/uinitcmd.sh
+{
+    echo "#!/bin/sh"
+    echo "mount -t efivarfs none /sys/firmware/efi/efivars"
+    # Get our interactive shell running, working around
+    # u-root regression, see https://github.com/u-root/u-root/issues/3645
+    echo "/bin/sh"
+} > build/uinitcmd.sh
 
+# With "-go-build-tags goshsmall" we make gosh use the most
+# simple and least buggy cmdline completer
 (cd cache/u-root &&
     ../bin/u-root\
     -o ../../build/stprov.cpio\
-    -uinitcmd="/bin/sh /bin/uinitcmd.sh"\
-    -defaultsh="elvish"\
+    -uinitcmd "/bin/sh /bin/uinitcmd.sh"\
+    -defaultsh gosh\
+    -go-build-tags goshsmall\
     -files ../../build/uinitcmd.sh:bin/uinitcmd.sh\
     -files ../../build/1-modules.conf:lib/modules-load.d/1-modules.conf\
     -files ../../build/modules/usr/lib/modules:lib/modules\
     -files ../bin/stprov:bin/stprov\
     -files ../../isrgrootx1.pem:/etc/trust_policy/tls_roots.pem\
-    ./cmds/core/{init,elvish,shutdown,cat,cp,dd,echo,grep,hexdump,ls,mkdir,mv,ping,pwd,rm,wget,wc,ip,mount}
+    ./cmds/core/{init,gosh,shutdown,cat,cp,dd,echo,grep,hexdump,ls,mkdir,mv,ping,pwd,rm,wget,wc,ip,mount}
 )
 
 rm -f build/stprov.iso
