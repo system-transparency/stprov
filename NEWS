@@ -8,7 +8,7 @@ NEWS for stprov v0.6.x
 
     Incompatible changes:
 
-    * This version requires go version 1.24 or later when building.
+    * This version requires go version 1.25 or later when building.
 
 NEWS for stprov v0.5.4
 
