@@ -84,9 +84,12 @@ function mock_operator() {
 	local configure=$1; shift
 	local run=$1; shift
 
-	echo "#!/bin/elvish"
+	echo "#!/bin/sh"
 	echo "mount -t efivarfs none /sys/firmware/efi/efivars"
 	if [[ "$INTERACTIVE" == true ]]; then
+		# Get our interactive shell running, working around
+		# u-root regression, see https://github.com/u-root/u-root/issues/3645
+		echo "/bin/sh"
 		return
 	fi
 
@@ -308,17 +311,20 @@ for i in "${!remote_configs[@]}"; do
 	remote_cfg="stprov remote ${remote_configs[$i]}"
 	mock_operator "$remote_cfg" "$remote_run" > build/uinitcmd.sh
 
+	# With "-go-build-tags goshsmall" we make gosh use the most
+	# simple and least buggy cmdline completer
         (cd cache/u-root &&
 	     ../bin/u-root\
 		-o ../../build/stprov.cpio\
-		-uinitcmd="/bin/sh /bin/uinitcmd.sh"\
-		-defaultsh="elvish"\
+		-uinitcmd "/bin/sh /bin/uinitcmd.sh"\
+		-defaultsh gosh\
+		-go-build-tags goshsmall\
 		-files ../../build/1-modules.conf:lib/modules-load.d/1-modules.conf\
 		-files ../../build/modules/usr/lib/modules:lib/modules\
 		-files ../bin/stprov:bin/stprov\
 		-files ../../build/uinitcmd.sh:bin/uinitcmd.sh\
 		-files ../../build/tls_roots.pem:etc/trust_policy/tls_roots.pem\
-		./cmds/core/{init,elvish,shutdown,cat,cp,dd,echo,grep,hexdump,ls,mkdir,mv,ping,pwd,rm,wget,wc,ip,mount,more}
+		./cmds/core/{init,gosh,shutdown,cat,cp,dd,echo,grep,hexdump,ls,mkdir,mv,ping,pwd,rm,wget,wc,ip,mount,more}
 	)
 	# Documentation to understand qemu user networking and these options:
 	# - https://wiki.qemu.org/Documentation/Networking#User_Networking_(SLIRP)
