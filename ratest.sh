@@ -14,7 +14,8 @@ swtpm socket --tpmstate "dir=$tpmd/state" --tpm2 --pid "file=$tpmd/swtpm.pid" \
       --ctrl "type=unixio,path=$tpmd/swtpm.socket" --log file=swtpm.log,level=10,truncate &
 export TPM_SOCKET=$tpmd/swtpm.socket
 
-./integration/qemu.sh || true
+./integration/qemu.sh
+./integration/quite-nuc.sh
 
 swtpm_pid=$(cat $tpmd/swtpm.pid 2>/dev/null) || true
 [[ -z "${swtpm_pid}" ]] || kill "${swtpm_pid}"
@@ -27,3 +28,5 @@ podman run -it --pull=always \
        -e SINGLE_TEST=0 \
        git.glasklar.is:5050/glasklar/infra/containers/stboot:integration \
        ./ratest-in-container.sh
+
+rm -f ratest-in-container.sh
