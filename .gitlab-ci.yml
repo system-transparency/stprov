@@ -1,5 +1,9 @@
----
+variables:
+  # Registry web: https://git.glasklar.is/glasklar/infra/containers/container_registry
+  STBOOT_OCI_IMAGE_NAME: git.glasklar.is:5050/glasklar/infra/containers/stboot
+
 include: integration/ci-images.yml
+
 stages:
   - unit_test
   - integration
@@ -18,15 +22,7 @@ qemu_test:
   stage: integration
   tags:
     - longrunning
-  image: debian:trixie
-  # Debian trixie has go 1.24, we rely on go itself downloading and installing 1.25
-  before_script:
-    - apt update
-    - apt install -qqy qemu-system-x86 qemu-system-common qemu-system-data golang
-    - apt install -qqy git python3 curl jq openssh-client make openssl unzip cpio gzip efitools uuid-runtime sbsigntool python3-virt-firmware
-    - export GOPATH=$PWD/.go
-    - export PATH=$PATH:$GOPATH/bin
-    - export PATH=$PATH:$HOME/.local/bin/
+  image: $STBOOT_OCI_IMAGE_NAME:integration
   script:
     - ./integration/qemu.sh
     - ./integration/supermicro-x11scl.sh
@@ -48,14 +44,9 @@ qemu_head_stboot_test:
   stage: integration
   tags:
     - longrunning
-  image: debian:trixie
+  image: $STBOOT_OCI_IMAGE_NAME:integration
   allow_failure: true
-  # Debian trixie has go 1.24, we rely on go itself downloading and installing 1.25
   before_script:
-    - apt update
-    - apt install -qqy qemu-system-x86 qemu-system-common qemu-system-data golang
-    - apt install -qqy git python3 curl jq openssh-client make openssl unzip cpio gzip efitools uuid-runtime sbsigntool python3-virt-firmware
-    - export PATH=$PATH:$HOME/.local/bin/
     - git clone https://git.glasklar.is/system-transparency/core/stboot.git
     - go work init && go work use . ./stboot && mv go.work go.work.local
   script:
