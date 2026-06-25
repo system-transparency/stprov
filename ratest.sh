@@ -3,10 +3,6 @@
 cat <<'EOF' >ratest-in-container.sh
 #!/bin/bash
 
-# Let's get this into our stboot:integration image: https://git.glasklar.is/glasklar/infra/containers/-/merge_requests/22
-apt-get -yq update
-apt-get -yq install --no-install-recommends swtpm-tools
-
 # Stuff copypasted from st-complete-poc tests
 rm -rf tmp.tpm
 mkdir -p tmp.tpm/state tmp.tpm/config
