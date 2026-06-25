@@ -326,6 +326,14 @@ for i in "${!remote_configs[@]}"; do
 		-files ../../build/tls_roots.pem:etc/trust_policy/tls_roots.pem\
 		./cmds/core/{init,gosh,shutdown,cat,cp,dd,echo,grep,hexdump,ls,mkdir,mv,ping,pwd,rm,wget,wc,ip,mount,more}
 	)
+
+	tpm_args=()
+	if [[ "${TPM_SOCKET:-}" ]] ; then
+		# Note: It seems one needs a --ctrl socket, not a --server socket.
+		# Example command line:
+		#  swtpm socket --tpmstate "dir=..." --tpm2 --pid "file=..." --ctrl "type=unixio,path=..."
+		tpm_args=(-chardev "socket,id=chrtpm,path=${TPM_SOCKET}" -tpmdev "emulator,id=tpm0,chardev=chrtpm" -device "tpm-tis,tpmdev=tpm0" -d guest_errors)
+	fi
 	# Documentation to understand qemu user networking and these options:
 	# - https://wiki.qemu.org/Documentation/Networking#User_Networking_(SLIRP)
 	# - https://www.qemu.org/docs/master/system/invocation.html#hxtool-5
@@ -347,6 +355,7 @@ for i in "${!remote_configs[@]}"; do
 	qemu_opts=(
 		-nographic -no-reboot -m 512M -M q35
 		-rtc base=localtime -pidfile qemu.pid
+		"${tpm_args[@]}"
 		-object "rng-random,filename=/dev/urandom,id=rng0"
 		-device "virtio-rng-pci,rng=rng0"
 		-nic "$nic_opts"
