@@ -32,14 +32,15 @@ mv ../stprov cache/bin/
     echo "/bin/sh"
 } > build/uinitcmd.sh
 
-# With "-go-build-tags goshsmall" we make gosh use the most
-# simple and least buggy cmdline completer
+# With "-go-build-tags goshliner" we avoid the buggy bubbline, and get
+# at least arrow-up for editing and running a previous command
+# (goshsmall does not have that).
 (cd cache/u-root &&
     ../bin/u-root\
     -o ../../build/stprov.cpio\
     -uinitcmd "/bin/sh /bin/uinitcmd.sh"\
     -defaultsh gosh\
-    -go-build-tags goshsmall\
+    -go-build-tags goshliner\
     -files ../../build/uinitcmd.sh:bin/uinitcmd.sh\
     -files ../../build/1-modules.conf:lib/modules-load.d/1-modules.conf\
     -files ../../build/modules/usr/lib/modules:lib/modules\
