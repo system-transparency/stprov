@@ -407,9 +407,13 @@ for i in "${!remote_configs[@]}"; do
 	#
 	chmod 600 saved/hostkey
 	fingerprint=$(ssh-keygen -lf saved/hostkey | cut -d' ' -f2)
+	publickey=$(ssh-keygen -yf saved/hostkey | cut -d' ' -f1,2)
 
 	got=$(grep ^fingerprint saved/stprov.log | cut -d'=' -f2)
 	[[ "$got" == "$fingerprint" ]] || die "test $i: SSH key fingerprint: got $got, want $fingerprint"
+
+	got=$(grep ^publickey saved/stprov.log | cut -d'=' -f2)
+	[[ "$got" == "$publickey" ]] || die "test $i: SSH key publickey: got $got, want $publickey"
 
 	#
 	# Check host configuration

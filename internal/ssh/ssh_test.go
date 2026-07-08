@@ -11,6 +11,69 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+func TestReadWritePublicKey(t *testing.T) {
+	for i, table := range []struct {
+		Raw       []byte
+		PublicKey string
+	}{
+		{mustDecodePEM(t, HostKey1), PublicKey1},
+		{mustDecodePEM(t, HostKey2), PublicKey2},
+		{mustDecodePEM(t, HostKey3), PublicKey3},
+		{mustDecodePEM(t, HostKey4), PublicKey4},
+		{mustDecodePEM(t, HostKey5), PublicKey5},
+		{mustDecodePEM(t, HostKey6), PublicKey6},
+		{mustDecodePEM(t, HostKey7), PublicKey7},
+		{mustDecodePEM(t, HostKey8), PublicKey8},
+	} {
+		var hk HostKey
+		if err := hk.read(bytes.NewBuffer(table.Raw)); err != nil {
+			t.Errorf("%d: failed reading valid host key: %v", i+1, err)
+			continue
+		}
+
+		buf := bytes.NewBuffer(nil)
+		if err := hk.write(buf); err != nil {
+			t.Errorf("%d: failed writing valid host key: %v", i+1, err)
+			continue
+		}
+		if got, want := buf.Bytes(), table.Raw; !bytes.Equal(got, want) {
+			t.Errorf("%d: got host key\n%x\nbut wanted\n%x", i+1, got, want)
+			continue
+		}
+
+		pk, err := hk.PublicKey()
+		if err != nil {
+			t.Errorf("%d: failed deriving public key: %v", i+1, err)
+			continue
+		}
+		if got, want := pk, table.PublicKey; got != want {
+			t.Errorf("%d: got public key\n%s\nbut wanted\n%s", i+1, got, want)
+		}
+	}
+}
+
+func TestWriteAndPublicKey(t *testing.T) {
+	buf := bytes.NewBuffer(nil)
+	hk := newHostKey(t)
+	if err := hk.writePEM(buf); err != nil {
+		t.Errorf("writePEM host key: %v", err)
+	}
+	signer, err := ssh.ParsePrivateKey(buf.Bytes())
+	if err != nil {
+		t.Errorf("parse host key: %v", err)
+	}
+
+	pkThere := ssh.MarshalAuthorizedKey(signer.PublicKey())
+	pkHere, err := hk.PublicKey()
+	if err != nil {
+		t.Errorf("failed deriving public key: %v", err)
+	}
+
+	if got, want := pkHere, string(pkThere)[:len(PublicKey1)]; got != want {
+		t.Errorf("got public key\n%s\nbut wanted\n%s", got, want)
+	}
+}
+
 func TestReadWriteFingerprint(t *testing.T) {
 	for i, table := range []struct {
 		Raw         []byte
@@ -132,6 +195,15 @@ const (
 	Fingerprint6 = "SHA256:vHDboZeN8+DoD5u3siUTSmxvpfrDaXPa7Fe01885tU8"
 	Fingerprint7 = "SHA256:WJ57YAICbGjG6lDLBGw9wmlLN3biGOMN3u/b6z8i3EE"
 	Fingerprint8 = "SHA256:+JMQx6mofEmNTLzKrrMFV6PI9CDMJ8qLWGE8shjFVsM"
+
+	PublicKey1 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAKSmIGYZrzc+BCLfoy9t02YEQ7lY2ilvuokXD3tcYyU"
+	PublicKey2 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINTykWgpMrqJxYBEEcJc0jxFz5v0HnoBsa0zKg/f1HD2"
+	PublicKey3 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMccXYER/DSMqLnVsJNSnypnqy+DpMcpISv85q0WJB29"
+	PublicKey4 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK3q9Sn3eXfRoJSyZjdR/i3N/jeP1dJUzoIh46gHTm/8"
+	PublicKey5 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHYbqSeqsnZrgc+pUUQjTwBwEWnYjAtBT8KXhZy1ftg4"
+	PublicKey6 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIA3oQRuQLLQpA8/WsCa+/UUhQUSDhs1yAekfDfR8uhF"
+	PublicKey7 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFruzhSbcJaPi/Cg+vgRTexHGdYgcQPQ9xbanSoZspQz"
+	PublicKey8 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHWQOhvBd/4JRcrwtqe3FPnmkBSBzvuFhua0MrdpEvs0"
 )
 
 const HostKey1 = `-----BEGIN OPENSSH PRIVATE KEY-----

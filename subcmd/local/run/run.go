@@ -84,6 +84,7 @@ func Main(args []string, optPort int, optIP, optOTP, optPKFile, optKEKFile, optD
 	}
 
 	log.Printf("added entropy\n\n%s\n", hexify.Format(data.Entropy))
+	fmt.Printf("publickey=%s\n", cr.PublicKey)
 	fmt.Printf("fingerprint=%s\n", cr.Fingerprint)
 	fmt.Printf("hostname=%s\n", cr.HostName)
 	fmt.Printf("ip=%s\n", optIP)
