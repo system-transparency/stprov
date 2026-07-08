@@ -19,7 +19,10 @@ const usage = `Usage:
     address (-i) and port (-p).  A one-time password (-o) is used to bootstrap
     HTTPS.  Secure Boot keys can optionally be provisioned in Setup Mode.
 
-    Outputs the following key-value pairs on success:
+    Upon success, the following key-value pairs are output on stdout, one pair
+    per line.  The order of these lines cannot be relied on.  New keys may be
+    added, so ignore unknown keys if you are consuming this output.  Key-value
+    pairs:
 
     publickey=<the public key of the platform's SSH hostkey>
     fingerprint=<the fingerprint of the platform's SSH hostkey>
