@@ -97,6 +97,11 @@ func (srv *Server) Run(ctx context.Context) error {
 	if err := srv.ListenAndServeTLS("", ""); !errors.Is(err, http.ErrServerClosed) {
 		return fmt.Errorf("server died: %w", err)
 	}
+
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	return nil
 }
 

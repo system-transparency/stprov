@@ -9,7 +9,9 @@ import (
 	"log"
 	"net"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"git.glasklar.is/nisse/tpm-lib/pkg/tpm"
@@ -90,6 +92,9 @@ func parseAllowedNets(addresses []string) ([]net.IPNet, error) {
 func listen(otp string, allowNets []net.IPNet, ip net.IP, port int, hostname st.HostName) (uds *secrets.UniqueDeviceSecret, err error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
 	tpmDevice, err := openTPM(ctx)
 	if err != nil {
